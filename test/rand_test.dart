@@ -4,7 +4,22 @@ import 'package:rand/rand.dart';
 import 'package:test/test.dart';
 
 void main() async {
-  test('integerRange', () {
+  test('probabilityDistribution', () {
+    expect(Rand.probabilityDistribution(probs: [], values: [], size: 10), []);
+
+    for (var i = 0; i < 100; i++) {
+      final result = Rand.probabilityDistribution(
+          probs: [1, 10, 100], values: ['foo', 'bar', 'baz'], size: 111);
+      final foo = result.where((element) => element == 'foo').length;
+      final bar = result.where((element) => element == 'bar').length;
+      final baz = result.where((element) => element == 'baz').length;
+      expect(RangeError.checkValueInInterval(foo, 0, bar), foo);
+      expect(RangeError.checkValueInInterval(bar, foo, baz), bar);
+      expect(RangeError.checkValueInInterval(baz, bar, 111), baz);
+    }
+  });
+
+  test('integer', () {
     expect(() => Random().nextInt(Rand.maxRngInt * 1000),
         throwsA(isA<RangeError>()));
     expect(() => Rand.integer(1, 2), throwsA(isA<RangeError>()));

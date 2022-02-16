@@ -18,6 +18,28 @@ abstract class Rand {
     return truePercent > _rand.nextInt(100);
   }
 
+  static List<T> probabilityDistribution<T>({
+    required List<int> probs, // probability of each value
+    required List<T> values,
+    required int size, // size of generated result
+  }) {
+    assert(probs.length == values.length,
+        "each value must have it's own probability");
+    final result = <T>[];
+    final totalProb = probs.fold<int>(0, (a, b) => a + b);
+    for (int i = 0; i < size; i++) {
+      int p = integer(totalProb);
+      for (int j = 0; j < probs.length; j++) {
+        if (probs[j] > p) {
+          result.add(values[j]);
+          break;
+        }
+        p -= probs[j];
+      }
+    }
+    return result;
+  }
+
   /// [max] is exclusive, [min] is inclusive
   /// default adjusted max value [adjMax] is `1 << 32`
   static int integer([int? max, int min = 0]) {
