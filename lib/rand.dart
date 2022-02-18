@@ -2,8 +2,6 @@ library rand;
 
 import 'dart:math' as math;
 
-part 'src/helpers.dart';
-
 abstract class Rand {
   static final _rand = math.Random();
 
@@ -99,20 +97,20 @@ abstract class Rand {
     return buffer.toString();
   }
 
-  static DateTime dateTime({DateTime? min, DateTime? max}) {
-    final microEpoch = _lerp(
-      (min ?? DateTime(2000)).microsecondsSinceEpoch,
-      (max ?? DateTime(2100)).microsecondsSinceEpoch,
+  /// [a] and [b] parameters define the limits of the generated [DateTime] object
+  /// (a < b) or (a > b) doesn't matter, they are just the limits
+  static DateTime dateTime({DateTime? a, DateTime? b}) {
+    final microEpoch = lerp(
+      (a ?? DateTime(2000)).microsecondsSinceEpoch,
+      (b ?? DateTime(2038)).microsecondsSinceEpoch,
       Rand._rand.nextDouble(),
     );
     return DateTime.fromMicrosecondsSinceEpoch(microEpoch.toInt());
   }
+}
 
-  static DateTime dateTimeAfterWithin(DateTime from, Duration within) {
-    return dateTime(min: from, max: from.add(within));
-  }
+double lerp<T extends num>(T a, T b, double t) => a + (b - a) * t;
 
-  static DateTime dateTimeBeforeWithin(DateTime from, Duration within) {
-    return dateTime(min: from, max: from.subtract(within));
-  }
+extension DateTimeExtensions on DateTime {
+  DateTime within(Duration margin) => Rand.dateTime(a: this, b: add(margin));
 }

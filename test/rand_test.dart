@@ -38,16 +38,16 @@ void main() async {
   });
 
   const within = Duration(days: 365);
-  test('dateTimeAfterWithin', () {
+  test('within.after', () {
     for (int i = 0; i < 1000; i++) {
-      final dt = Rand.dateTimeAfterWithin(DateTime(2000), within);
+      final dt = DateTime(2000).within(within);
       expect(dt.isAfter(DateTime(2000)) && dt.isBefore(DateTime(2001)), true);
     }
   });
 
-  test('dateTimeBeforeWithin', () {
+  test('within.before', () {
     for (int i = 0; i < 1000; i++) {
-      final dt = Rand.dateTimeBeforeWithin(DateTime(2001), within);
+      final dt = DateTime(2001).within(-within);
       expect(dt.isAfter(DateTime(2000)) && dt.isBefore(DateTime(2001)), true);
     }
   });
