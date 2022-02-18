@@ -31,9 +31,11 @@ void main() async {
   });
 
   test('dateTime', () {
+    const max = (1 << 31) * 1000000;
     for (int i = 0; i < 1000; i++) {
       final dt = Rand.dateTime();
-      expect(dt.isAfter(DateTime(2000)) && dt.isBefore(DateTime(2100)), true);
+      expect(dt.isAfter(DateTime.fromMicrosecondsSinceEpoch(0)), true);
+      expect(dt.isBefore(DateTime.fromMicrosecondsSinceEpoch(max)), true);
     }
   });
 

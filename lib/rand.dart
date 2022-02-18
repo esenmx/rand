@@ -97,20 +97,21 @@ abstract class Rand {
     return buffer.toString();
   }
 
-  /// [a] and [b] parameters define the limits of the generated [DateTime] object
-  /// (a < b) or (a > b) doesn't matter, they are just the limits
-  static DateTime dateTime({DateTime? a, DateTime? b}) {
-    final microEpoch = lerp(
-      (a ?? DateTime(2000)).microsecondsSinceEpoch,
-      (b ?? DateTime(2038)).microsecondsSinceEpoch,
-      Rand._rand.nextDouble(),
+  /// microsecondsSinceEpoch based random [DateTime] generator
+  /// [from]/[to] parameters defines the limits instead of [min]/[max]
+  /// so the order doesn't matter
+  static DateTime dateTime([DateTime? to, DateTime? from]) {
+    final microEpochLerp = lerp(
+      from?.microsecondsSinceEpoch ?? 0,
+      to?.microsecondsSinceEpoch ?? ((1 << 31) * 1000000),
+      _rand.nextDouble(),
     );
-    return DateTime.fromMicrosecondsSinceEpoch(microEpoch.toInt());
+    return DateTime.fromMicrosecondsSinceEpoch(microEpochLerp.toInt());
   }
 }
 
 double lerp<T extends num>(T a, T b, double t) => a + (b - a) * t;
 
 extension DateTimeExtensions on DateTime {
-  DateTime within(Duration margin) => Rand.dateTime(a: this, b: add(margin));
+  DateTime within(Duration margin) => Rand.dateTime(this, add(margin));
 }
