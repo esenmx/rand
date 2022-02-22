@@ -42,14 +42,14 @@ void main() async {
   const within = Duration(days: 365);
   test('within.after', () {
     for (int i = 0; i < 1000; i++) {
-      final dt = DateTime(2000).within(within);
+      final dt = DateTime(2000).randomWithin(within);
       expect(dt.isAfter(DateTime(2000)) && dt.isBefore(DateTime(2001)), true);
     }
   });
 
   test('within.before', () {
     for (int i = 0; i < 1000; i++) {
-      final dt = DateTime(2001).within(-within);
+      final dt = DateTime(2001).randomWithin(-within);
       expect(dt.isAfter(DateTime(2000)) && dt.isBefore(DateTime(2001)), true);
     }
   });
