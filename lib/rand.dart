@@ -22,7 +22,7 @@ abstract class Rand {
     required int size, // size of generated result
   }) {
     assert(probs.length == values.length,
-        "each value must have it's own probability");
+        "each value must have it's own probability in same index");
     final result = <T>[];
     final totalProb = probs.fold<int>(0, (a, b) => a + b);
     for (int i = 0; i < size; i++) {
@@ -97,21 +97,37 @@ abstract class Rand {
     return buffer.toString();
   }
 
+  static const _maxInt32Epoch = (1 << 31) * 1000000;
+
   /// microsecondsSinceEpoch based random [DateTime] generator
   /// [from]/[to] parameters defines the limits instead of [min]/[max]
   /// so the order doesn't matter
   static DateTime dateTime([DateTime? to, DateTime? from]) {
-    final microEpochLerp = lerp(
+    final microEpochLerp = numLerp(
       from?.microsecondsSinceEpoch ?? 0,
-      to?.microsecondsSinceEpoch ?? ((1 << 31) * 1000000),
+      to?.microsecondsSinceEpoch ?? _maxInt32Epoch,
       _rand.nextDouble(),
     );
     return DateTime.fromMicrosecondsSinceEpoch(microEpochLerp.toInt());
   }
 }
 
-double lerp<T extends num>(T a, T b, double t) => a + (b - a) * t;
-
 extension DateTimeExtensions on DateTime {
-  DateTime within(Duration margin) => Rand.dateTime(this, add(margin));
+  DateTime randomWithin(Duration margin) => Rand.dateTime(this, add(margin));
+}
+
+double numLerp<T extends num>(T a, T b, double t) => a + (b - a) * t;
+
+extension NumExtensions on num {
+  num get square => this * this;
+
+  num get cube => this * this * this;
+
+  num get sqrt => math.sqrt(this);
+
+  num get exp => math.exp(this);
+
+  num pow(num exp) => math.pow(this, exp);
+
+  num get log => math.log(this);
 }
