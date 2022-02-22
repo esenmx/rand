@@ -59,6 +59,19 @@ abstract class Rand {
     return map.entries.elementAt(_rand.nextInt(map.length));
   }
 
+  static Set<T> elementSet<T>(Iterable<T> iterable, int length) {
+    final copy = Set<T>.of(iterable);
+    RangeError.checkValidIndex(length - 1, copy,
+        "not enough unique values for creating Set<{$T> with length of $length");
+    final elements = <T>{};
+    for (int i = 0; i < length; i++) {
+      final e = element(copy);
+      elements.add(e);
+      copy.remove(e);
+    }
+    return elements;
+  }
+
   static String string(int length) {
     final buffer = StringBuffer();
     for (int i = 0; i < length; i++) {

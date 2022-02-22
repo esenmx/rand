@@ -4,6 +4,17 @@ import 'package:rand/rand.dart';
 import 'package:test/test.dart';
 
 void main() async {
+  test('integer', () {
+    expect(() => Random().nextInt(Rand.maxRngInt * 1000),
+        throwsA(isA<RangeError>()));
+    expect(() => Rand.integer(1, 2), throwsA(isA<RangeError>()));
+    expect(() => Rand.integer(-1), throwsA(isA<RangeError>()));
+    expect(() => Rand.integer(1, -1), throwsA(isA<RangeError>()));
+    expect(Rand.integer(), isA<int>());
+    expect(Rand.integer(1), isA<int>());
+    expect(Rand.integer(2, 1), isA<int>());
+  });
+
   test('probabilityDistribution', () {
     expect(Rand.probabilityDistribution(probs: [], values: [], size: 10), []);
 
@@ -19,15 +30,12 @@ void main() async {
     }
   });
 
-  test('integer', () {
-    expect(() => Random().nextInt(Rand.maxRngInt * 1000),
-        throwsA(isA<RangeError>()));
-    expect(() => Rand.integer(1, 2), throwsA(isA<RangeError>()));
-    expect(() => Rand.integer(-1), throwsA(isA<RangeError>()));
-    expect(() => Rand.integer(1, -1), throwsA(isA<RangeError>()));
-    expect(Rand.integer(), isA<int>());
-    expect(Rand.integer(1), isA<int>());
-    expect(Rand.integer(2, 1), isA<int>());
+  test('elementSet', () {
+    expect(() => Rand.elementSet([], 0), throwsA(isA<RangeError>()));
+    expect(() => Rand.elementSet([1, 2, 2], 3), throwsA(isA<RangeError>()));
+    expect(Rand.elementSet([1, 2, 2, 3, 3, 3], 3), {1, 2, 3});
+    expect(Rand.elementSet(List.generate(100, (i) => i), 100).length, 100);
+    expect(Rand.elementSet(List.generate(100, (i) => i), 50).length, 50);
   });
 
   test('dateTime', () {
