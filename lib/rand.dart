@@ -118,16 +118,24 @@ extension DateTimeExtensions on DateTime {
 
 double numLerp<T extends num>(T a, T b, double t) => a + (b - a) * t;
 
+extension IntExtensions on int {
+  int get square => this * this;
+
+  int get cube => this * this * this;
+}
+
+extension DoubleExtensions on double {
+  double get square => this * this;
+
+  double get cube => this * this * this;
+}
+
 extension NumExtensions on num {
-  num get square => this * this;
+  double get sqrt => math.sqrt(this);
 
-  num get cube => this * this * this;
+  double get exp => math.exp(this);
 
-  num get sqrt => math.sqrt(this);
-
-  num get exp => math.exp(this);
+  double get log => math.log(this);
 
   num pow(num exp) => math.pow(this, exp);
-
-  num get log => math.log(this);
 }
