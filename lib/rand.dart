@@ -55,14 +55,22 @@ abstract class Rand {
     return iterable.elementAt(_rand.nextInt(iterable.length));
   }
 
-  static MapEntry<K, V> entry<K, V>(Map<K, V> map) {
+  static MapEntry<K, V> mapEntry<K, V>(Map<K, V> map) {
     return map.entries.elementAt(_rand.nextInt(map.length));
   }
 
-  static Set<T> elementSet<T>(Iterable<T> iterable, int length) {
-    final copy = Set<T>.of(iterable);
-    RangeError.checkValidIndex(length - 1, copy,
+  static K mapKey<K, V>(Map<K, V> map) {
+    return map.keys.elementAt(_rand.nextInt(map.length));
+  }
+
+  static V mapValue<K, V>(Map<K, V> map) {
+    return map[mapKey(map)]!;
+  }
+
+  static Set<T> elementSet<T>(Set<T> pool, int length) {
+    RangeError.checkValidIndex(length - 1, pool,
         "not enough unique values for creating Set<{$T> with length of $length");
+    final copy = Set<T>.of(pool);
     final elements = <T>{};
     for (int i = 0; i < length; i++) {
       final e = element(copy);
@@ -71,6 +79,25 @@ abstract class Rand {
     }
     return elements;
   }
+
+  // static Set<T> quantitiveConditionalSetBuilder<T>({
+  //   required Map<int, bool Function(T test)> quantitiveConditions,
+  //   required Set<T> pool,
+  // }) {
+  //   final set = <T>{};
+  //   final copy = Set<T>.of(pool);
+  //   for (final e in quantitiveConditions.entries) {
+  //     final found = copy.where(e.value).toSet();
+  //     set.addAll(found.take(e.key));
+  //     copy.removeAll(found);
+  //     if (found.length < e.key) {
+  //       final additions = Rand.elementSet(pool, e.key - found.length);
+  //       set.addAll(additions);
+  //       copy.removeAll(additions);
+  //     }
+  //   }
+  //   return set;
+  // }
 
   static String string(int length) {
     final buffer = StringBuffer();
