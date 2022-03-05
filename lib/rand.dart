@@ -16,7 +16,7 @@ abstract class Rand {
     return truePercent > _rand.nextInt(100);
   }
 
-  static List<T> probabilityDistribution<T>({
+  static List<T> distributedProps<T>({
     required List<int> probs, // probability of each value
     required List<T> values,
     required int size, // size of generated result
@@ -80,25 +80,6 @@ abstract class Rand {
     return elements;
   }
 
-  // static Set<T> quantitiveConditionalSetBuilder<T>({
-  //   required Map<int, bool Function(T test)> quantitiveConditions,
-  //   required Set<T> pool,
-  // }) {
-  //   final set = <T>{};
-  //   final copy = Set<T>.of(pool);
-  //   for (final e in quantitiveConditions.entries) {
-  //     final found = copy.where(e.value).toSet();
-  //     set.addAll(found.take(e.key));
-  //     copy.removeAll(found);
-  //     if (found.length < e.key) {
-  //       final additions = Rand.elementSet(pool, e.key - found.length);
-  //       set.addAll(additions);
-  //       copy.removeAll(additions);
-  //     }
-  //   }
-  //   return set;
-  // }
-
   static String string(int length) {
     final buffer = StringBuffer();
     for (int i = 0; i < length; i++) {
@@ -107,8 +88,11 @@ abstract class Rand {
     return buffer.toString();
   }
 
-  /// Random [Firestore] documentId, rarely it becomes 28 characters
-  static String get documentId => boolean(99) ? string(20) : string(28);
+  /// [Firestore] DocumentReference id
+  static String get documentId => string(20);
+
+  /// [FirebaseAuth] uid
+  static String get uid => string(28);
 
   static String randomPassword({
     int length = 16,

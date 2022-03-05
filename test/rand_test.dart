@@ -15,11 +15,11 @@ void main() async {
     expect(Rand.integer(2, 1), isA<int>());
   });
 
-  test('probabilityDistribution', () {
-    expect(Rand.probabilityDistribution(probs: [], values: [], size: 10), []);
+  test('distributedProps', () {
+    expect(Rand.distributedProps(probs: [], values: [], size: 10), []);
 
     for (var i = 0; i < 100; i++) {
-      final result = Rand.probabilityDistribution(
+      final result = Rand.distributedProps(
           probs: [1, 10, 100], values: ['foo', 'bar', 'baz'], size: 111);
       final foo = result.where((element) => element == 'foo').length;
       final bar = result.where((element) => element == 'bar').length;
