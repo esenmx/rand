@@ -5,8 +5,8 @@ import 'package:test/test.dart';
 
 void main() async {
   test('integer', () {
-    expect(() => Random().nextInt(Rand.maxRngInt * 1000),
-        throwsA(isA<RangeError>()));
+    expect(
+        () => Random().nextInt(Rand.maxInt * 1000), throwsA(isA<RangeError>()));
     expect(() => Rand.integer(1, 2), throwsA(isA<RangeError>()));
     expect(() => Rand.integer(-1), throwsA(isA<RangeError>()));
     expect(() => Rand.integer(1, -1), throwsA(isA<RangeError>()));
