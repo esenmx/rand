@@ -2,12 +2,18 @@ library rand;
 
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 abstract class Rand {
   static final _rand = math.Random();
+  static final _randSecure = math.Random.secure();
 
-  static const maxRngInt = 1 << 32;
+  @visibleForTesting
+  static const maxInt = 1 << 32;
 
-  static const base62CharSet =
+  static const _maxEpoch = (1 << 31) * 1000000;
+
+  static const _base62CharSet =
       '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
   static bool boolean([truePercent = 50]) {
@@ -42,7 +48,7 @@ abstract class Rand {
   /// default adjusted max value [adjMax] is `1 << 32`
   static int integer([int? max, int min = 0]) {
     RangeError.checkNotNegative(min, 'min');
-    final adjMax = max ?? maxRngInt;
+    final adjMax = max ?? maxInt;
     RangeError.checkNotNegative(adjMax, 'max');
     return adjMax == min ? adjMax : _rand.nextInt(adjMax - min) + min;
   }
@@ -83,7 +89,7 @@ abstract class Rand {
   static String string(int length) {
     final buffer = StringBuffer();
     for (int i = 0; i < length; i++) {
-      buffer.writeCharCode(base62CharSet.codeUnitAt(_rand.nextInt(62)));
+      buffer.writeCharCode(_base62CharSet.codeUnitAt(_rand.nextInt(62)));
     }
     return buffer.toString();
   }
@@ -115,13 +121,11 @@ abstract class Rand {
 
     final buffer = StringBuffer();
     for (var i = 0; i < length; i++) {
-      final value = math.Random.secure().nextInt(chars.length);
+      final value = _randSecure.nextInt(chars.length);
       buffer.write(chars[value]);
     }
     return buffer.toString();
   }
-
-  static const _maxInt32Epoch = (1 << 31) * 1000000;
 
   /// microsecondsSinceEpoch based random [DateTime] generator
   /// [from]/[to] parameters defines the limits instead of [min]/[max]
@@ -129,7 +133,7 @@ abstract class Rand {
   static DateTime dateTime([DateTime? to, DateTime? from]) {
     final microEpochLerp = numLerp(
       from?.microsecondsSinceEpoch ?? 0,
-      to?.microsecondsSinceEpoch ?? _maxInt32Epoch,
+      to?.microsecondsSinceEpoch ?? _maxEpoch,
       _rand.nextDouble(),
     );
     return DateTime.fromMicrosecondsSinceEpoch(microEpochLerp.toInt());
