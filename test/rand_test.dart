@@ -18,7 +18,7 @@ void main() async {
   test('distributedProps', () {
     expect(Rand.distributedProps(probs: [], values: [], size: 10), []);
 
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < 1000; i++) {
       final result = Rand.distributedProps(
           probs: [1, 10, 100], values: ['foo', 'bar', 'baz'], size: 111);
       final foo = result.where((element) => element == 'foo').length;
@@ -39,14 +39,11 @@ void main() async {
     expect(Rand.elementSet(array, 50).length, 50);
   });
 
-  test('quantitiveConditionalSetBuilder', () {});
-
   test('dateTime', () {
-    const max = (1 << 31) * 1000000;
     for (int i = 0; i < 1000; i++) {
       final dt = Rand.dateTime();
-      expect(dt.isAfter(DateTime.fromMicrosecondsSinceEpoch(0)), true);
-      expect(dt.isBefore(DateTime.fromMicrosecondsSinceEpoch(max)), true);
+      expect(dt.microsecondsSinceEpoch, greaterThan(Rand.defaultMinEpoch));
+      expect(dt.microsecondsSinceEpoch, lessThan(Rand.defaultMaxEpoch));
     }
   });
 

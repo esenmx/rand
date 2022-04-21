@@ -11,7 +11,8 @@ abstract class Rand {
   @visibleForTesting
   static const maxInt = 1 << 32;
 
-  static const _maxEpoch = (1 << 31) * 1000000;
+  static final defaultMinEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
+  static final defaultMaxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
   static const _base62CharSet =
       '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -132,8 +133,8 @@ abstract class Rand {
   /// so the order doesn't matter
   static DateTime dateTime([DateTime? to, DateTime? from]) {
     final microEpochLerp = numLerp(
-      from?.microsecondsSinceEpoch ?? 0,
-      to?.microsecondsSinceEpoch ?? _maxEpoch,
+      from?.microsecondsSinceEpoch ?? defaultMinEpoch,
+      to?.microsecondsSinceEpoch ?? defaultMaxEpoch,
       _rand.nextDouble(),
     );
     return DateTime.fromMicrosecondsSinceEpoch(microEpochLerp.toInt());
