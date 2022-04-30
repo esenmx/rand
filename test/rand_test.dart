@@ -42,8 +42,16 @@ void main() async {
   test('dateTime', () {
     for (int i = 0; i < 1000; i++) {
       final dt = Rand.dateTime();
-      expect(dt.microsecondsSinceEpoch, greaterThan(Rand.defaultMinEpoch));
-      expect(dt.microsecondsSinceEpoch, lessThan(Rand.defaultMaxEpoch));
+      expect(dt.microsecondsSinceEpoch, greaterThan(Rand.minEpoch));
+      expect(dt.microsecondsSinceEpoch, lessThan(Rand.maxEpoch));
+    }
+  });
+
+  test('dateTimeWithinYears', () {
+    for (int i = 0; i < 1000; i++) {
+      final dt = Rand.dateTimeWithinYears(1970, 2038);
+      expect(dt.microsecondsSinceEpoch, greaterThan(Rand.minEpoch));
+      expect(dt.microsecondsSinceEpoch, lessThan(Rand.maxEpoch));
     }
   });
 

@@ -2,17 +2,14 @@ library rand;
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
-
 abstract class Rand {
   static final _rand = math.Random();
   static final _randSecure = math.Random.secure();
 
-  @visibleForTesting
   static const maxInt = 1 << 32;
 
-  static final defaultMinEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
-  static final defaultMaxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
+  static final minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
+  static final maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
   static const _base62CharSet =
       '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -132,12 +129,21 @@ abstract class Rand {
   /// [from]/[to] parameters defines the limits instead of [min]/[max]
   /// so the order doesn't matter
   static DateTime dateTime([DateTime? to, DateTime? from]) {
-    final microEpochLerp = numLerp(
-      from?.microsecondsSinceEpoch ?? defaultMinEpoch,
-      to?.microsecondsSinceEpoch ?? defaultMaxEpoch,
+    final epoch = numLerp(
+      from?.microsecondsSinceEpoch ?? minEpoch,
+      to?.microsecondsSinceEpoch ?? maxEpoch,
       _rand.nextDouble(),
     );
-    return DateTime.fromMicrosecondsSinceEpoch(microEpochLerp.toInt());
+    return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
+  }
+
+  static DateTime dateTimeWithinYears(int yearA, int yearB) {
+    final epoch = numLerp(
+      DateTime(yearA).microsecondsSinceEpoch,
+      DateTime(yearB).microsecondsSinceEpoch,
+      _rand.nextDouble(),
+    );
+    return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
   }
 }
 
