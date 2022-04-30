@@ -31,9 +31,9 @@ void main() async {
   });
 
   test('elementSet', () {
-    expect(() => Rand.elementSet({}, 0), throwsA(isA<RangeError>()));
-    expect(() => Rand.elementSet({1, 2, 2}, 3), throwsA(isA<RangeError>()));
-    expect(Rand.elementSet({1, 2, 2, 3, 3, 3}, 3), {1, 2, 3});
+    expect(() => Rand.elementSet([], 0), throwsA(isA<RangeError>()));
+    expect(() => Rand.elementSet([1, 2, 2], 3), throwsA(isA<RangeError>()));
+    expect(Rand.elementSet([1, 2, 2, 3, 3, 3], 3), {1, 2, 3});
     final array = List.generate(100, (i) => i).toSet();
     expect(Rand.elementSet(array, 100).length, 100);
     expect(Rand.elementSet(array, 50).length, 50);
