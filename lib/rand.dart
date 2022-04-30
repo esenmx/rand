@@ -71,10 +71,11 @@ abstract class Rand {
     return map[mapKey(map)]!;
   }
 
-  static Set<T> elementSet<T>(Iterable<T> pool, int length) {
+  static Set<T> setOf<T>(Iterable<T> pool, int length) {
     final copy = Set<T>.of(pool);
-    RangeError.checkValidIndex(length - 1, copy,
-        "not enough unique values for creating Set<{$T> with length of $length");
+    if (length > copy.length) {
+      throw IndexError(length - 1, copy, 'FewUniqueError');
+    }
     final elements = <T>{};
     for (int i = 0; i < length; i++) {
       final e = element(copy);
@@ -84,19 +85,21 @@ abstract class Rand {
     return elements;
   }
 
-  static String string(int length) {
+  static int charCode() => _base62CharSet.codeUnitAt(_rand.nextInt(62));
+
+  static String string(int len, [bool forceMaxLen = true]) {
     final buffer = StringBuffer();
-    for (int i = 0; i < length; i++) {
-      buffer.writeCharCode(_base62CharSet.codeUnitAt(_rand.nextInt(62)));
+    for (int i = 0; i < (forceMaxLen ? len : Rand.integer(len)); i++) {
+      buffer.writeCharCode(charCode());
     }
     return buffer.toString();
   }
 
   /// [Firestore] DocumentReference id
-  static String get documentId => string(20);
+  static String documentId() => string(20);
 
   /// [FirebaseAuth] uid
-  static String get uid => string(28);
+  static String uid() => string(28);
 
   static String randomPassword({
     int length = 16,
@@ -154,23 +157,23 @@ extension DateTimeExtensions on DateTime {
 double numLerp<T extends num>(T a, T b, double t) => a + (b - a) * t;
 
 extension IntExtensions on int {
-  int get square => this * this;
+  int square() => this * this;
 
-  int get cube => this * this * this;
+  int cube() => this * this * this;
 }
 
 extension DoubleExtensions on double {
-  double get square => this * this;
+  double square() => this * this;
 
-  double get cube => this * this * this;
+  double cube() => this * this * this;
 }
 
 extension NumExtensions on num {
-  double get sqrt => math.sqrt(this);
+  double sqrt() => math.sqrt(this);
 
-  double get exp => math.exp(this);
+  double exp() => math.exp(this);
 
-  double get log => math.log(this);
+  double log() => math.log(this);
 
   num pow(num exp) => math.pow(this, exp);
 }
