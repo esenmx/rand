@@ -71,10 +71,10 @@ abstract class Rand {
     return map[mapKey(map)]!;
   }
 
-  static Set<T> elementSet<T>(Set<T> pool, int length) {
-    RangeError.checkValidIndex(length - 1, pool,
-        "not enough unique values for creating Set<{$T> with length of $length");
+  static Set<T> elementSet<T>(Iterable<T> pool, int length) {
     final copy = Set<T>.of(pool);
+    RangeError.checkValidIndex(length - 1, copy,
+        "not enough unique values for creating Set<{$T> with length of $length");
     final elements = <T>{};
     for (int i = 0; i < length; i++) {
       final e = element(copy);
