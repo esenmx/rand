@@ -31,7 +31,7 @@ void main() async {
   });
 
   test('setOf', () {
-    expect(() => Rand.setOf([], 0), throwsA(isA<RangeError>()));
+    expect(Rand.setOf([], 0), <dynamic>{});
     expect(() => Rand.setOf([1, 2, 2], 3), throwsA(isA<RangeError>()));
     expect(Rand.setOf([1, 2, 2, 3, 3, 3], 3), {1, 2, 3});
     final array = List.generate(100, (i) => i).toSet();
