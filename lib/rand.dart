@@ -20,7 +20,7 @@ abstract class Rand {
     return truePercent > _rand.nextInt(100);
   }
 
-  static List<T> distributedPropilities<T>({
+  static List<T> distributedProbability<T>({
     required List<int> probs, // probability of each value
     required List<T> values,
     required int size, // size of generated result

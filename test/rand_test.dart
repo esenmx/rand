@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:math';
 
 import 'package:rand/rand.dart';
@@ -30,11 +29,11 @@ void main() async {
     expect(Rand.integer(2, 1), isA<int>());
   });
 
-  test('distributedPropilities', () {
-    expect(Rand.distributedPropilities(probs: [], values: [], size: 10), []);
+  test('distributedProbability', () {
+    expect(Rand.distributedProbability(probs: [], values: [], size: 10), []);
 
     for (var i = 0; i < 1000; i++) {
-      final result = Rand.distributedPropilities(
+      final result = Rand.distributedProbability(
           probs: [1, 10, 100], values: ['foo', 'bar', 'baz'], size: 111);
       final foo = result.where((element) => element == 'foo').length;
       final bar = result.where((element) => element == 'bar').length;
