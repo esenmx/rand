@@ -1,9 +1,24 @@
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:rand/rand.dart';
 import 'package:test/test.dart';
 
 void main() async {
+  test('boolean', () {
+    expect(() => Rand.boolean(0), throwsA(isA<AssertionError>()));
+    expect(() => Rand.boolean(100), throwsA(isA<AssertionError>()));
+    int falseCount = 0;
+    int trueCount = 0;
+    for (var i = 0; i < 10000; i++) {
+      if (Rand.boolean(99)) trueCount++;
+      if (!Rand.boolean(1)) falseCount++;
+    }
+    expect(falseCount, greaterThan(9800));
+    expect(falseCount, lessThan(10000));
+    expect(trueCount, greaterThan(9800));
+    expect(trueCount, lessThan(10000));
+  });
   test('integer', () {
     expect(
         () => Random().nextInt(Rand.maxInt * 1000), throwsA(isA<RangeError>()));
@@ -15,11 +30,11 @@ void main() async {
     expect(Rand.integer(2, 1), isA<int>());
   });
 
-  test('distributedProps', () {
-    expect(Rand.distributedProps(probs: [], values: [], size: 10), []);
+  test('distributedPropilities', () {
+    expect(Rand.distributedPropilities(probs: [], values: [], size: 10), []);
 
     for (var i = 0; i < 1000; i++) {
-      final result = Rand.distributedProps(
+      final result = Rand.distributedPropilities(
           probs: [1, 10, 100], values: ['foo', 'bar', 'baz'], size: 111);
       final foo = result.where((element) => element == 'foo').length;
       final bar = result.where((element) => element == 'bar').length;
@@ -30,13 +45,15 @@ void main() async {
     }
   });
 
-  test('setOf', () {
-    expect(Rand.setOf([], 0), <dynamic>{});
-    expect(() => Rand.setOf([1, 2, 2], 3), throwsA(isA<RangeError>()));
-    expect(Rand.setOf([1, 2, 2, 3, 3, 3], 3), {1, 2, 3});
+  test('setOfSize', () {
+    expect(Rand.setOfSize([], 0), <dynamic>{});
+    expect(() => Rand.setOfSize([1, 2, 2], 3), throwsA(isA<RangeError>()));
+    expect(Rand.setOfSize([1, 2, 2, 3, 3, 3], 3), {1, 2, 3});
     final array = List.generate(100, (i) => i).toSet();
-    expect(Rand.setOf(array, 100).length, 100);
-    expect(Rand.setOf(array, 50).length, 50);
+    expect(Rand.setOfSize(array, 100).length, 100);
+    expect(Rand.setOfSize(array, 50).length, 50);
+    expect(
+        Rand.setOfSize(List.generate(500, (_) => Rand.uid()), 500).length, 500);
   });
 
   test('dateTime', () {
