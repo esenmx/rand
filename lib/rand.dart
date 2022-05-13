@@ -20,17 +20,17 @@ abstract class Rand {
     return truePercent > _rand.nextInt(100);
   }
 
-  static List<T> distributedProps<T>({
+  static List<T> distributedPropilities<T>({
     required List<int> probs, // probability of each value
     required List<T> values,
     required int size, // size of generated result
   }) {
     assert(probs.length == values.length,
-        "each value must have it's own probability in same index");
+        "each value must have it's own probability in equivalent index");
     final result = <T>[];
-    final totalProb = probs.fold<int>(0, (a, b) => a + b);
+    final total = probs.fold<int>(0, (a, b) => a + b);
     for (int i = 0; i < size; i++) {
-      int p = integer(totalProb);
+      int p = integer(total);
       for (int j = 0; j < probs.length; j++) {
         if (probs[j] > p) {
           result.add(values[j]);
@@ -51,7 +51,7 @@ abstract class Rand {
     return adjMax == min ? adjMax : _rand.nextInt(adjMax - min) + min;
   }
 
-  static T? mayBeNull<T>(T value, [int nullPercent = 50]) {
+  static T? valurOrNull<T>(T value, [int nullPercent = 50]) {
     return boolean(nullPercent) ? null : value;
   }
 
@@ -60,7 +60,7 @@ abstract class Rand {
   }
 
   static MapEntry<K, V> mapEntry<K, V>(Map<K, V> map) {
-    return map.entries.elementAt(_rand.nextInt(map.length));
+    return Rand.element(map.entries);
   }
 
   static K mapKey<K, V>(Map<K, V> map) {
@@ -71,13 +71,13 @@ abstract class Rand {
     return map[mapKey(map)]!;
   }
 
-  static Set<T> setOf<T>(Iterable<T> pool, int length) {
+  static Set<T> setOfSize<T>(Iterable<T> pool, int size) {
     final copy = Set<T>.of(pool);
-    if (length > copy.length) {
-      throw IndexError(length - 1, copy, 'FewUniqueError');
+    if (size > copy.length) {
+      throw IndexError(size - 1, copy, 'FewUniqueError');
     }
     final elements = <T>{};
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < size; i++) {
       final e = element(copy);
       elements.add(e);
       copy.remove(e);
@@ -85,17 +85,19 @@ abstract class Rand {
     return elements;
   }
 
-  static int charCode() => _base62CharSet.codeUnitAt(_rand.nextInt(62));
+  /// Base62([_base62CharSet]) based char code
+  static int char() => _base62CharSet.codeUnitAt(_rand.nextInt(62));
 
+  /// Base62([_base62CharSet]) based string
   static String string(int len, [bool forceMaxLen = true]) {
     final buffer = StringBuffer();
     for (int i = 0; i < (forceMaxLen ? len : Rand.integer(len)); i++) {
-      buffer.writeCharCode(charCode());
+      buffer.writeCharCode(char());
     }
     return buffer.toString();
   }
 
-  /// [Firestore] DocumentReference id
+  /// [FirebaseFirestore] [DocumentReference] id
   static String documentId() => string(20);
 
   /// [FirebaseAuth] uid
@@ -129,8 +131,7 @@ abstract class Rand {
   }
 
   /// microsecondsSinceEpoch based random [DateTime] generator
-  /// [from]/[to] parameters defines the limits instead of [min]/[max]
-  /// so the order doesn't matter
+  /// [to]/[from] parameters defines the limits, the order doesn't matter
   static DateTime dateTime([DateTime? to, DateTime? from]) {
     final epoch = numLerp(
       from?.microsecondsSinceEpoch ?? minEpoch,
@@ -140,6 +141,7 @@ abstract class Rand {
     return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
   }
 
+  /// Random local date between [01/01/a] and [01/01/b]
   static DateTime dateTimeWithinYears(int yearA, int yearB) {
     final epoch = numLerp(
       DateTime(yearA).microsecondsSinceEpoch,
