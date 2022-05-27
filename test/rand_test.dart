@@ -18,30 +18,16 @@ void main() async {
     expect(trueCount, greaterThan(9800));
     expect(trueCount, lessThan(10000));
   });
+
   test('integer', () {
-    expect(
-        () => Random().nextInt(Rand.maxInt * 1000), throwsA(isA<RangeError>()));
+    expect(() => Random().nextInt(1 << 64), throwsA(isA<RangeError>()));
     expect(() => Rand.integer(1, 2), throwsA(isA<RangeError>()));
     expect(() => Rand.integer(-1), throwsA(isA<RangeError>()));
     expect(() => Rand.integer(1, -1), throwsA(isA<RangeError>()));
     expect(Rand.integer(), isA<int>());
     expect(Rand.integer(1), isA<int>());
     expect(Rand.integer(2, 1), isA<int>());
-  });
-
-  test('distributedProbability', () {
-    expect(Rand.distributedProbability(probs: [], values: [], size: 10), []);
-
-    for (var i = 0; i < 1000; i++) {
-      final result = Rand.distributedProbability(
-          probs: [1, 10, 100], values: ['foo', 'bar', 'baz'], size: 111);
-      final foo = result.where((element) => element == 'foo').length;
-      final bar = result.where((element) => element == 'bar').length;
-      final baz = result.where((element) => element == 'baz').length;
-      expect(RangeError.checkValueInInterval(foo, 0, bar), foo);
-      expect(RangeError.checkValueInInterval(bar, foo, baz), bar);
-      expect(RangeError.checkValueInInterval(baz, bar, 111), baz);
-    }
+    expect(Rand.integer(1 << 64, 1 << 64 - 1 << 32), isA<int>());
   });
 
   test('setOfSize', () {
@@ -51,38 +37,60 @@ void main() async {
     final array = List.generate(100, (i) => i).toSet();
     expect(Rand.setOfSize(array, 100).length, 100);
     expect(Rand.setOfSize(array, 50).length, 50);
-    expect(
-        Rand.setOfSize(List.generate(500, (_) => Rand.uid()), 500).length, 500);
   });
+
+  final minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
+  final maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
   test('dateTime', () {
     for (int i = 0; i < 1000; i++) {
       final dt = Rand.dateTime();
-      expect(dt.microsecondsSinceEpoch, greaterThan(Rand.minEpoch));
-      expect(dt.microsecondsSinceEpoch, lessThan(Rand.maxEpoch));
+      expect(dt.microsecondsSinceEpoch, greaterThan(minEpoch));
+      expect(dt.microsecondsSinceEpoch, lessThan(maxEpoch));
     }
   });
 
-  test('dateTimeWithinYears', () {
+  group('duration', () {
+    const max = Duration(days: 30);
+    test('max', () {
+      for (var i = 0; i < 1000; i++) {
+        final d = Rand.duration(max);
+        expect(d.inMicroseconds, lessThan(max.inMicroseconds));
+        expect(d.inMicroseconds, greaterThan(0));
+      }
+    });
+
+    const min = Duration(days: 1);
+    test('max/min', () {
+      for (var i = 0; i < 1000; i++) {
+        final d = Rand.duration(max, min);
+        expect(d.inMicroseconds, lessThan(max.inMicroseconds));
+        expect(d.inMicroseconds, greaterThan(min.inMicroseconds));
+      }
+    });
+  });
+
+  test('dateTimeYear', () {
+    expect(Rand.dateTimeYear(2000, 2000), DateTime(2000));
     for (int i = 0; i < 1000; i++) {
-      final dt = Rand.dateTimeWithinYears(1970, 2038);
-      expect(dt.microsecondsSinceEpoch, greaterThan(Rand.minEpoch));
-      expect(dt.microsecondsSinceEpoch, lessThan(Rand.maxEpoch));
+      final dt = Rand.dateTimeYear(1970, 2038);
+      expect(dt.microsecondsSinceEpoch, greaterThan(minEpoch));
+      expect(dt.microsecondsSinceEpoch, lessThan(maxEpoch));
     }
   });
 
-  const within = Duration(days: 365);
-  test('within.after', () {
-    for (int i = 0; i < 1000; i++) {
-      final dt = DateTime(2000).randomWithin(within);
-      expect(dt.isAfter(DateTime(2000)) && dt.isBefore(DateTime(2001)), true);
-    }
-  });
+  test('distributedProbability', () {
+    expect(Rand.distributedProbability(probs: [], values: [], size: 10), []);
 
-  test('within.before', () {
-    for (int i = 0; i < 1000; i++) {
-      final dt = DateTime(2001).randomWithin(-within);
-      expect(dt.isAfter(DateTime(2000)) && dt.isBefore(DateTime(2001)), true);
+    for (var i = 0; i < 10000; i++) {
+      final result = Rand.distributedProbability(
+          probs: [1, 10, 100], values: ['foo', 'bar', 'baz'], size: 1110);
+      final foo = result.where((e) => e == 'foo').length;
+      final bar = result.where((e) => e == 'bar').length;
+      final baz = result.where((e) => e == 'baz').length;
+      expect(RangeError.checkValueInInterval(foo, 0, bar), foo);
+      expect(RangeError.checkValueInInterval(bar, foo, baz), bar);
+      expect(RangeError.checkValueInInterval(baz, bar, 1110), baz);
     }
   });
 }
