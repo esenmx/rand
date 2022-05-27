@@ -6,13 +6,11 @@ abstract class Rand {
   static final _rand = math.Random();
   static final _randSecure = math.Random.secure();
 
-  static const maxInt = 1 << 32;
-
-  static final minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
-  static final maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
-
+  static const _maxInt = 1 << 32;
   static const _base62CharSet =
       '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  static final _minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
+  static final _maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
   static bool boolean([truePercent = 50]) {
     assert(truePercent > 0, 'use false instead');
@@ -20,35 +18,28 @@ abstract class Rand {
     return truePercent > _rand.nextInt(100);
   }
 
-  static List<T> distributedProbability<T>({
-    required List<int> probs, // probability of each value
-    required List<T> values,
-    required int size, // size of generated result
-  }) {
-    assert(probs.length == values.length,
-        "each value must have it's own probability in equivalent index");
-    final result = <T>[];
-    final total = probs.fold<int>(0, (a, b) => a + b);
-    for (int i = 0; i < size; i++) {
-      int p = integer(total);
-      for (int j = 0; j < probs.length; j++) {
-        if (probs[j] > p) {
-          result.add(values[j]);
-          break;
-        }
-        p -= probs[j];
-      }
+  /// [min] is inclusive, [max] is exclusive
+  /// Default [max] is set to [1 << 32]
+  static int integer([int max = _maxInt, int min = 0]) {
+    RangeError.checkNotNegative(min, 'min');
+    if (max == min) {
+      return max;
     }
-    return result;
+    final diff = max - min;
+    RangeError.checkValueInInterval(diff, 0, _maxInt, 'difference');
+    return _rand.nextInt(diff) + min;
   }
 
-  /// [max] is exclusive, [min] is inclusive
-  /// default adjusted max value [adjMax] is `1 << 32`
-  static int integer([int? max, int min = 0]) {
-    RangeError.checkNotNegative(min, 'min');
-    final adjMax = max ?? maxInt;
-    RangeError.checkNotNegative(adjMax, 'max');
-    return adjMax == min ? adjMax : _rand.nextInt(adjMax - min) + min;
+  /// Base62([_base62CharSet]) based char code
+  static int char() => _base62CharSet.codeUnitAt(_rand.nextInt(62));
+
+  /// Base62([_base62CharSet]) based string
+  static String string(int len, [bool forceMaxLen = true]) {
+    final buffer = StringBuffer();
+    for (int i = 0; i < (forceMaxLen ? len : integer(len)); i++) {
+      buffer.writeCharCode(char());
+    }
+    return buffer.toString();
   }
 
   static T? valurOrNull<T>(T value, [int nullPercent = 50]) {
@@ -60,7 +51,7 @@ abstract class Rand {
   }
 
   static MapEntry<K, V> mapEntry<K, V>(Map<K, V> map) {
-    return Rand.element(map.entries);
+    return element(map.entries);
   }
 
   static K mapKey<K, V>(Map<K, V> map) {
@@ -85,19 +76,7 @@ abstract class Rand {
     return elements;
   }
 
-  /// Base62([_base62CharSet]) based char code
-  static int char() => _base62CharSet.codeUnitAt(_rand.nextInt(62));
-
-  /// Base62([_base62CharSet]) based string
-  static String string(int len, [bool forceMaxLen = true]) {
-    final buffer = StringBuffer();
-    for (int i = 0; i < (forceMaxLen ? len : Rand.integer(len)); i++) {
-      buffer.writeCharCode(char());
-    }
-    return buffer.toString();
-  }
-
-  /// [FirebaseFirestore] [DocumentReference] id
+  /// [FirebaseFirestore.DocumentReference] id
   static String documentId() => string(20);
 
   /// [FirebaseAuth] uid
@@ -130,33 +109,62 @@ abstract class Rand {
     return buffer.toString();
   }
 
+  /// [a]/[b] parameters defines the limits, the order doesn't matter
+  static Duration duration(Duration a, [Duration b = Duration.zero]) {
+    return Duration(
+      microseconds: numLerp(
+        a.inMicroseconds,
+        b.inMicroseconds,
+        _rand.nextDouble(),
+      ).toInt(),
+    );
+  }
+
   /// microsecondsSinceEpoch based random [DateTime] generator
-  /// [to]/[from] parameters defines the limits, the order doesn't matter
-  static DateTime dateTime([DateTime? to, DateTime? from]) {
+  /// [a]/[b] parameters defines the limits, the order doesn't matter
+  static DateTime dateTime([DateTime? a, DateTime? b]) {
     final epoch = numLerp(
-      from?.microsecondsSinceEpoch ?? minEpoch,
-      to?.microsecondsSinceEpoch ?? maxEpoch,
+      a?.microsecondsSinceEpoch ?? _minEpoch,
+      b?.microsecondsSinceEpoch ?? _maxEpoch,
       _rand.nextDouble(),
     );
     return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
   }
 
   /// Random local date between [01/01/a] and [01/01/b]
-  static DateTime dateTimeWithinYears(int yearA, int yearB) {
+  static DateTime dateTimeYear(int a, int b) {
     final epoch = numLerp(
-      DateTime(yearA).microsecondsSinceEpoch,
-      DateTime(yearB).microsecondsSinceEpoch,
+      DateTime(a).microsecondsSinceEpoch,
+      DateTime(b).microsecondsSinceEpoch,
       _rand.nextDouble(),
     );
     return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
   }
+
+  static List<T> distributedProbability<T>({
+    required List<int> probs, // probability of each value
+    required List<T> values,
+    required int size, // size of generated result
+  }) {
+    assert(probs.length == values.length,
+        "each value must have it's own probability in equivalent index");
+    final result = <T>[];
+    final total = probs.fold<int>(0, (a, b) => a + b);
+    for (int i = 0; i < size; i++) {
+      int p = integer(total);
+      for (int j = 0; j < probs.length; j++) {
+        if (probs[j] > p) {
+          result.add(values[j]);
+          break;
+        }
+        p -= probs[j];
+      }
+    }
+    return result;
+  }
 }
 
-extension DateTimeExtensions on DateTime {
-  DateTime randomWithin(Duration margin) => Rand.dateTime(this, add(margin));
-}
-
-double numLerp<T extends num>(T a, T b, double t) => a + (b - a) * t;
+double numLerp(num a, num b, double t) => a + (b - a) * t;
 
 extension IntExtensions on int {
   int square() => this * this;
