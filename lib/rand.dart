@@ -20,7 +20,9 @@ abstract class Rand {
 
   /// [min] is inclusive, [max] is exclusive
   /// Default [max] is set to [1 << 32]
-  static int integer([int max = _maxInt, int min = 0]) {
+  static int integer([int? max, int? min]) {
+    max ??= _maxInt;
+    min ??= 0;
     RangeError.checkNotNegative(min, 'min');
     if (max == min) {
       return max;
