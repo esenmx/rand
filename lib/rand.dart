@@ -12,24 +12,16 @@ abstract class Rand {
   static final _minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
   static final _maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
-  static bool boolean([truePercent = 50]) {
-    assert(truePercent > 0, 'use false instead');
-    assert(truePercent < 100, 'use true instead');
-    return truePercent > _rand.nextInt(100);
-  }
+  static bool boolean([truePercent = 50]) => truePercent > _rand.nextInt(100);
 
-  /// [min] is inclusive, [max] is exclusive
-  /// Default [max] is set to [1 << 32]
-  static int integer([int? max, int? min]) {
-    max ??= _maxInt;
-    min ??= 0;
-    RangeError.checkNotNegative(min, 'min');
+  /// both [min]/[max] is inclusive
+  /// [max] - [min] must be lesser or equal than [1 << 32 - 1]
+  static int integer([int max = _maxInt - 1, int min = 0]) {
     if (max == min) {
       return max;
     }
-    final diff = max - min;
-    RangeError.checkValueInInterval(diff, 0, _maxInt, 'difference');
-    return _rand.nextInt(diff) + min;
+    RangeError.checkValueInInterval(max - min, 1, _maxInt - 1, 'difference');
+    return _rand.nextInt(max - min + 1) + min;
   }
 
   /// Base62([_base62CharSet]) based char code
@@ -64,7 +56,7 @@ abstract class Rand {
     return map[mapKey(map)]!;
   }
 
-  static Set<T> setOfSize<T>(Iterable<T> pool, int size) {
+  static Set<T> sliceSet<T>(Iterable<T> pool, int size) {
     final copy = Set<T>.of(pool);
     if (size > copy.length) {
       throw IndexError(size - 1, copy, 'FewUniqueError');
@@ -148,12 +140,13 @@ abstract class Rand {
     required List<T> values,
     required int size, // size of generated result
   }) {
-    assert(probs.length == values.length,
-        "each value must have it's own probability in equivalent index");
+    assert(probs.isNotEmpty);
+    assert(values.isNotEmpty);
+    assert(probs.length == values.length);
     final result = <T>[];
     final total = probs.fold<int>(0, (a, b) => a + b);
     for (int i = 0; i < size; i++) {
-      int p = integer(total);
+      int p = _rand.nextInt(total);
       for (int j = 0; j < probs.length; j++) {
         if (probs[j] > p) {
           result.add(values[j]);

@@ -4,9 +4,7 @@ import 'package:rand/rand.dart';
 import 'package:test/test.dart';
 
 void main() async {
-  test('boolean', () {
-    expect(() => Rand.boolean(0), throwsA(isA<AssertionError>()));
-    expect(() => Rand.boolean(100), throwsA(isA<AssertionError>()));
+  test('boolean (statistical)', () {
     int falseCount = 0;
     int trueCount = 0;
     for (var i = 0; i < 10000; i++) {
@@ -23,20 +21,22 @@ void main() async {
     expect(() => Random().nextInt(1 << 64), throwsA(isA<RangeError>()));
     expect(() => Rand.integer(1, 2), throwsA(isA<RangeError>()));
     expect(() => Rand.integer(-1), throwsA(isA<RangeError>()));
-    expect(() => Rand.integer(1, -1), throwsA(isA<RangeError>()));
+    expect(Rand.integer(0, 0), 0);
     expect(Rand.integer(), isA<int>());
     expect(Rand.integer(1), isA<int>());
     expect(Rand.integer(2, 1), isA<int>());
-    expect(Rand.integer(1 << 64, 1 << 64 - 1 << 32), isA<int>());
+    expect(Rand.integer(1, -1), isA<int>());
+    expect(Rand.integer(1 << 33 - 1, 1 << 32), greaterThanOrEqualTo(1 << 32));
+    expect(Rand.integer(1 << 33 - 1, 1 << 32), lessThanOrEqualTo(1 << 33));
   });
 
-  test('setOfSize', () {
-    expect(Rand.setOfSize([], 0), <dynamic>{});
-    expect(() => Rand.setOfSize([1, 2, 2], 3), throwsA(isA<RangeError>()));
-    expect(Rand.setOfSize([1, 2, 2, 3, 3, 3], 3), {1, 2, 3});
+  test('sliceSet', () {
+    expect(Rand.sliceSet([], 0), <dynamic>{});
+    expect(() => Rand.sliceSet([1, 2, 2], 3), throwsA(isA<RangeError>()));
+    expect(Rand.sliceSet([1, 2, 2, 3, 3, 3], 3), {1, 2, 3});
     final array = List.generate(100, (i) => i).toSet();
-    expect(Rand.setOfSize(array, 100).length, 100);
-    expect(Rand.setOfSize(array, 50).length, 50);
+    expect(Rand.sliceSet(array, 100).length, 100);
+    expect(Rand.sliceSet(array, 50).length, 50);
   });
 
   final minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
@@ -80,7 +80,15 @@ void main() async {
   });
 
   test('distributedProbability', () {
-    expect(Rand.distributedProbability(probs: [], values: [], size: 10), []);
+    expect(() {
+      return Rand.distributedProbability(probs: [1], values: [], size: 10);
+    }, throwsA(isA<AssertionError>()));
+    expect(() {
+      return Rand.distributedProbability(probs: [], values: [1], size: 10);
+    }, throwsA(isA<AssertionError>()));
+    expect(() {
+      return Rand.distributedProbability(probs: [1], values: [1, 2], size: 10);
+    }, throwsA(isA<AssertionError>()));
 
     for (var i = 0; i < 10000; i++) {
       final result = Rand.distributedProbability(
