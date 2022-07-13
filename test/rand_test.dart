@@ -30,13 +30,13 @@ void main() async {
     expect(Rand.integer(1 << 33 - 1, 1 << 32), lessThanOrEqualTo(1 << 33));
   });
 
-  test('sliceSet', () {
-    expect(Rand.sliceSet([], 0), <dynamic>{});
-    expect(() => Rand.sliceSet([1, 2, 2], 3), throwsA(isA<RangeError>()));
-    expect(Rand.sliceSet([1, 2, 2, 3, 3, 3], 3), {1, 2, 3});
+  test('subSet', () {
+    expect(Rand.subSet([], 0), <dynamic>{});
+    expect(() => Rand.subSet([1, 2, 2], 3), throwsA(isA<RangeError>()));
+    expect(Rand.subSet([1, 2, 2, 3, 3, 3], 3), {1, 2, 3});
     final array = List.generate(100, (i) => i).toSet();
-    expect(Rand.sliceSet(array, 100).length, 100);
-    expect(Rand.sliceSet(array, 50).length, 50);
+    expect(Rand.subSet(array, 100).length, 100);
+    expect(Rand.subSet(array, 50).length, 50);
   });
 
   final minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;

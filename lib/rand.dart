@@ -12,7 +12,9 @@ abstract class Rand {
   static final _minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
   static final _maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
-  static bool boolean([truePercent = 50]) => truePercent > _rand.nextInt(100);
+  static bool boolean([double truePercent = 50]) {
+    return truePercent > _rand.nextInt(100);
+  }
 
   /// both [min]/[max] is inclusive
   /// [max] - [min] must be lesser or equal than [1 << 32 - 1]
@@ -36,7 +38,7 @@ abstract class Rand {
     return buffer.toString();
   }
 
-  static T? valurOrNull<T>(T value, [int nullPercent = 50]) {
+  static T? valuerOrNull<T>(T value, [double nullPercent = 50]) {
     return boolean(nullPercent) ? null : value;
   }
 
@@ -56,7 +58,7 @@ abstract class Rand {
     return map[mapKey(map)]!;
   }
 
-  static Set<T> sliceSet<T>(Iterable<T> pool, int size) {
+  static Set<T> subSet<T>(Iterable<T> pool, int size) {
     final copy = Set<T>.of(pool);
     if (size > copy.length) {
       throw IndexError(size - 1, copy, 'FewUniqueError');
