@@ -101,4 +101,21 @@ void main() async {
       expect(RangeError.checkValueInInterval(baz, bar, 1110), baz);
     }
   });
+
+  test('char', () {
+    for (var i = 0; i < 1000; i++) {
+      var char = Rand.char();
+      expect(Rand.base62CharSet.contains(String.fromCharCode(char)), isTrue);
+      char = Rand.char(true);
+      expect(Rand.base62CharSet.contains(String.fromCharCode(char)), isTrue);
+    }
+  });
+
+  test('nonce', () {
+    for (var i = 0; i < 1000; i++) {
+      final len = Rand.integer(100);
+      final nonce = Rand.nonce(len);
+      expect(nonce, hasLength(len));
+    }
+  });
 }
