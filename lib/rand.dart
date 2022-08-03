@@ -2,13 +2,18 @@ library rand;
 
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 abstract class Rand {
   static final _rand = math.Random();
   static final _randSecure = math.Random.secure();
 
   static const _maxInt = 1 << 32;
-  static const _base62CharSet =
+
+  @visibleForTesting
+  static const base62CharSet =
       '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
   static final _minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
   static final _maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
@@ -26,16 +31,29 @@ abstract class Rand {
     return _rand.nextInt(max - min + 1) + min;
   }
 
-  /// Base62([_base62CharSet]) based char code
-  static int char() => _base62CharSet.codeUnitAt(_rand.nextInt(62));
-
-  /// Base62([_base62CharSet]) based string
-  static String string(int len, [bool forceMaxLen = true]) {
-    final buffer = StringBuffer();
-    for (int i = 0; i < (forceMaxLen ? len : integer(len)); i++) {
-      buffer.writeCharCode(char());
+  /// Base62([base62CharSet]) based char code
+  static int char([bool secure = false]) {
+    final rand = secure ? _randSecure : _rand;
+    final int codeUnit;
+    switch (rand.nextInt(3)) {
+      case 0:
+        codeUnit = rand.nextInt(10) + 48;
+        break;
+      case 1:
+        codeUnit = rand.nextInt(26) + 65;
+        break;
+      case 2:
+        codeUnit = rand.nextInt(26) + 97;
+        break;
+      default:
+        throw FallThroughError();
     }
-    return buffer.toString();
+    return codeUnit;
+  }
+
+  /// Base62([base62CharSet]) based nonce
+  static String nonce(int len) {
+    return String.fromCharCodes([for (int i = 0; i < len; i++) char(true)]);
   }
 
   static T? valuerOrNull<T>(T value, [double nullPercent = 50]) {
@@ -73,10 +91,10 @@ abstract class Rand {
   }
 
   /// [FirebaseFirestore.DocumentReference] id
-  static String documentId() => string(20);
+  static String documentId() => nonce(20);
 
   /// [FirebaseAuth] uid
-  static String uid() => string(28);
+  static String uid() => nonce(28);
 
   static String randomPassword({
     int length = 16,
