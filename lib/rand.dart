@@ -4,9 +4,11 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-abstract class Rand {
-  static final _rand = math.Random();
-  static final _randSecure = math.Random.secure();
+class Rand {
+  const Rand._();
+
+  static final _r = math.Random();
+  static final _rs = math.Random.secure();
 
   static const _maxInt = 1 << 32;
 
@@ -18,7 +20,7 @@ abstract class Rand {
   static final _maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
   static bool boolean([double truePercent = 50]) {
-    return truePercent > _rand.nextInt(100);
+    return truePercent > _r.nextInt(100);
   }
 
   /// both [min]/[max] is inclusive
@@ -28,12 +30,12 @@ abstract class Rand {
       return max;
     }
     RangeError.checkValueInInterval(max - min, 1, _maxInt - 1, 'difference');
-    return _rand.nextInt(max - min + 1) + min;
+    return _r.nextInt(max - min + 1) + min;
   }
 
   /// Base62([base62CharSet]) based char code
   static int char([bool secure = false]) {
-    final rand = secure ? _randSecure : _rand;
+    final rand = secure ? _rs : _r;
     final int codeUnit;
     switch (rand.nextInt(3)) {
       case 0:
@@ -61,7 +63,7 @@ abstract class Rand {
   }
 
   static T element<T>(Iterable<T> iterable) {
-    return iterable.elementAt(_rand.nextInt(iterable.length));
+    return iterable.elementAt(_r.nextInt(iterable.length));
   }
 
   static MapEntry<K, V> mapEntry<K, V>(Map<K, V> map) {
@@ -69,7 +71,7 @@ abstract class Rand {
   }
 
   static K mapKey<K, V>(Map<K, V> map) {
-    return map.keys.elementAt(_rand.nextInt(map.length));
+    return map.keys.elementAt(_r.nextInt(map.length));
   }
 
   static V mapValue<K, V>(Map<K, V> map) {
@@ -117,7 +119,7 @@ abstract class Rand {
 
     final buffer = StringBuffer();
     for (var i = 0; i < length; i++) {
-      final value = _randSecure.nextInt(chars.length);
+      final value = _rs.nextInt(chars.length);
       buffer.write(chars[value]);
     }
     return buffer.toString();
@@ -129,7 +131,7 @@ abstract class Rand {
       microseconds: numLerp(
         a.inMicroseconds,
         b.inMicroseconds,
-        _rand.nextDouble(),
+        _r.nextDouble(),
       ).toInt(),
     );
   }
@@ -140,7 +142,7 @@ abstract class Rand {
     final epoch = numLerp(
       a?.microsecondsSinceEpoch ?? _minEpoch,
       b?.microsecondsSinceEpoch ?? _maxEpoch,
-      _rand.nextDouble(),
+      _r.nextDouble(),
     );
     return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
   }
@@ -150,7 +152,7 @@ abstract class Rand {
     final epoch = numLerp(
       DateTime(a).microsecondsSinceEpoch,
       DateTime(b).microsecondsSinceEpoch,
-      _rand.nextDouble(),
+      _r.nextDouble(),
     );
     return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
   }
@@ -166,7 +168,7 @@ abstract class Rand {
     final result = <T>[];
     final total = probs.fold<int>(0, (a, b) => a + b);
     for (int i = 0; i < size; i++) {
-      int p = _rand.nextInt(total);
+      int p = _r.nextInt(total);
       for (int j = 0; j < probs.length; j++) {
         if (probs[j] > p) {
           result.add(values[j]);
