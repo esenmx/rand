@@ -1,6 +1,7 @@
 library rand;
 
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
@@ -51,6 +52,14 @@ class Rand {
         throw FallThroughError();
     }
     return codeUnit;
+  }
+
+  static Uint8List bytes(int size) {
+    var buffer = Uint8List(size);
+    for (var i = 0; i < size; i++) {
+      buffer[i] = _rs.nextInt(0xff + 1);
+    }
+    return buffer;
   }
 
   /// Base62([base62CharSet]) based nonce
