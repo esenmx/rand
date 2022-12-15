@@ -54,60 +54,30 @@ class Rand {
     return codeUnit;
   }
 
-  static Uint8List bytes(int size) {
+  static Uint8List bytes(int size, [bool secure = false]) {
     var buffer = Uint8List(size);
     for (var i = 0; i < size; i++) {
-      buffer[i] = _rs.nextInt(0xff + 1);
+      buffer[i] = (secure ? _rs : _r).nextInt(0xff + 1);
     }
     return buffer;
   }
 
   /// Base62([base62CharSet]) based nonce
-  static String nonce(int len) {
-    return String.fromCharCodes([for (int i = 0; i < len; i++) char(true)]);
+  static String nonce(int len, [bool secure = true]) {
+    return String.fromCharCodes([for (int i = 0; i < len; i++) char(secure)]);
   }
 
   static T? valuerOrNull<T>(T value, [double nullPercent = 50]) {
     return boolean(nullPercent) ? null : value;
   }
 
-  static T element<T>(Iterable<T> iterable) {
-    return iterable.elementAt(_r.nextInt(iterable.length));
-  }
+  /// An example [FirebaseFirestore.DocumentReference] id
+  static String documentId([int length = 20]) => nonce(length);
 
-  static MapEntry<K, V> mapEntry<K, V>(Map<K, V> map) {
-    return element(map.entries);
-  }
+  /// An example s[FirebaseAuth] uid
+  static String uid([int length = 28]) => nonce(length);
 
-  static K mapKey<K, V>(Map<K, V> map) {
-    return map.keys.elementAt(_r.nextInt(map.length));
-  }
-
-  static V mapValue<K, V>(Map<K, V> map) {
-    return map[mapKey(map)]!;
-  }
-
-  static Set<T> subSet<T>(Iterable<T> pool, int size) {
-    final copy = Set<T>.of(pool);
-    if (size > copy.length) {
-      throw IndexError(size - 1, copy, 'FewUniqueError');
-    }
-    final elements = <T>{};
-    for (int i = 0; i < size; i++) {
-      final e = element(copy);
-      elements.add(e);
-      copy.remove(e);
-    }
-    return elements;
-  }
-
-  /// [FirebaseFirestore.DocumentReference] id
-  static String documentId() => nonce(20);
-
-  /// [FirebaseAuth] uid
-  static String uid() => nonce(28);
-
-  static String randomPassword({
+  static String password({
     int length = 16,
     bool withLowercase = true,
     bool withUppercase = true,
@@ -164,6 +134,40 @@ class Rand {
       _r.nextDouble(),
     );
     return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
+  }
+
+  ///
+  /// Collections
+  ///
+
+  static T element<T>(Iterable<T> iterable) {
+    return iterable.elementAt(_r.nextInt(iterable.length));
+  }
+
+  static MapEntry<K, V> mapEntry<K, V>(Map<K, V> map) {
+    return element(map.entries);
+  }
+
+  static K mapKey<K, V>(Map<K, V> map) {
+    return map.keys.elementAt(_r.nextInt(map.length));
+  }
+
+  static V mapValue<K, V>(Map<K, V> map) {
+    return map[mapKey(map)]!;
+  }
+
+  static Set<T> subSet<T>(Iterable<T> pool, int size) {
+    final copy = Set<T>.of(pool);
+    if (size > copy.length) {
+      throw IndexError(size - 1, copy, 'FewUniqueError');
+    }
+    final elements = <T>{};
+    for (int i = 0; i < size; i++) {
+      final e = element(copy);
+      elements.add(e);
+      copy.remove(e);
+    }
+    return elements;
   }
 
   static List<T> distributedProbability<T>({
