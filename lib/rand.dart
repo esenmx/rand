@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-class Rand {
+final class Rand {
   const Rand._();
 
   static final _r = math.Random();
@@ -37,21 +37,12 @@ class Rand {
   /// Base62([base62CharSet]) based char code
   static int char([bool secure = false]) {
     final rand = secure ? _rs : _r;
-    final int codeUnit;
-    switch (rand.nextInt(3)) {
-      case 0:
-        codeUnit = rand.nextInt(10) + 48;
-        break;
-      case 1:
-        codeUnit = rand.nextInt(26) + 65;
-        break;
-      case 2:
-        codeUnit = rand.nextInt(26) + 97;
-        break;
-      default:
-        throw FallThroughError();
-    }
-    return codeUnit;
+    return switch (rand.nextInt(3)) {
+      0 => rand.nextInt(10) + 48,
+      1 => rand.nextInt(26) + 65,
+      2 => rand.nextInt(26) + 97,
+      _ => throw StateError(''),
+    };
   }
 
   static Uint8List bytes(int size, [bool secure = false]) {
@@ -67,14 +58,14 @@ class Rand {
     return String.fromCharCodes([for (int i = 0; i < len; i++) char(secure)]);
   }
 
-  static T? valuerOrNull<T>(T value, [double nullPercent = 50]) {
+  static T? maybeNull<T>(T value, [double nullPercent = 50]) {
     return boolean(nullPercent) ? null : value;
   }
 
   /// An example [FirebaseFirestore.DocumentReference] id
   static String documentId([int length = 20]) => nonce(length);
 
-  /// An example s[FirebaseAuth] uid
+  /// For generating [FirebaseAuth] like uid's
   static String uid([int length = 28]) => nonce(length);
 
   static String password({
@@ -159,7 +150,11 @@ class Rand {
   static Set<T> subSet<T>(Iterable<T> pool, int size) {
     final copy = Set<T>.of(pool);
     if (size > copy.length) {
-      throw IndexError(size - 1, copy, 'FewUniqueError');
+      throw IndexError.withLength(
+        size - 1,
+        copy.length,
+        message: 'FewUniqueError',
+      );
     }
     final elements = <T>{};
     for (int i = 0; i < size; i++) {
