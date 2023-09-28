@@ -1,5 +1,3 @@
-library rand;
-
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -46,7 +44,7 @@ final class Rand {
   }
 
   static Uint8List bytes(int size, [bool secure = false]) {
-    var buffer = Uint8List(size);
+    final buffer = Uint8List(size);
     for (var i = 0; i < size; i++) {
       buffer[i] = (secure ? _rs : _r).nextInt(0xff + 1);
     }
@@ -55,7 +53,7 @@ final class Rand {
 
   /// Base62([base62CharSet]) based nonce
   static String nonce(int len, [bool secure = true]) {
-    return String.fromCharCodes([for (int i = 0; i < len; i++) char(secure)]);
+    return String.fromCharCodes([for (var i = 0; i < len; i++) char(secure)]);
   }
 
   static T? maybeNull<T>(T value, [double nullPercent = 50]) {
@@ -98,7 +96,7 @@ final class Rand {
   /// [a]/[b] parameters defines the limits, the order doesn't matter
   static Duration duration(Duration a, [Duration b = Duration.zero]) {
     return Duration(
-      microseconds: numLerp(
+      microseconds: _lerp(
         a.inMicroseconds,
         b.inMicroseconds,
         _r.nextDouble(),
@@ -109,7 +107,7 @@ final class Rand {
   /// microsecondsSinceEpoch based random [DateTime] generator
   /// [a]/[b] parameters defines the limits, the order doesn't matter
   static DateTime dateTime([DateTime? a, DateTime? b]) {
-    final epoch = numLerp(
+    final epoch = _lerp(
       a?.microsecondsSinceEpoch ?? _minEpoch,
       b?.microsecondsSinceEpoch ?? _maxEpoch,
       _r.nextDouble(),
@@ -119,7 +117,7 @@ final class Rand {
 
   /// Random local date between [01/01/a] and [01/01/b]
   static DateTime dateTimeYear(int a, int b) {
-    final epoch = numLerp(
+    final epoch = _lerp(
       DateTime(a).microsecondsSinceEpoch,
       DateTime(b).microsecondsSinceEpoch,
       _r.nextDouble(),
@@ -157,7 +155,7 @@ final class Rand {
       );
     }
     final elements = <T>{};
-    for (int i = 0; i < size; i++) {
+    for (var i = 0; i < size; i++) {
       final e = element(copy);
       elements.add(e);
       copy.remove(e);
@@ -175,9 +173,9 @@ final class Rand {
     assert(probs.length == values.length);
     final result = <T>[];
     final total = probs.fold<int>(0, (a, b) => a + b);
-    for (int i = 0; i < size; i++) {
+    for (var i = 0; i < size; i++) {
       int p = _r.nextInt(total);
-      for (int j = 0; j < probs.length; j++) {
+      for (var j = 0; j < probs.length; j++) {
         if (probs[j] > p) {
           result.add(values[j]);
           break;
@@ -189,26 +187,4 @@ final class Rand {
   }
 }
 
-double numLerp(num a, num b, double t) => a + (b - a) * t;
-
-extension IntExtensions on int {
-  int square() => this * this;
-
-  int cube() => this * this * this;
-}
-
-extension DoubleExtensions on double {
-  double square() => this * this;
-
-  double cube() => this * this * this;
-}
-
-extension NumExtensions on num {
-  double sqrt() => math.sqrt(this);
-
-  double exp() => math.exp(this);
-
-  double log() => math.log(this);
-
-  num pow(num exp) => math.pow(this, exp);
-}
+double _lerp(num a, num b, double t) => a + (b - a) * t;

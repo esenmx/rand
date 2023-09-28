@@ -21,7 +21,7 @@ void main() async {
     expect(() => Random().nextInt(1 << 64), throwsA(isA<RangeError>()));
     expect(() => Rand.integer(1, 2), throwsA(isA<RangeError>()));
     expect(() => Rand.integer(-1), throwsA(isA<RangeError>()));
-    expect(Rand.integer(0, 0), 0);
+    expect(Rand.integer(0), 0);
     expect(Rand.integer(), isA<int>());
     expect(Rand.integer(1), isA<int>());
     expect(Rand.integer(2, 1), isA<int>());
@@ -43,7 +43,7 @@ void main() async {
   final maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
   test('dateTime', () {
-    for (int i = 0; i < 1000; i++) {
+    for (var i = 0; i < 1000; i++) {
       final dt = Rand.dateTime();
       expect(dt.microsecondsSinceEpoch, greaterThan(minEpoch));
       expect(dt.microsecondsSinceEpoch, lessThan(maxEpoch));
@@ -72,7 +72,7 @@ void main() async {
 
   test('dateTimeYear', () {
     expect(Rand.dateTimeYear(2000, 2000), DateTime(2000));
-    for (int i = 0; i < 1000; i++) {
+    for (var i = 0; i < 1000; i++) {
       final dt = Rand.dateTimeYear(1970, 2038);
       expect(dt.microsecondsSinceEpoch, greaterThan(minEpoch));
       expect(dt.microsecondsSinceEpoch, lessThan(maxEpoch));
@@ -80,19 +80,35 @@ void main() async {
   });
 
   test('distributedProbability', () {
-    expect(() {
-      return Rand.distributedProbability(probs: [1], values: [], size: 10);
-    }, throwsA(isA<AssertionError>()));
-    expect(() {
-      return Rand.distributedProbability(probs: [], values: [1], size: 10);
-    }, throwsA(isA<AssertionError>()));
-    expect(() {
-      return Rand.distributedProbability(probs: [1], values: [1, 2], size: 10);
-    }, throwsA(isA<AssertionError>()));
+    expect(
+      () {
+        return Rand.distributedProbability(probs: [1], values: [], size: 10);
+      },
+      throwsA(isA<AssertionError>()),
+    );
+    expect(
+      () {
+        return Rand.distributedProbability(probs: [], values: [1], size: 10);
+      },
+      throwsA(isA<AssertionError>()),
+    );
+    expect(
+      () {
+        return Rand.distributedProbability(
+          probs: [1],
+          values: [1, 2],
+          size: 10,
+        );
+      },
+      throwsA(isA<AssertionError>()),
+    );
 
     for (var i = 0; i < 10000; i++) {
       final result = Rand.distributedProbability(
-          probs: [1, 10, 100], values: ['foo', 'bar', 'baz'], size: 1110);
+        probs: [1, 10, 100],
+        values: ['foo', 'bar', 'baz'],
+        size: 1110,
+      );
       final foo = result.where((e) => e == 'foo').length;
       final bar = result.where((e) => e == 'bar').length;
       final baz = result.where((e) => e == 'baz').length;
