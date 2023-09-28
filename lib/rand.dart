@@ -18,8 +18,8 @@ final class Rand {
   static final _minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
   static final _maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
-  static bool boolean([double truePercent = 50]) {
-    return truePercent > _r.nextInt(100);
+  static bool boolean([double trueProbability = 50]) {
+    return trueProbability > _r.nextInt(100);
   }
 
   /// both [min]/[max] is inclusive
@@ -56,8 +56,8 @@ final class Rand {
     return String.fromCharCodes([for (var i = 0; i < len; i++) char(secure)]);
   }
 
-  static T? maybeNull<T>(T value, [double nullPercent = 50]) {
-    return boolean(nullPercent) ? null : value;
+  static T? maybeNull<T>(T value, [double nullProbability = 50]) {
+    return boolean(nullProbability) ? null : value;
   }
 
   /// An example [FirebaseFirestore.DocumentReference] id
