@@ -1,5 +1,5 @@
 name: rand
-description: Random Generator for Dart
+description: A stateful random generator with extra functionalities
 version: 1.0.0
 homepage: https://mehmetesen.com
 
