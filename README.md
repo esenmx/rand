@@ -1,3 +1,8 @@
 # rand
 
-Random Generator for Dart.
+A random generator for Dart. To use:
+```dart
+if (Rand.boolean()) {
+  print('head');
+}
+```
