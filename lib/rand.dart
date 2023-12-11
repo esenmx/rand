@@ -3,11 +3,17 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+part 'lorem.dart';
+
 final class Rand {
   const Rand._();
 
   static final _r = math.Random();
   static final _rs = math.Random.secure();
+
+  ///
+  /// Constants
+  ///
 
   static const _maxInt = 1 << 32;
 
@@ -21,6 +27,10 @@ final class Rand {
   static bool boolean([double trueProbability = 50]) {
     return trueProbability > _r.nextInt(100);
   }
+
+  ///
+  /// Numeric
+  ///
 
   /// both [min]/[max] is inclusive
   /// [max] - [min] must be lesser or equal than [1 << 32 - 1]
@@ -50,6 +60,10 @@ final class Rand {
     }
     return buffer;
   }
+
+  ///
+  /// Crypto
+  ///
 
   /// Base62([base62CharSet]) based nonce
   static String nonce(int len, [bool secure = true]) {
@@ -92,6 +106,10 @@ final class Rand {
     }
     return buffer.toString();
   }
+
+  ///
+  /// DateTime/Duration
+  ///
 
   /// [a]/[b] parameters defines the limits, the order doesn't matter
   static Duration duration(Duration a, [Duration b = Duration.zero]) {
@@ -162,6 +180,10 @@ final class Rand {
     }
     return elements;
   }
+
+  ///
+  /// Probability
+  ///
 
   static List<T> distributedProbability<T>({
     required List<int> probs, // probability of each value
