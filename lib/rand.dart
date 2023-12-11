@@ -182,6 +182,19 @@ final class Rand {
   }
 
   ///
+  /// Text
+  ///
+
+  String word() => Rand.element(_words);
+
+  String sentence() => Rand.element(_sentences);
+
+  String words(int size, [String separator = ' ']) =>
+      Rand.subSet(_words, size).join(separator);
+
+  String sentences(int size) => Rand.subSet(_sentences, size).join('. ');
+
+  ///
   /// Probability
   ///
 
