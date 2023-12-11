@@ -1,6 +1,6 @@
 name: rand
 description: A stateful random generator with extra functionalities
-version: 1.0.1
+version: 1.0.2
 homepage: https://mehmetesen.com
 
 environment:
