@@ -44,11 +44,11 @@ final class Rand {
 
   /// Base62([base62CharSet]) based char code
   static int char([bool secure = false]) {
-    final rand = secure ? _rs : _r;
-    return switch (rand.nextInt(3)) {
-      0 => rand.nextInt(10) + 48,
-      1 => rand.nextInt(26) + 65,
-      2 => rand.nextInt(26) + 97,
+    final r = secure ? _rs : _r;
+    return switch (r.nextInt(3)) {
+      0 => r.nextInt(10) + 48,
+      1 => r.nextInt(26) + 65,
+      2 => r.nextInt(26) + 97,
       _ => throw StateError(''),
     };
   }
@@ -185,14 +185,18 @@ final class Rand {
   /// Text
   ///
 
-  String word() => Rand.element(_words);
+  static String word() => element(_words);
 
-  String sentence() => Rand.element(_sentences);
+  static String words({int? size, String separator = ' '}) =>
+      subSet(_words, size ?? integer(10, 3)).join(separator);
 
-  String words(int size, [String separator = ' ']) =>
-      Rand.subSet(_words, size).join(separator);
+  static String sentence() => element(_sentences);
 
-  String sentences(int size) => Rand.subSet(_sentences, size).join('. ');
+  static String paragraph([int? size]) =>
+      List.generate(size ?? integer(10, 5), (_) => sentence()).join('. ');
+
+  static String article([int? size]) =>
+      List.generate(size ?? integer(7, 3), (_) => paragraph()).join('\n\n');
 
   ///
   /// Probability
