@@ -8,8 +8,12 @@ part 'lorem.dart';
 final class Rand {
   const Rand._();
 
-  static final _r = math.Random();
+  static var _r = math.Random();
   static final _rs = math.Random.secure();
+
+  static void seed(int seed) {
+    _r = math.Random(seed);
+  }
 
   ///
   /// Constants
@@ -187,8 +191,8 @@ final class Rand {
 
   static String word() => element(_words);
 
-  static String words({int? size, String separator = ' '}) =>
-      subSet(_words, size ?? integer(10, 3)).join(separator);
+  static String words({int? count, String separator = ' '}) =>
+      subSet(_words, count ?? integer(10, 3)).join(separator);
 
   static String sentence() => element(_sentences);
 
