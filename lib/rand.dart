@@ -44,7 +44,7 @@ final class Rand {
   ///
 
   /// Returns [Null] or [value] based on [nullChance]
-  static T? nullable<T>(T value, [double nullChance = 50]) {
+  static T? nullable<T>(T value, [double nullChance = .5]) {
     return boolean(nullChance) ? null : value;
   }
 

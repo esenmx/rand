@@ -1,6 +1,6 @@
 name: rand
 description: "Advanced, easy-to-use random generator for Dart with simple syntax. Ideal for efficient randomness in code."
-version: 2.0.0
+version: 2.0.0+1
 homepage: https://mehmetesen.com
 repository: https://github.com/esenmx/rand
 
