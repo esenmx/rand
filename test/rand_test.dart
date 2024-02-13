@@ -8,8 +8,8 @@ void main() async {
     int falseCount = 0;
     int trueCount = 0;
     for (var i = 0; i < 10000; i++) {
-      if (Rand.boolean(99)) trueCount++;
-      if (!Rand.boolean(1)) falseCount++;
+      if (Rand.boolean(.99)) trueCount++;
+      if (!Rand.boolean(.01)) falseCount++;
     }
     expect(falseCount, greaterThan(9800));
     expect(falseCount, lessThan(10000));
@@ -79,51 +79,52 @@ void main() async {
     }
   });
 
-  test('distributedProbability', () {
-    expect(
-      () {
-        return Rand.distributedProbability(probs: [1], values: [], size: 10);
-      },
-      throwsA(isA<AssertionError>()),
-    );
-    expect(
-      () {
-        return Rand.distributedProbability(probs: [], values: [1], size: 10);
-      },
-      throwsA(isA<AssertionError>()),
-    );
-    expect(
-      () {
-        return Rand.distributedProbability(
-          probs: [1],
-          values: [1, 2],
-          size: 10,
-        );
-      },
-      throwsA(isA<AssertionError>()),
-    );
-
-    for (var i = 0; i < 10000; i++) {
-      final result = Rand.distributedProbability(
-        probs: [1, 10, 100],
-        values: ['foo', 'bar', 'baz'],
-        size: 1110,
+  group('weightedRandomizedArray', () {
+    test('empty weights', () {
+      expect(
+        () => Rand.weightedRandomizedArray(weights: [], pool: [1], size: 10),
+        throwsA(isA<AssertionError>()),
       );
-      final foo = result.where((e) => e == 'foo').length;
-      final bar = result.where((e) => e == 'bar').length;
-      final baz = result.where((e) => e == 'baz').length;
-      expect(RangeError.checkValueInInterval(foo, 0, bar), foo);
-      expect(RangeError.checkValueInInterval(bar, foo, baz), bar);
-      expect(RangeError.checkValueInInterval(baz, bar, 1110), baz);
-    }
+    });
+
+    test('different sizes of weights and pool ', () {
+      expect(
+        () =>
+            Rand.weightedRandomizedArray(weights: [1], pool: [1, 2], size: 10),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('empty pool', () {
+      expect(
+        Rand.weightedRandomizedArray(weights: [1], pool: [], size: 10),
+        const [],
+      );
+    });
+
+    test('weightedRandomizedArray', () {
+      for (var i = 0; i < 10000; i++) {
+        final result = Rand.weightedRandomizedArray(
+          weights: [1, 10, 100],
+          pool: ['foo', 'bar', 'baz'],
+          size: 1110,
+        );
+        final foo = result.where((e) => e == 'foo').length;
+        final bar = result.where((e) => e == 'bar').length;
+        final baz = result.where((e) => e == 'baz').length;
+        expect(RangeError.checkValueInInterval(foo, 0, bar), foo);
+        expect(RangeError.checkValueInInterval(bar, foo, baz), bar);
+        expect(RangeError.checkValueInInterval(baz, bar, 1110), baz);
+      }
+    });
   });
 
   test('char', () {
     for (var i = 0; i < 1000; i++) {
       var char = Rand.char();
-      expect(Rand.base62CharSet.contains(String.fromCharCode(char)), isTrue);
-      char = Rand.char(true);
-      expect(Rand.base62CharSet.contains(String.fromCharCode(char)), isTrue);
+      expect(Rand.base62.contains(String.fromCharCode(char)), isTrue);
+      char = Rand.charSecure();
+      expect(Rand.base62.contains(String.fromCharCode(char)), isTrue);
     }
   });
 
