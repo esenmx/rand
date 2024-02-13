@@ -3,7 +3,11 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-part 'lorem.dart';
+part 'data/alias.dart';
+part 'data/cities.dart';
+part 'data/first_name.dart';
+part 'data/last_name.dart';
+part 'data/lorem.dart';
 
 final class Rand {
   const Rand._();
@@ -11,9 +15,7 @@ final class Rand {
   static var _r = math.Random();
   static final _rs = math.Random.secure();
 
-  static void seed(int seed) {
-    _r = math.Random(seed);
-  }
+  static void seed(int seed) => _r = math.Random(seed);
 
   ///
   /// Constants
@@ -21,22 +23,36 @@ final class Rand {
 
   static const _maxInt = 1 << 32;
 
+  static const _lower = 'abcdefghijklmnopqrstuvwxyz';
+  static const _upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  static const _numeric = '0123456789';
+  static const _special = '!@#\$%^&*()-_=+[]{}\\|;:\'",<.>/?`~';
+
   @visibleForTesting
-  static const base62CharSet =
-      '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  static const base62 = _numeric + _upper + _lower;
 
   static final _minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
   static final _maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
-  static bool boolean([double trueProbability = 50]) {
-    return trueProbability > _r.nextInt(100);
+  static bool boolean([double trueChance = .5]) {
+    assert(trueChance >= 0 && trueChance <= 1, 'trueChance must be in [0, 1]');
+    return trueChance > _r.nextDouble();
+  }
+
+  ///
+  /// Generic
+  ///
+
+  /// Returns [Null] or [value] based on [nullChance]
+  static T? nullable<T>(T value, [double nullChance = 50]) {
+    return boolean(nullChance) ? null : value;
   }
 
   ///
   /// Numeric
   ///
 
-  /// both [min]/[max] is inclusive
+  /// [min]/[max] is inclusive
   /// [max] - [min] must be lesser or equal than [1 << 32 - 1]
   static int integer([int max = _maxInt - 1, int min = 0]) {
     if (max == min) {
@@ -46,14 +62,33 @@ final class Rand {
     return _r.nextInt(max - min + 1) + min;
   }
 
+  /// [min]/[max] is inclusive
+  static double float([num max = double.maxFinite, num min = 0]) {
+    return _lerp(min, max, _r.nextDouble());
+  }
+
+  /// [precision] is the number of digits after the decimal point
+  static double latitude([int precision = 5]) =>
+      double.parse(float(90, -90).toStringAsPrecision(precision));
+
+  /// [precision] is the number of digits after the decimal point
+  static double longitude([int precision = 5]) =>
+      double.parse(float(180, -180).toStringAsPrecision(precision));
+
+  /// Returns a character using non-secure [math.Random]
+  static int char() => _char(_r);
+
+  /// Returns a character using secure [math.Random.secure]
+  static int charSecure() => _char(_rs);
+
   /// Base62([base62CharSet]) based char code
-  static int char([bool secure = false]) {
-    final r = secure ? _rs : _r;
-    return switch (r.nextInt(3)) {
-      0 => r.nextInt(10) + 48,
-      1 => r.nextInt(26) + 65,
-      2 => r.nextInt(26) + 97,
-      _ => throw StateError(''),
+  static int _char(math.Random r) {
+    final s = r.nextInt(3);
+    return switch (s) {
+      0 => r.nextInt(10) + 48, // numeric
+      1 => r.nextInt(26) + 65, // upper case
+      2 => r.nextInt(26) + 97, // lower case
+      _ => throw RangeError.range(s, 0, 2),
     };
   }
 
@@ -66,53 +101,48 @@ final class Rand {
   }
 
   ///
-  /// Crypto
+  /// Cryptographic
   ///
 
-  /// Base62([base62CharSet]) based nonce
-  static String nonce(int len, [bool secure = true]) {
-    return String.fromCharCodes([for (var i = 0; i < len; i++) char(secure)]);
+  /// [base62] based nonce
+  static String nonce(int len) {
+    return String.fromCharCodes([for (var i = 0; i < len; i++) charSecure()]);
   }
 
-  static T? maybeNull<T>(T value, [double nullProbability = 50]) {
-    return boolean(nullProbability) ? null : value;
-  }
+  /// [base62] based id
+  static String id([int length = 16]) => nonce(length);
 
-  /// An example [FirebaseFirestore.DocumentReference] id
-  static String documentId([int length = 20]) => nonce(length);
-
-  /// For generating [FirebaseAuth] like uid's
-  static String uid([int length = 28]) => nonce(length);
-
+  /// Cryptographically secure password generator
+  /// [length] is the length of the password
+  /// [withLowercase] is the flag to include lowercase characters
+  /// [withUppercase] is the flag to include uppercase characters
+  /// [withNumeric] is the flag to include numeric characters
+  /// [withSpecial] is the flag to include special characters
   static String password({
-    int length = 16,
+    int length = 12,
     bool withLowercase = true,
     bool withUppercase = true,
     bool withNumeric = true,
     bool withSpecial = true,
   }) {
-    const lowerCase = "abcdefghijklmnopqrstuvwxyz";
-    const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const numeric = "0123456789";
-    const special = "!@#\$%^&*()-_=+[]{}\\|;:'\",<.>/?`~";
-
-    final chars = (StringBuffer()
-          ..write(withLowercase ? lowerCase : '')
-          ..write(withUppercase ? upperCase : '')
-          ..write(withNumeric ? numeric : '')
-          ..write(withSpecial ? special : ''))
+    assert(length >= 4, 'minimum password length is 4');
+    final pool = (StringBuffer()
+          ..write(withLowercase ? _lower : '')
+          ..write(withUppercase ? _upper : '')
+          ..write(withNumeric ? _numeric : '')
+          ..write(withSpecial ? _special : ''))
         .toString();
 
     final buffer = StringBuffer();
     for (var i = 0; i < length; i++) {
-      final value = _rs.nextInt(chars.length);
-      buffer.write(chars[value]);
+      final value = _rs.nextInt(pool.length);
+      buffer.write(pool[value]);
     }
     return buffer.toString();
   }
 
   ///
-  /// DateTime/Duration
+  /// Time/Duration
   ///
 
   /// [a]/[b] parameters defines the limits, the order doesn't matter
@@ -148,24 +178,18 @@ final class Rand {
   }
 
   ///
-  /// Collections
+  /// Collection
   ///
 
-  static T element<T>(Iterable<T> iterable) {
-    return iterable.elementAt(_r.nextInt(iterable.length));
-  }
+  static T element<T>(Iterable<T> iterable) =>
+      iterable.elementAt(_r.nextInt(iterable.length));
 
-  static MapEntry<K, V> mapEntry<K, V>(Map<K, V> map) {
-    return element(map.entries);
-  }
+  static MapEntry<K, V> mapEntry<K, V>(Map<K, V> map) => element(map.entries);
 
-  static K mapKey<K, V>(Map<K, V> map) {
-    return map.keys.elementAt(_r.nextInt(map.length));
-  }
+  static K mapKey<K, V>(Map<K, V> map) =>
+      map.keys.elementAt(_r.nextInt(map.length));
 
-  static V mapValue<K, V>(Map<K, V> map) {
-    return map[mapKey(map)]!;
-  }
+  static V mapValue<K, V>(Map<K, V> map) => map[mapKey(map)]!;
 
   static Set<T> subSet<T>(Iterable<T> pool, int size) {
     final copy = Set<T>.of(pool);
@@ -173,7 +197,7 @@ final class Rand {
       throw IndexError.withLength(
         size - 1,
         copy.length,
-        message: 'FewUniqueError',
+        message: 'few unique elements in the pool',
       );
     }
     final elements = <T>{};
@@ -189,41 +213,84 @@ final class Rand {
   /// Text
   ///
 
+  static String alias() => element(_alias);
+
+  static String firstName() => element(_firstNames);
+
+  static String lastName() => element(_lastNames);
+
+  static String fullName() {
+    final buffer = StringBuffer('${firstName()} ');
+    final middleCount = weightedRandomizedArray(
+      weights: [100, 10, 1],
+      pool: [0, 1, 2],
+      size: 1,
+    ).first;
+    for (int i = 0; i < middleCount; i++) {
+      buffer.write('${boolean() ? firstName() : lastName()} ');
+    }
+    buffer.write(lastName());
+    return buffer.toString();
+  }
+
+  /// Returns a random lorem ipsum word
   static String word() => element(_words);
 
+  /// Aggregates [count] number of random lorem ipsum words
   static String words({int? count, String separator = ' '}) =>
       subSet(_words, count ?? integer(10, 3)).join(separator);
 
+  /// Returns a random lorem ipsum sentence
   static String sentence() => element(_sentences);
 
+  /// Aggregates [size] number of random lorem ipsum sentences
   static String paragraph([int? size]) =>
       List.generate(size ?? integer(10, 5), (_) => sentence()).join('. ');
 
+  /// Aggregates [size] number of [paragraph()]
   static String article([int? size]) =>
       List.generate(size ?? integer(7, 3), (_) => paragraph()).join('\n\n');
+
+  ///
+  /// Miscellaneous
+  ///
+
+  /// Returns a random city name
+  static String city() => element(_cities);
 
   ///
   /// Probability
   ///
 
-  static List<T> distributedProbability<T>({
-    required List<int> probs, // probability of each value
-    required List<T> values,
-    required int size, // size of generated result
+  /// [weights] represents the probability weights of each corresponding value
+  /// in the same index from the [pool].
+  /// [pool] is the list of values of type [T].
+  /// [size] is size of the result array.
+  /// [secure] is the flag to use cryptographically secure random generator.
+  static List<T> weightedRandomizedArray<T>({
+    required List<int> weights,
+    required List<T> pool,
+    required int size,
+    bool secure = false,
   }) {
-    assert(probs.isNotEmpty);
-    assert(values.isNotEmpty);
-    assert(probs.length == values.length);
+    assert(
+      weights.length >= pool.length,
+      'weights must greater or equal than pool',
+    );
+    if (weights.isEmpty || pool.isEmpty || size == 0) {
+      return const [];
+    }
+    final random = (secure ? _rs : _r);
     final result = <T>[];
-    final total = probs.fold<int>(0, (a, b) => a + b);
+    final total = weights.fold<int>(0, (a, b) => a + b);
     for (var i = 0; i < size; i++) {
-      int p = _r.nextInt(total);
-      for (var j = 0; j < probs.length; j++) {
-        if (probs[j] > p) {
-          result.add(values[j]);
+      int p = random.nextInt(total);
+      for (var j = 0; j < weights.length; j++) {
+        if (weights[j] > p) {
+          result.add(pool[j]);
           break;
         }
-        p -= probs[j];
+        p -= weights[j];
       }
     }
     return result;

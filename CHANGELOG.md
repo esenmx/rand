@@ -1,14 +1,20 @@
-# 1.0.3
+# 2.0.0
 
-- Added `seed` functionality
+- **BREAKING CHANGE**: `documentId` and `uid` removed, just use `id` function
+- Added functions: `alias`, `firstName`, `lastName`, `city`, `latitude`, `longitude`
+- Improved in-line documentation
+
+## 1.0.3
+
+- Added `seed` support for `math.Random` field
 
 ## 1.0.2
 
-- Lorem method tweaks and fixes
+- Tweaks and fixes for lorem functions
 
 ## 1.0.1
 
-- Lorem features added
+- Lorem functions added
 
 ## 1.0.0
 
