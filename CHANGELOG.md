@@ -1,6 +1,6 @@
 # 2.0.0
 
-- **BREAKING CHANGE**: `documentId` and `uid` removed, just use `id` function
+- **BREAKING CHANGE**: `documentId` and `uid` removed, just use `id` function, `mayBeNull` renamed as `nullable`
 - Added functions: `alias`, `firstName`, `lastName`, `city`, `latitude`, `longitude`
 - Improved in-line documentation
 
