@@ -34,9 +34,12 @@ final class Rand {
   static final _minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
   static final _maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
-  static bool boolean([double trueChance = .5]) {
-    assert(trueChance >= 0 && trueChance <= 1, 'trueChance must be in [0, 1]');
-    return trueChance > _r.nextDouble();
+  static bool boolean([double trueChance = 50]) {
+    assert(
+      trueChance >= 0 && trueChance <= 100,
+      'trueChance should be in [0, 100]',
+    );
+    return trueChance > _r.nextInt(100);
   }
 
   ///
@@ -44,7 +47,7 @@ final class Rand {
   ///
 
   /// Returns [Null] or [value] based on [nullChance]
-  static T? nullable<T>(T value, [double nullChance = .5]) {
+  static T? nullable<T>(T value, [double nullChance = 50]) {
     return boolean(nullChance) ? null : value;
   }
 

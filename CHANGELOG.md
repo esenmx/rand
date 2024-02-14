@@ -1,3 +1,7 @@
+## 2.0.2
+
+- regression `boolean()` function
+
 ## 2.0.1
 
 - `nullable()` default `nullChance` value fix

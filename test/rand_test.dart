@@ -8,8 +8,8 @@ void main() async {
     int falseCount = 0;
     int trueCount = 0;
     for (var i = 0; i < 10000; i++) {
-      if (Rand.boolean(.99)) trueCount++;
-      if (!Rand.boolean(.01)) falseCount++;
+      if (Rand.boolean(99)) trueCount++;
+      if (!Rand.boolean(1)) falseCount++;
     }
     expect(falseCount, greaterThan(9800));
     expect(falseCount, lessThan(10000));
