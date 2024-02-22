@@ -1,3 +1,7 @@
+## 2.0.2+1
+
+- max int fix for web
+
 ## 2.0.2
 
 - regression `boolean()` function

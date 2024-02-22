@@ -21,7 +21,8 @@ final class Rand {
   /// Constants
   ///
 
-  static const _maxInt = 1 << 32;
+  /// not [1 << 32] 
+  static const _maxInt = (1 << 31) - 1;
 
   static const _lower = 'abcdefghijklmnopqrstuvwxyz';
   static const _upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
