@@ -1,3 +1,7 @@
+## 2.0.2+2
+
+- `meta` dependency uses version range
+
 ## 2.0.2+1
 
 - max int fix for web
