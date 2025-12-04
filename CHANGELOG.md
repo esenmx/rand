@@ -1,48 +1,73 @@
-# 2.0.3
+# Changelog
+
+## 3.0.0
+
+### Breaking Changes
+
+- `integer()` and `float()` now use named parameters:
+
+  ```dart
+  // Before
+  Rand.integer(100, 50);
+  
+  // After
+  Rand.integer(min: 50, max: 100);
+  ```
+
+- Replaced assertions with `ArgumentError` exceptions
+
+### New Features
+
+- Added `color()`, `colorDark()`, `colorLight()` methods
+- Exported `CSSColors` enum (148 CSS named colors)
+
+### Improvements
+
+- Better error messages
+- Comprehensive test coverage (40+ tests)
+- Migrated tests to `checks` package
+- Enhanced example
+- Rewrote README
+
+## 2.0.3
 
 - Updated dependencies
-- Enhanced formatting
+- Formatting improvements
 
 ## 2.0.2+2
 
-- `meta` dependency uses version range
+- Changed `meta` dependency to version range
 
 ## 2.0.2+1
 
-- max int fix for web
+- Fixed max int for web
 
 ## 2.0.2
 
-- regression `boolean()` function
+- Fixed `boolean()` regression
 
 ## 2.0.1
 
-- `nullable()` default `nullChance` value fix
-
-```dart
-// BEFORE
-nullable<T>(T value, [double nullChance = 50])
-// AFTER
-nullable<T>(T value, [double nullChance = .5])
-```
+- Fixed `nullable()` default value
 
 ## 2.0.0
 
-- **BREAKING CHANGE**: `documentId` and `uid` removed, just use `id` function, `mayBeNull` renamed as `nullable`
-- Added functions: `alias`, `firstName`, `lastName`, `city`, `latitude`, `longitude`
-- Improved in-line documentation
+- **Breaking:** Removed `documentId` and `uid` (use `id` instead)
+- **Breaking:** Renamed `mayBeNull` to `nullable`
+- Added `alias`, `firstName`, `lastName`, `city`, `latitude`, `longitude`
+- Improved documentation
 
 ## 1.0.3
 
-- Added `seed` support for `math.Random` field
+- Added `seed()` for reproducible results
 
 ## 1.0.2
 
-- Tweaks and fixes for lorem functions
+- Fixed lorem functions
 
 ## 1.0.1
 
-- Lorem functions added
+- Added lorem functions
 
 ## 1.0.0
 
