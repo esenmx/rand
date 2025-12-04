@@ -22,11 +22,11 @@ final date = Rand.dateTime();      // → 2024-03-15 14:32:07
 | **Numbers** | `integer()` `float()` `boolean()` `latitude()` `longitude()` |
 | **Text** | `word()` `words()` `sentence()` `paragraph()` `article()` |
 | **Identity** | `firstName()` `lastName()` `fullName()` `alias()` |
-| **Cryptographic** | `password()` `id()` `nonce()` `bytes()` |
-| **Time** | `dateTime()` `dateTimeYear()` `duration()` |
+| **Cryptographic** | `password()` `id()` `nonce()` `bytes()` `charCode()` `safeCharCode()` |
+| **Time** | `dateTime()` `duration()` |
 | **Collections** | `element()` `subSet()` `mapKey()` `mapValue()` `mapEntry()` |
 | **Colors** | `color()` `colorDark()` `colorLight()` |
-| **Probability** | `weightedRandomizedArray()` `nullable()` |
+| **Probability** | `sample()` `nullable()` |
 | **Misc** | `city()` |
 
 ---
@@ -35,7 +35,7 @@ final date = Rand.dateTime();      // → 2024-03-15 14:32:07
 
 ```yaml
 dependencies:
-  rand: ^3.0.0
+  rand: ^3.0.1
 ```
 
 ```dart
@@ -91,10 +91,10 @@ Rand.id(32);              // → custom length
 Rand.nonce(64);           // → 64-char secure string
 
 // Passwords with options
-Rand.password();                           // → "k9#Mx!pL2@qR"
-Rand.password(length: 20);                 // longer password
-Rand.password(withSpecial: false);         // no special chars
-Rand.password(withUppercase: false);       // lowercase + digits only
+Rand.password();                     // → "k9#Mx!pL2@qR"
+Rand.password(length: 20);           // longer password
+Rand.password(symbols: false);       // no symbols
+Rand.password(uppercase: false);     // lowercase + digits only
 
 // Secure bytes
 Rand.bytes(32);           // → Uint8List of 32 random bytes
@@ -110,9 +110,6 @@ Rand.dateTime();
 // Custom range
 Rand.dateTime(DateTime(2020), DateTime(2025));
 
-// By year
-Rand.dateTimeYear(2020, 2025);
-
 // Random duration
 Rand.duration(Duration(days: 30));                    // 0 to 30 days
 Rand.duration(Duration(days: 30), Duration(days: 1)); // 1 to 30 days
@@ -124,8 +121,8 @@ Rand.duration(Duration(days: 30), Duration(days: 1)); // 1 to 30 days
 final fruits = ['🍎', '🍊', '🍋', '🍇', '🍓'];
 final scores = {'Alice': 95, 'Bob': 87};
 
-Rand.element(fruits);     // → '🍊'
-Rand.subSet(fruits, 3);   // → {'🍎', '🍋', '🍓'}
+Rand.element(fruits);   // → '🍊'
+Rand.subSet(fruits, 3); // → {'🍎', '🍋', '🍓'}
 
 Rand.mapKey(scores);      // → 'Bob'
 Rand.mapValue(scores);    // → 95
@@ -146,25 +143,22 @@ Rand.colorDark();    // dark colors only (good for light backgrounds)
 Rand.colorLight();   // light colors only (good for dark backgrounds)
 ```
 
-### Weighted Random
+### Sampling
 
-Perfect for game mechanics, A/B testing, or any scenario with unequal probabilities:
+Select random elements with or without weights:
 
 ```dart
+// Equal probability (no weights)
+final dice = Rand.sample(from: [1, 2, 3, 4, 5, 6], count: 3);
+// → [4, 2, 6]
+
 // Loot box with rarity weights
-final loot = Rand.weightedRandomizedArray(
-  weights: [1, 10, 100],           // relative probabilities
-  pool: ['Legendary', 'Rare', 'Common'],
-  size: 10,                        // draw 10 items
+final loot = Rand.sample(
+  from: ['Legendary', 'Rare', 'Common'],
+  count: 10,
+  weights: [1, 10, 100],  // optional - higher = more likely
 );
 // → ['Common', 'Common', 'Rare', 'Common', ...]
-
-// Football team composition (weighted positions)
-final team = Rand.weightedRandomizedArray(
-  weights: [10, 40, 40, 10],
-  pool: ['GK', 'DEF', 'MID', 'FWD'],
-  size: 11,
-);
 ```
 
 ### Nullable Helper
@@ -207,19 +201,29 @@ print(Rand.integer(max: 100)); // Always same value for same seed
 
 ## 📝 Migration from v2.x
 
-### Breaking Changes in v3.0.0
-
-**Parameter Order Changed** - `integer()` and `float()` now use named parameters:
+### Breaking Changes in v3.x
 
 ```dart
-// v2.x (DEPRECATED)
-Rand.integer(100, 50);    // max, min
+// integer() and float() use named parameters
+Rand.integer(100, 50);           // ❌ Before
+Rand.integer(min: 50, max: 100); // ✅ After
 
-// v3.x (NEW)
-Rand.integer(min: 50, max: 100);
+// sample() replaces weightedRandomizedArray()
+Rand.weightedRandomizedArray(weights: [...], pool: items, size: 5); // ❌ Before
+Rand.sample(from: items, count: 5, weights: [...]);                 // ✅ After
+
+// charCode() replaces char()
+Rand.char();       // ❌ Before
+Rand.charCode();   // ✅ After
+
+// password() params simplified
+Rand.password(withLowercase: true);  // ❌ Before
+Rand.password(lowercase: true);      // ✅ After
 ```
 
-**New Methods** - `color()`, `colorDark()`, `colorLight()` - CSS color generation
+**Removed:** `dateTimeYear()` — use `dateTime(DateTime(year1), DateTime(year2))`
+
+**New:** `color()`, `colorDark()`, `colorLight()`, `CSSColors` enum
 
 ---
 

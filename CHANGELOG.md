@@ -1,50 +1,44 @@
 # Changelog
 
-## 3.0.0
+## 3.0.1
 
 ### Breaking Changes
 
-- `integer()` and `float()` now use named parameters:
+- `integer()` and `float()` now use named parameters (`min:`, `max:`)
+- `sample()` replaces `weightedRandomizedArray()`:
 
   ```dart
   // Before
-  Rand.integer(100, 50);
+  Rand.weightedRandomizedArray(weights: [...], pool: items, size: 5);
   
   // After
-  Rand.integer(min: 50, max: 100);
+  Rand.sample(from: items, count: 5);                 // equal probability
+  Rand.sample(from: items, count: 5, weights: [...]); // weighted
   ```
 
-- Replaced assertions with `ArgumentError` exceptions
+- `charCode()` and `safeCharCode()` replace `char()` and `charSecure()`
+- Removed `dateTimeYear()` — use `dateTime(DateTime(year1), DateTime(year2))`
+- Collection params renamed to `from`
+- Password params simplified: `lowercase`, `uppercase`, `digits`, `symbols`
 
-### New Features
+### New
 
-- Added `color()`, `colorDark()`, `colorLight()` methods
-- Exported `CSSColors` enum (148 CSS named colors)
+- `color()`, `colorDark()`, `colorLight()` for CSS colors
+- `CSSColors` enum with 148 named colors
 
-### Improvements
+### Improved
 
-- Better error messages
-- Comprehensive test coverage (40+ tests)
-- Migrated tests to `checks` package
-- Enhanced example
-- Rewrote README
+- Proper `ArgumentError` exceptions instead of assertions
+- 40+ tests with `checks` package
 
 ## 2.0.3
 
 - Updated dependencies
-- Formatting improvements
-
-## 2.0.2+2
-
-- Changed `meta` dependency to version range
-
-## 2.0.2+1
-
-- Fixed max int for web
 
 ## 2.0.2
 
 - Fixed `boolean()` regression
+- Fixed max int for web
 
 ## 2.0.1
 
@@ -52,22 +46,9 @@
 
 ## 2.0.0
 
-- **Breaking:** Removed `documentId` and `uid` (use `id` instead)
-- **Breaking:** Renamed `mayBeNull` to `nullable`
+- Removed `documentId`, `uid` — use `id()`
+- Renamed `mayBeNull` → `nullable`
 - Added `alias`, `firstName`, `lastName`, `city`, `latitude`, `longitude`
-- Improved documentation
-
-## 1.0.3
-
-- Added `seed()` for reproducible results
-
-## 1.0.2
-
-- Fixed lorem functions
-
-## 1.0.1
-
-- Added lorem functions
 
 ## 1.0.0
 

@@ -10,53 +10,62 @@ part 'data/first_name.dart';
 part 'data/last_name.dart';
 part 'data/lorem.dart';
 
+/// A utility class for generating random data.
+///
+/// All methods are static. Use [seed] for reproducible results.
 final class Rand {
   const Rand._();
 
   static var _r = math.Random();
-  static final _rs = math.Random.secure();
+  static final _sr = math.Random.secure();
 
-  /// Set the seed for non-secure RNG.
-  static void seed(int seed) => _r = math.Random(seed);
+  /// Sets the seed for reproducible random generation.
+  ///
+  /// Does not affect secure methods like [password], [id], [nonce].
+  static void seed(int value) => _r = math.Random(value);
 
-  ///
-  /// Constants
-  ///
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Constants
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   static const int _maxInt = (1 << 31) - 1;
-  static const _lower = 'abcdefghijklmnopqrstuvwxyz';
-  static const _upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  static const _numeric = '0123456789';
-  static const _special = '!@#\$%^&*()-_=+[]{}\\|;:\'",<.>/?`~';
+  static const _lowercase = 'abcdefghijklmnopqrstuvwxyz';
+  static const _uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  static const _digits = '0123456789';
+  static const _symbols = '!@#\$%^&*()-_=+[]{}\\|;:\'",<.>/?`~';
+
+  /// Base62 character set (digits + uppercase + lowercase).
   @visibleForTesting
-  static const String base62 = _numeric + _upper + _lower;
+  static const String base62 = _digits + _uppercase + _lowercase;
 
-  static final int _minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
-  static final int _maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
+  static final int _epochMin = DateTime.utc(1970).microsecondsSinceEpoch;
+  static final int _epochMax = DateTime.utc(2038).microsecondsSinceEpoch;
 
-  ///
-  /// Generic
-  ///
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Boolean & Nullable
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  /// Returns true with [trueChance]% probability (default: 50).
-  static bool boolean([double trueChance = 50]) {
+  /// Returns `true` with given [probability] (0-100). Default: 50%.
+  static bool boolean([double probability = 50]) {
     assert(
-      trueChance >= 0 && trueChance <= 100,
-      'trueChance should be in [0, 100]',
+      probability >= 0 && probability <= 100,
+      'probability must be in [0, 100]',
     );
-    return trueChance > _r.nextInt(100);
+    return probability > _r.nextInt(100);
   }
 
-  /// Returns [value] or null according to [nullChance]% probability.
-  static T? nullable<T>(T value, [double nullChance = 50]) {
-    return boolean(nullChance) ? null : value;
+  /// Returns [value] or `null` with given [nullProbability] (0-100). Default: 50%.
+  static T? nullable<T>(T value, [double nullProbability = 50]) {
+    return boolean(nullProbability) ? null : value;
   }
 
-  ///
-  /// Numeric
-  ///
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Numbers
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  /// Random int in [min, max] (inclusive). Max difference: 2^31-1.
+  /// Random integer in [min, max] range (inclusive).
+  ///
+  /// Maximum range: 2^31-1.
   static int integer({int min = 0, int max = _maxInt - 1}) {
     if (max == min) return max;
     if (min > max) throw ArgumentError('min ($min) must be <= max ($max)');
@@ -67,158 +76,133 @@ final class Rand {
   /// Random double in [min, max] range.
   static double float({num min = 0, num max = double.maxFinite}) {
     if (min > max) throw ArgumentError('min ($min) must be <= max ($max)');
-    return Rand._lerp(min, max, _r.nextDouble());
+    return _lerp(min, max, _r.nextDouble());
   }
 
-  /// Random latitude value, [precision] controls decimals.
+  /// Random latitude (-90 to 90) with given decimal [precision].
   static double latitude([int precision = 5]) =>
       double.parse(float(min: -90, max: 90).toStringAsPrecision(precision));
 
-  /// Random longitude value, [precision] controls decimals.
+  /// Random longitude (-180 to 180) with given decimal [precision].
   static double longitude([int precision = 5]) =>
       double.parse(float(min: -180, max: 180).toStringAsPrecision(precision));
 
-  /// Random base62 char code (non-secure).
-  static int char() => _char(_r);
+  /// Random base62 character code.
+  static int charCode() => _r.charCode();
 
-  /// Random base62 char code (secure).
-  static int charSecure() => _char(_rs);
+  /// Random base62 character code (cryptographically secure).
+  static int safeCharCode() => _sr.charCode();
 
-  /// Internal: random base62 char from [r].
-  static int _char(math.Random r) {
-    final s = r.nextInt(3);
-    return switch (s) {
-      0 => r.nextInt(10) + 48, // 0-9
-      1 => r.nextInt(26) + 65, // A-Z
-      2 => r.nextInt(26) + 97, // a-z
-      _ => throw RangeError.range(s, 0, 2),
-    };
+  /// Random bytes of given [length]. Set [secure] for cryptographic use.
+  static Uint8List bytes(int length, [bool secure = false]) {
+    final rng = secure ? _sr : _r;
+    return Uint8List.fromList(
+      [for (var i = 0; i < length; i++) rng.nextInt(256)],
+    );
   }
 
-  /// Random bytes of length [size]. Set [secure] for cryptographic RNG.
-  static Uint8List bytes(int size, [bool secure = false]) {
-    final buffer = Uint8List(size);
-    for (var i = 0; i < size; i++) {
-      buffer[i] = (secure ? _rs : _r).nextInt(0xff + 1);
-    }
-    return buffer;
-  }
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Cryptographic
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ///
-  /// Cryptographic
-  ///
+  /// Secure random base62 string of given [length].
+  static String nonce(int length) =>
+      String.fromCharCodes([for (var i = 0; i < length; i++) safeCharCode()]);
 
-  /// Secure random base62 string of length [len].
-  static String nonce(int len) =>
-      String.fromCharCodes([for (var i = 0; i < len; i++) charSecure()]);
-
-  /// Secure random ID (base62) of [length].
+  /// Secure random ID (base62). Default: 16 characters.
   static String id([int length = 16]) => nonce(length);
 
-  /// Secure random password. Options control charsets; min length 4.
+  /// Secure random password with configurable character sets.
+  ///
+  /// Minimum [length] is 4.
   static String password({
     int length = 12,
-    bool withLowercase = true,
-    bool withUppercase = true,
-    bool withNumeric = true,
-    bool withSpecial = true,
+    bool lowercase = true,
+    bool uppercase = true,
+    bool digits = true,
+    bool symbols = true,
   }) {
     if (length < 4) {
-      throw ArgumentError('minimum password length is 4, got $length');
+      throw ArgumentError('length must be >= 4, got $length');
     }
-    final pool = (StringBuffer()
-          ..write(withLowercase ? _lower : '')
-          ..write(withUppercase ? _upper : '')
-          ..write(withNumeric ? _numeric : '')
-          ..write(withSpecial ? _special : ''))
-        .toString();
+    final pool = StringBuffer()
+      ..write(lowercase ? _lowercase : '')
+      ..write(uppercase ? _uppercase : '')
+      ..write(digits ? _digits : '')
+      ..write(symbols ? _symbols : '');
     if (pool.isEmpty) {
       throw ArgumentError('at least one character set must be enabled');
     }
-
-    final buffer = StringBuffer();
-    for (var i = 0; i < length; i++) {
-      final value = _rs.nextInt(pool.length);
-      buffer.write(pool[value]);
-    }
-    return buffer.toString();
+    final chars = pool.toString();
+    return String.fromCharCodes([
+      for (var i = 0; i < length; i++)
+        chars.codeUnitAt(_sr.nextInt(chars.length)),
+    ]);
   }
 
-  ///
-  /// Time/Duration
-  ///
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Time
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  /// Random Duration between [a] and [b].
-  static Duration duration(Duration a, [Duration b = Duration.zero]) {
+  /// Random [Duration] between [max] and [min]. Default min: zero.
+  static Duration duration(Duration max, [Duration min = Duration.zero]) {
     return Duration(
-      microseconds: Rand._lerp(
-        a.inMicroseconds,
-        b.inMicroseconds,
+      microseconds: _lerp(
+        min.inMicroseconds,
+        max.inMicroseconds,
         _r.nextDouble(),
       ).toInt(),
     );
   }
 
-  /// Random DateTime (microsecondsSinceEpoch) between [a] and [b].
-  static DateTime dateTime([DateTime? a, DateTime? b]) {
-    final epoch = Rand._lerp(
-      a?.microsecondsSinceEpoch ?? _minEpoch,
-      b?.microsecondsSinceEpoch ?? _maxEpoch,
+  /// Random [DateTime] between [start] and [end]. Default: 1970-2038.
+  static DateTime dateTime([DateTime? start, DateTime? end]) {
+    final epoch = _lerp(
+      start?.microsecondsSinceEpoch ?? _epochMin,
+      end?.microsecondsSinceEpoch ?? _epochMax,
       _r.nextDouble(),
     );
     return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
   }
 
-  /// Random DateTime between Jan 1st of years [a] and [b].
-  static DateTime dateTimeYear(int a, int b) {
-    final epoch = Rand._lerp(
-      DateTime(a).microsecondsSinceEpoch,
-      DateTime(b).microsecondsSinceEpoch,
-      _r.nextDouble(),
-    );
-    return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
-  }
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Collections
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ///
-  /// Collection
-  ///
+  /// Random element from [from].
+  static T element<T>(Iterable<T> from) =>
+      from.elementAt(_r.nextInt(from.length));
 
-  /// Returns a random element from [iterable].
-  static T element<T>(Iterable<T> iterable) =>
-      iterable.elementAt(_r.nextInt(iterable.length));
+  /// Random entry from [from].
+  static MapEntry<K, V> mapEntry<K, V>(Map<K, V> from) => element(from.entries);
 
-  /// Returns a random entry from [map].
-  static MapEntry<K, V> mapEntry<K, V>(Map<K, V> map) => element(map.entries);
+  /// Random key from [from].
+  static K mapKey<K, V>(Map<K, V> from) =>
+      from.keys.elementAt(_r.nextInt(from.length));
 
-  /// Returns a random key from [map].
-  static K mapKey<K, V>(Map<K, V> map) =>
-      map.keys.elementAt(_r.nextInt(map.length));
+  /// Random value from [from].
+  static V mapValue<K, V>(Map<K, V> from) => from[mapKey(from)]!;
 
-  /// Returns a random value from [map].
-  static V mapValue<K, V>(Map<K, V> map) => map[mapKey(map)]!;
-
-  /// Returns unique random subset (size [size]) from [pool].
-  static Set<T> subSet<T>(Iterable<T> pool, int size) {
-    final copy = Set<T>.of(pool);
-    if (size > copy.length) {
-      throw IndexError.withLength(
-        size - 1,
-        copy.length,
-        message: 'few unique elements in the pool',
+  /// Random subset of [count] unique elements from [from].
+  static Set<T> subSet<T>(Iterable<T> from, int count) {
+    final available = Set<T>.of(from);
+    if (count > available.length) {
+      throw RangeError(
+        'count ($count) exceeds unique elements (${available.length})',
       );
     }
-    final elements = <T>{};
-    for (var i = 0; i < size; i++) {
-      final e = element(copy);
-      elements.add(e);
-      copy.remove(e);
+    final result = <T>{};
+    for (var i = 0; i < count; i++) {
+      final picked = element(available);
+      result.add(picked);
+      available.remove(picked);
     }
-    return elements;
+    return result;
   }
 
-  ///
-  /// Text
-  ///
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Text
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   /// Random alias/nickname.
   static String alias() => element(_alias);
@@ -229,44 +213,44 @@ final class Rand {
   /// Random last name.
   static String lastName() => element(_lastNames);
 
-  /// Random full name. May include 0-2 additional names.
+  /// Random full name (first + optional middle + last).
   static String fullName() {
-    final buffer = StringBuffer('${firstName()} ');
-    final middleCount = weightedRandomizedArray(
+    final buffer = StringBuffer(firstName());
+    final middleCount = sample(
       weights: [100, 10, 1],
-      pool: [0, 1, 2],
-      size: 1,
+      from: [0, 1, 2],
+      count: 1,
     ).first;
     for (var i = 0; i < middleCount; i++) {
-      buffer.write('${boolean() ? firstName() : lastName()} ');
+      buffer.write(' ${boolean() ? firstName() : lastName()}');
     }
-    buffer.write(lastName());
+    buffer.write(' ${lastName()}');
     return buffer.toString();
   }
 
   /// Random lorem word.
   static String word() => element(_words);
 
-  /// [count] random lorem words, joined by [separator]. If [count] is null, uses random count.
+  /// Random lorem words joined by [separator]. Default [count]: 3-10.
   static String words({int? count, String separator = ' '}) =>
       subSet(_words, count ?? integer(min: 3, max: 10)).join(separator);
 
   /// Random lorem sentence.
   static String sentence() => element(_sentences);
 
-  /// [size] random sentences as a paragraph. If [size] is null, uses random size.
-  static String paragraph([int? size]) =>
-      List.generate(size ?? integer(min: 5, max: 10), (_) => sentence())
+  /// Random paragraph of [count] sentences. Default: 5-10.
+  static String paragraph([int? count]) =>
+      List.generate(count ?? integer(min: 5, max: 10), (_) => sentence())
           .join('. ');
 
-  /// [size] random paragraphs as article. If [size] is null, uses random size.
-  static String article([int? size]) =>
-      List.generate(size ?? integer(min: 3, max: 7), (_) => paragraph())
+  /// Random article of [count] paragraphs. Default: 3-7.
+  static String article([int? count]) =>
+      List.generate(count ?? integer(min: 3, max: 7), (_) => paragraph())
           .join('\n\n');
 
-  ///
-  /// Miscellaneous
-  ///
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Miscellaneous
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   /// Random city name.
   static String city() => element(_cities);
@@ -274,49 +258,61 @@ final class Rand {
   /// Random CSS color.
   static CSSColors color() => element(CSSColors.values);
 
-  /// Random CSS color (dark colors only).
+  /// Random dark CSS color.
   static CSSColors colorDark() =>
       element(CSSColors.values.where((c) => c.isDark));
 
-  /// Random CSS color (light colors only).
+  /// Random light CSS color.
   static CSSColors colorLight() =>
       element(CSSColors.values.where((c) => !c.isDark));
 
-  ///
-  /// Probability
-  ///
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Sampling
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  /// Returns an array of [size] random elements from [pool], using [weights] as selection probability, optionally with secure RNG.
-  static List<T> weightedRandomizedArray<T>({
-    required List<int> weights,
-    required List<T> pool,
-    required int size,
+  /// Selects [count] elements from [from] with optional [weights].
+  ///
+  /// If [weights] is null, all items have equal probability.
+  /// Set [secure] for cryptographic RNG.
+  static List<T> sample<T>({
+    required List<T> from,
+    required int count,
+    List<int>? weights,
     bool secure = false,
   }) {
-    if (weights.length < pool.length) {
+    if (from.isEmpty || count == 0) return const [];
+    final w = weights ?? List.filled(from.length, 1);
+    if (w.length < from.length) {
       throw ArgumentError(
-        'weights length (${weights.length}) must be >= pool length (${pool.length})',
+        'weights.length (${w.length}) must be >= from.length (${from.length})',
       );
     }
-    if (weights.isEmpty || pool.isEmpty || size == 0) {
-      return const [];
-    }
-    final random = (secure ? _rs : _r);
+    final rng = secure ? _sr : _r;
+    final total = w.fold<int>(0, (sum, v) => sum + v);
     final result = <T>[];
-    final total = weights.fold<int>(0, (a, b) => a + b);
-    for (var i = 0; i < size; i++) {
-      var p = random.nextInt(total);
-      for (var j = 0; j < weights.length; j++) {
-        if (weights[j] > p) {
-          result.add(pool[j]);
+    for (var i = 0; i < count; i++) {
+      var threshold = rng.nextInt(total);
+      for (var j = 0; j < w.length; j++) {
+        if (w[j] > threshold) {
+          result.add(from[j]);
           break;
         }
-        p -= weights[j];
+        threshold -= w[j];
       }
     }
     return result;
   }
 
-  /// Linear interpolation between [a] and [b] by [t].
   static double _lerp(num a, num b, double t) => a + (b - a) * t;
+}
+
+extension on math.Random {
+  int charCode() {
+    return switch (nextInt(3)) {
+      0 => nextInt(10) + 48, // 0-9
+      1 => nextInt(26) + 65, // A-Z
+      2 => nextInt(26) + 97, // a-z
+      _ => throw StateError('unreachable'),
+    };
+  }
 }
