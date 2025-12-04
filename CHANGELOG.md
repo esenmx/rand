@@ -1,3 +1,8 @@
+# 2.0.3
+
+- Updated dependencies
+- Enhanced formatting
+
 ## 2.0.2+2
 
 - `meta` dependency uses version range
