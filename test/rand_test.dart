@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:rand/rand.dart';
 import 'package:test/test.dart';
 
-void main() async {
+void main() {
   test('boolean (statistical)', () {
     int falseCount = 0;
     int trueCount = 0;
