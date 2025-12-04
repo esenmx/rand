@@ -2,7 +2,7 @@ name: rand
 description: >-
   Powerful random data generator for Dart. Generate numbers, text, names,
   passwords, colors, dates, and more. Perfect for testing, mocking, and games.
-version: 3.0.2
+version: 3.1.0
 homepage: https://mehmetesen.com
 repository: https://github.com/esenmx/rand
 issue_tracker: https://github.com/esenmx/rand/issues

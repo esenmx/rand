@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Dart](https://img.shields.io/badge/Dart-3.0+-00B4AB.svg)](https://dart.dev)
 
-**A powerful, intuitive random generator for Dart.** Generate random numbers, text, colors, dates, passwords, and more with a clean, ergonomic API.
+**A powerful yet simple and intuitive random generator for Dart.** Generate random numbers, text, colors, dates, passwords, and more with a clean, ergonomic API.
 
 ```dart
 final name = Rand.fullName();      // → "Emma Rodriguez"
@@ -19,10 +19,10 @@ final date = Rand.dateTime();      // → 2024-03-15 14:32:07
 
 | Category | Methods |
 |----------|---------|
-| **Numbers** | `integer()` `float()` `boolean()` `latitude()` `longitude()` |
+| **Numbers** | `integer()` `float()` `charCode()` `boolean()` `latitude()` `longitude()` |
 | **Text** | `word()` `words()` `sentence()` `paragraph()` `article()` |
 | **Identity** | `firstName()` `lastName()` `fullName()` `alias()` |
-| **Cryptographic** | `password()` `id()` `nonce()` `bytes()` `charCode()` `safeCharCode()` |
+| **Cryptographic** | `password()` `nonce()` `bytes()` `secureCharCode()` |
 | **Time** | `dateTime()` `duration()` |
 | **Collections** | `element()` `subSet()` `mapKey()` `mapValue()` `mapEntry()` |
 | **Colors** | `color()` `colorDark()` `colorLight()` |
@@ -35,7 +35,7 @@ final date = Rand.dateTime();      // → 2024-03-15 14:32:07
 
 ```yaml
 dependencies:
-  rand: ^3.0.2
+  rand: ^3.1.0
 ```
 
 ```dart
@@ -86,8 +86,7 @@ Rand.alias();       // → "ShadowHunter"
 
 ```dart
 // Secure random strings (uses dart:math.Random.secure())
-Rand.id();                // → "k9Mx2pLqR8nT4wZy" (16 chars, base62)
-Rand.id(32);              // → custom length
+Rand.nonce();             // → 16-char secure string (default)
 Rand.nonce(64);           // → 64-char secure string
 
 // Passwords with options
@@ -111,8 +110,8 @@ Rand.dateTime();
 Rand.dateTime(DateTime(2020), DateTime(2025));
 
 // Random duration
-Rand.duration(Duration(days: 30));                    // 0 to 30 days
-Rand.duration(Duration(days: 30), Duration(days: 1)); // 1 to 30 days
+Rand.duration(max: Duration(days: 30));                          // 0 to 30 days
+Rand.duration(min: Duration(days: 1), max: Duration(days: 30));  // 1 to 30 days
 ```
 
 ### Collections
@@ -194,46 +193,8 @@ print(Rand.integer(max: 100)); // Always same value for same seed
 | Method | RNG Type | Use Case |
 |--------|----------|----------|
 | `integer()`, `float()`, etc. | `Random()` | General purpose, fast |
-| `password()`, `id()`, `nonce()` | `Random.secure()` | Cryptographic, tokens |
-| `bytes(size, true)` | `Random.secure()` | When you need secure bytes |
-
----
-
-## 📝 Migration from v2.x
-
-### Breaking Changes in v3.x
-
-```dart
-// integer() and float() use named parameters
-Rand.integer(100, 50);           // ❌ Before
-Rand.integer(min: 50, max: 100); // ✅ After
-
-// sample() replaces weightedRandomizedArray()
-Rand.weightedRandomizedArray(weights: [...], pool: items, size: 5); // ❌ Before
-Rand.sample(from: items, count: 5, weights: [...]);                 // ✅ After
-
-// charCode() replaces char()
-Rand.char();       // ❌ Before
-Rand.charCode();   // ✅ After
-
-// password() params simplified
-Rand.password(withLowercase: true);  // ❌ Before
-Rand.password(lowercase: true);      // ✅ After
-```
-
-**Removed:** `dateTimeYear()` — use `dateTime(DateTime(year1), DateTime(year2))`
-
-**New:** `color()`, `colorDark()`, `colorLight()`, `CSSColors` enum
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details.
+| `password()`, `nonce()`, `secureCharCode()` | `Random.secure()` | Cryptographic, tokens |
+| `bytes(length, true)` | `Random.secure()` | When you need secure bytes |
 
 ---
 

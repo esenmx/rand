@@ -6,5 +6,5 @@ A Dart example demonstrating the [rand](https://pub.dev/packages/rand) package.
 
 ```bash
 cd example
-dart run example.dart
+dart run example/main.dart
 ```
