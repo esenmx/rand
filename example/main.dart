@@ -37,9 +37,7 @@ void main() {
   print('  ${_indent(Rand.paragraph(3))}');
 
   _section('🔐 Cryptographic');
-  print('  ID (16):       ${Rand.id()}');
-  print('  ID (8):        ${Rand.id(8)}');
-  print('  Nonce (32):    ${Rand.nonce(32)}');
+  print('  Nonce (32):    ${Rand.nonce(length: 32)}');
   print('  Password:      ${Rand.password()}');
   print('  Password (no symbols): ${Rand.password(symbols: false)}');
   print('  Bytes (8):     ${Rand.bytes(8)}');
@@ -50,7 +48,10 @@ void main() {
     '  DateTime (2020-2025): ${Rand.dateTime(DateTime(2020), DateTime(2025))}',
   );
   print(
-    '  Duration (1-30 days): ${Rand.duration(const Duration(days: 30), const Duration(days: 1))}',
+    '  Duration (1-30 days): ${Rand.duration(
+      min: const Duration(days: 1),
+      max: const Duration(days: 30),
+    )}',
   );
 
   _section('🎨 Colors');
@@ -94,9 +95,7 @@ void main() {
   print('  nullable("value", 50%): ${Rand.nullable("value") ?? "null"}');
   print('  nullable("value", 90%): ${Rand.nullable("value", 90) ?? "null"}');
 
-  print(
-    '\n\x1B[36m═══════════════════════════════════════════════════════════════\x1B[0m\n',
-  );
+  print('\n\x1B[36m═════════════════════════════════════════════════\x1B[0m\n');
 }
 
 void _section(String title) {

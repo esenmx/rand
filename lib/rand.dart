@@ -10,53 +10,48 @@ part 'data/first_name.dart';
 part 'data/last_name.dart';
 part 'data/lorem.dart';
 
+const int _maxInt = (1 << 31) - 1;
+const _lowercase = 'abcdefghijklmnopqrstuvwxyz';
+const _uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const _digits = '0123456789';
+const _symbols = '!@#\$%^&*()-_=+[]{}\\|;:\'",<.>/?`~';
+
+/// Base62 character set (digits + uppercase + lowercase).
+@visibleForTesting
+const String base62 = _digits + _uppercase + _lowercase;
+
+final int _epochMin = DateTime.utc(1970).microsecondsSinceEpoch;
+final int _epochMax = DateTime.utc(2038).microsecondsSinceEpoch;
+
+var _r = math.Random();
+final _sr = math.Random.secure();
+
 /// A utility class for generating random data.
 ///
 /// All methods are static. Use [seed] for reproducible results.
 final class Rand {
   const Rand._();
 
-  static var _r = math.Random();
-  static final _sr = math.Random.secure();
-
   /// Sets the seed for reproducible random generation.
   ///
-  /// Does not affect secure methods like [password], [id], [nonce].
+  /// Does not affect secure methods like [password] and [nonce].
   static void seed(int value) => _r = math.Random(value);
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // Constants
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  static const int _maxInt = (1 << 31) - 1;
-  static const _lowercase = 'abcdefghijklmnopqrstuvwxyz';
-  static const _uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  static const _digits = '0123456789';
-  static const _symbols = '!@#\$%^&*()-_=+[]{}\\|;:\'",<.>/?`~';
-
-  /// Base62 character set (digits + uppercase + lowercase).
-  @visibleForTesting
-  static const String base62 = _digits + _uppercase + _lowercase;
-
-  static final int _epochMin = DateTime.utc(1970).microsecondsSinceEpoch;
-  static final int _epochMax = DateTime.utc(2038).microsecondsSinceEpoch;
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Boolean & Nullable
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  /// Returns `true` with given [probability] (0-100). Default: 50%.
-  static bool boolean([double probability = 50]) {
-    assert(
-      probability >= 0 && probability <= 100,
-      'probability must be in [0, 100]',
-    );
-    return probability > _r.nextInt(100);
+  /// Returns `true` with given [trueChance] (0-100). Default: 50%.
+  static bool boolean([double trueChance = 50]) {
+    if (trueChance < 0 || trueChance > 100) {
+      throw ArgumentError('trueChance must be in [0, 100]');
+    }
+    return trueChance > _r.nextInt(100);
   }
 
-  /// Returns [value] or `null` with given [nullProbability] (0-100). Default: 50%.
-  static T? nullable<T>(T value, [double nullProbability = 50]) {
-    return boolean(nullProbability) ? null : value;
+  /// Returns [value] or `null`. Higher [nullChance] = more likely null.
+  static T? nullable<T>(T value, [double nullChance = 50]) {
+    return boolean(nullChance) ? null : value;
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -66,10 +61,10 @@ final class Rand {
   /// Random integer in [min, max] range (inclusive).
   ///
   /// Maximum range: 2^31-1.
-  static int integer({int min = 0, int max = _maxInt - 1}) {
+  static int integer({int min = 0, int max = _maxInt}) {
     if (max == min) return max;
     if (min > max) throw ArgumentError('min ($min) must be <= max ($max)');
-    RangeError.checkValueInInterval(max - min, 1, _maxInt - 1, 'difference');
+    RangeError.checkValueInInterval(max - min, 1, _maxInt, 'difference');
     return _r.nextInt(max - min + 1) + min;
   }
 
@@ -80,37 +75,32 @@ final class Rand {
   }
 
   /// Random latitude (-90 to 90) with given decimal [precision].
-  static double latitude([int precision = 5]) =>
-      double.parse(float(min: -90, max: 90).toStringAsPrecision(precision));
+  static double latitude([int precision = 5]) {
+    return double.parse(float(min: -90, max: 90).toStringAsFixed(precision));
+  }
 
   /// Random longitude (-180 to 180) with given decimal [precision].
-  static double longitude([int precision = 5]) =>
-      double.parse(float(min: -180, max: 180).toStringAsPrecision(precision));
+  static double longitude([int precision = 5]) {
+    return double.parse(float(min: -180, max: 180).toStringAsFixed(precision));
+  }
 
   /// Random base62 character code.
   static int charCode() => _r.charCode();
 
-  /// Random base62 character code (cryptographically secure).
-  static int safeCharCode() => _sr.charCode();
+  /// Random cryptographically secure, base62 character code.
+  static int secureCharCode() => _sr.charCode();
 
   /// Random bytes of given [length]. Set [secure] for cryptographic use.
-  static Uint8List bytes(int length, [bool secure = false]) {
-    final rng = secure ? _sr : _r;
-    return Uint8List.fromList(
-      [for (var i = 0; i < length; i++) rng.nextInt(256)],
-    );
+  static Uint8List bytes(int length, {bool secure = false}) {
+    final r = secure ? _sr : _r;
+    return Uint8List.fromList(List.generate(length, (_) => r.nextInt(256)));
   }
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // Cryptographic
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   /// Secure random base62 string of given [length].
-  static String nonce(int length) =>
-      String.fromCharCodes([for (var i = 0; i < length; i++) safeCharCode()]);
-
-  /// Secure random ID (base62). Default: 16 characters.
-  static String id([int length = 16]) => nonce(length);
+  static String nonce({int length = 16, bool secure = true}) {
+    final r = secure ? _sr : _r;
+    return String.fromCharCodes(List.generate(length, (_) => r.nextInt(256)));
+  }
 
   /// Secure random password with configurable character sets.
   ///
@@ -144,8 +134,11 @@ final class Rand {
   // Time
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  /// Random [Duration] between [max] and [min]. Default min: zero.
-  static Duration duration(Duration max, [Duration min = Duration.zero]) {
+  /// Random [Duration] in [[min], [max]] range.
+  static Duration duration({
+    required Duration max,
+    Duration min = Duration.zero,
+  }) {
     return Duration(
       microseconds: _lerp(
         min.inMicroseconds,
@@ -170,15 +163,17 @@ final class Rand {
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   /// Random element from [from].
-  static T element<T>(Iterable<T> from) =>
-      from.elementAt(_r.nextInt(from.length));
+  static T element<T>(Iterable<T> from) {
+    return from.elementAt(_r.nextInt(from.length));
+  }
 
   /// Random entry from [from].
   static MapEntry<K, V> mapEntry<K, V>(Map<K, V> from) => element(from.entries);
 
   /// Random key from [from].
-  static K mapKey<K, V>(Map<K, V> from) =>
-      from.keys.elementAt(_r.nextInt(from.length));
+  static K mapKey<K, V>(Map<K, V> from) {
+    return from.keys.elementAt(_r.nextInt(from.length));
+  }
 
   /// Random value from [from].
   static V mapValue<K, V>(Map<K, V> from) => from[mapKey(from)]!;
@@ -239,14 +234,16 @@ final class Rand {
   static String sentence() => element(_sentences);
 
   /// Random paragraph of [count] sentences. Default: 5-10.
-  static String paragraph([int? count]) =>
-      List.generate(count ?? integer(min: 5, max: 10), (_) => sentence())
-          .join('. ');
+  static String paragraph([int? count]) {
+    return List.generate(count ?? integer(min: 5, max: 10), (_) => sentence())
+        .join('. ');
+  }
 
   /// Random article of [count] paragraphs. Default: 3-7.
-  static String article([int? count]) =>
-      List.generate(count ?? integer(min: 3, max: 7), (_) => paragraph())
-          .join('\n\n');
+  static String article([int? count]) {
+    return List.generate(count ?? integer(min: 3, max: 7), (_) => paragraph())
+        .join('\n\n');
+  }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Miscellaneous
@@ -259,12 +256,14 @@ final class Rand {
   static CSSColors color() => element(CSSColors.values);
 
   /// Random dark CSS color.
-  static CSSColors colorDark() =>
-      element(CSSColors.values.where((c) => c.isDark));
+  static CSSColors colorDark() {
+    return element(CSSColors.values.where((c) => c.isDark));
+  }
 
   /// Random light CSS color.
-  static CSSColors colorLight() =>
-      element(CSSColors.values.where((c) => !c.isDark));
+  static CSSColors colorLight() {
+    return element(CSSColors.values.where((c) => !c.isDark));
+  }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Sampling
@@ -302,9 +301,9 @@ final class Rand {
     }
     return result;
   }
-
-  static double _lerp(num a, num b, double t) => a + (b - a) * t;
 }
+
+double _lerp(num a, num b, double t) => a + (b - a) * t;
 
 extension on math.Random {
   int charCode() {

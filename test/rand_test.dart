@@ -71,9 +71,9 @@ void main() {
     test('charCode returns base62 character', () {
       for (var i = 0; i < 1000; i++) {
         final c = Rand.charCode();
-        check(Rand.base62.contains(String.fromCharCode(c))).isTrue();
-        final cs = Rand.safeCharCode();
-        check(Rand.base62.contains(String.fromCharCode(cs))).isTrue();
+        check(base62.contains(String.fromCharCode(c))).isTrue();
+        final cs = Rand.secureCharCode();
+        check(base62.contains(String.fromCharCode(cs))).isTrue();
       }
     });
 
@@ -81,7 +81,7 @@ void main() {
       check(Rand.bytes(0)).length.equals(0);
       check(Rand.bytes(10)).length.equals(10);
       check(Rand.bytes(100)).length.equals(100);
-      check(Rand.bytes(10, true)).length.equals(10);
+      check(Rand.bytes(10, secure: true)).length.equals(10);
     });
   });
 
@@ -89,14 +89,8 @@ void main() {
     test('nonce returns correct length', () {
       for (var i = 0; i < 100; i++) {
         final len = Rand.integer(max: 100);
-        check(Rand.nonce(len)).length.equals(len);
+        check(Rand.nonce(length: len)).length.equals(len);
       }
-    });
-
-    test('id returns correct length', () {
-      check(Rand.id()).length.equals(16);
-      check(Rand.id(8)).length.equals(8);
-      check(Rand.id(32)).length.equals(32);
     });
 
     test('password returns correct length and respects options', () {
@@ -116,10 +110,14 @@ void main() {
       check(() => Rand.password(length: 3)).throws<ArgumentError>();
     });
 
-    test('password throws when all charsets disabled', () {
+    test('password throws when all char sets disabled', () {
       check(
         () => Rand.password(
-            lowercase: false, uppercase: false, digits: false, symbols: false),
+          lowercase: false,
+          uppercase: false,
+          digits: false,
+          symbols: false,
+        ),
       ).throws<ArgumentError>();
     });
   });
@@ -132,7 +130,7 @@ void main() {
       const max = Duration(days: 30);
       const min = Duration(days: 1);
       for (var i = 0; i < 100; i++) {
-        final d = Rand.duration(max, min);
+        final d = Rand.duration(min: min, max: max);
         check(d.inMicroseconds).isLessThan(max.inMicroseconds);
         check(d.inMicroseconds).isGreaterThan(min.inMicroseconds);
       }

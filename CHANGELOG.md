@@ -1,39 +1,25 @@
 # Changelog
 
-## 3.0.2
+## 3.1.0
 
-- Reverted example
+- `duration()` now uses named parameters: `duration(max:, min:)`
+- `nullable()` parameter renamed: `probability` → `nullChance`
+- `boolean()` parameter renamed: `probability` → `trueChance`
+- Removed `id()` — use `nonce()` (now has default length of 16)
+- `latitude()` / `longitude()` now use decimal places (not significant figures)
 
 ## 3.0.1
 
-### Breaking Changes
-
 - `integer()` and `float()` now use named parameters (`min:`, `max:`)
-- `sample()` replaces `weightedRandomizedArray()`:
-
-  ```dart
-  // Before
-  Rand.weightedRandomizedArray(weights: [...], pool: items, size: 5);
-  
-  // After
-  Rand.sample(from: items, count: 5);                 // equal probability
-  Rand.sample(from: items, count: 5, weights: [...]); // weighted
-  ```
-
-- `charCode()` and `safeCharCode()` replace `char()` and `charSecure()`
+- `sample()` replaces `weightedRandomizedArray()`
+- `charCode()` and `secureCharCode()` replace `char()` and `charSecure()`
 - Removed `dateTimeYear()` — use `dateTime(DateTime(year1), DateTime(year2))`
 - Collection params renamed to `from`
-- Password params simplified: `lowercase`, `uppercase`, `digits`, `symbols`
-
-### New
-
+- Password params: `lowercase`, `uppercase`, `digits`, `symbols`
 - `color()`, `colorDark()`, `colorLight()` for CSS colors
 - `CSSColors` enum with 148 named colors
-
-### Improved
-
-- Proper `ArgumentError` exceptions instead of assertions
-- 40+ tests with `checks` package
+- `ArgumentError` exceptions instead of assertions
+- Comprehensive tests with `checks` package
 
 ## 2.0.3
 
