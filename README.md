@@ -35,7 +35,7 @@ final date = Rand.dateTime();      // → 2024-03-15 14:32:07
 
 ```yaml
 dependencies:
-  rand: ^3.0.1
+  rand: ^3.0.2
 ```
 
 ```dart

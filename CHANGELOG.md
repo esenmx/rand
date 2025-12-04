@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.2
+
+- Reverted example
+
 ## 3.0.1
 
 ### Breaking Changes
