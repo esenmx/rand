@@ -1,5 +1,6 @@
-// ignore_for_file: unused_member
+part of '../rand.dart';
 
+/// CSS named colors with their ARGB values.
 enum CSSColors {
   aliceBlue(0xFFF0F8FF, false),
   antiqueWhite(0xFFFAEBD7, false),
