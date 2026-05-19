@@ -10,4 +10,11 @@ build/
 pubspec.lock
 /example/.idea/
 /example/.packages
+/example/.dart_tool/
 .idea
+
+# Coverage output.
+coverage/
+
+# Generated API docs.
+doc/api/

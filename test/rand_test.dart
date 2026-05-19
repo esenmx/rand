@@ -1,9 +1,69 @@
+import 'dart:math';
+
 import 'package:checks/checks.dart';
 import 'package:rand/rand.dart';
 import 'package:test/test.dart';
 
 void main() {
   setUp(() => Rand.seed(42));
+
+  group('useRng / seed', () {
+    test('same seed produces same sequence', () {
+      Rand.seed(42);
+      final a = List.generate(100, (_) => Rand.integer(max: 1 << 20));
+      Rand.seed(42);
+      final b = List.generate(100, (_) => Rand.integer(max: 1 << 20));
+      check(a).deepEquals(b);
+    });
+
+    test('different seeds produce different sequences', () {
+      Rand.seed(42);
+      final a = List.generate(100, (_) => Rand.integer(max: 1 << 20));
+      Rand.seed(43);
+      final b = List.generate(100, (_) => Rand.integer(max: 1 << 20));
+      check(a).not((it) => it.deepEquals(b));
+    });
+
+    test('useRng(Random(N)) is observably equivalent to seed(N)', () {
+      Rand.seed(42);
+      final a = List.generate(50, (_) => Rand.integer(max: 1 << 20));
+      Rand.useRng(Random(42));
+      final b = List.generate(50, (_) => Rand.integer(max: 1 << 20));
+      check(a).deepEquals(b);
+    });
+
+    test('seed does not affect password', () {
+      Rand.seed(42);
+      final a = Rand.password();
+      Rand.seed(42);
+      final b = Rand.password();
+      check(a).not((it) => it.equals(b));
+    });
+
+    test('seed does not affect nonce', () {
+      Rand.seed(42);
+      final a = Rand.nonce();
+      Rand.seed(42);
+      final b = Rand.nonce();
+      check(a).not((it) => it.equals(b));
+    });
+
+    test('seed does not affect bytes', () {
+      Rand.seed(42);
+      final a = Rand.bytes(16);
+      Rand.seed(42);
+      final b = Rand.bytes(16);
+      check(a).not((it) => it.deepEquals(b));
+    });
+
+    test('seed does not affect secureCharCode', () {
+      Rand.seed(42);
+      final a = List.generate(50, (_) => Rand.secureCharCode());
+      Rand.seed(42);
+      final b = List.generate(50, (_) => Rand.secureCharCode());
+      check(a).not((it) => it.deepEquals(b));
+    });
+  });
 
   group('Boolean & Nullable', () {
     test('boolean returns true/false based on probability', () {
@@ -15,6 +75,11 @@ void main() {
       }
       check(trueCount).isGreaterThan(9700);
       check(falseCount).isGreaterThan(9700);
+    });
+
+    test('boolean throws on invalid probability', () {
+      check(() => Rand.boolean(-1)).throws<ArgumentError>();
+      check(() => Rand.boolean(101)).throws<ArgumentError>();
     });
 
     test('nullable returns value or null based on probability', () {
@@ -36,11 +101,23 @@ void main() {
       check(Rand.integer(min: -1, max: 1)).isA<int>();
     });
 
+    test('integer is uniform over its range', () {
+      Rand.seed(42);
+      final histogram = List.filled(10, 0);
+      for (var i = 0; i < 100000; i++) {
+        histogram[Rand.integer(max: 9)]++;
+      }
+      for (final count in histogram) {
+        check(count).isGreaterOrEqual(9000);
+        check(count).isLessOrEqual(11000);
+      }
+    });
+
     test('integer throws on invalid range', () {
       check(() => Rand.integer(min: 2, max: 1)).throws<ArgumentError>();
     });
 
-    test('float returns value in range', () {
+    test('float returns value in [min, max)', () {
       for (var i = 0; i < 100; i++) {
         final f = Rand.float(min: 10, max: 20);
         check(f).isGreaterOrEqual(10);
@@ -81,7 +158,6 @@ void main() {
       check(Rand.bytes(0)).length.equals(0);
       check(Rand.bytes(10)).length.equals(10);
       check(Rand.bytes(100)).length.equals(100);
-      check(Rand.bytes(10, secure: true)).length.equals(10);
     });
   });
 
@@ -93,16 +169,31 @@ void main() {
       }
     });
 
+    test('nonce returns base62 characters', () {
+      for (var i = 0; i < 50; i++) {
+        final n = Rand.nonce(length: 32);
+        for (var j = 0; j < n.length; j++) {
+          check(base62.contains(n[j])).isTrue();
+        }
+      }
+    });
+
     test('password returns correct length and respects options', () {
       check(Rand.password()).length.equals(12);
       check(Rand.password(length: 20)).length.equals(20);
 
-      final lower =
-          Rand.password(uppercase: false, digits: false, symbols: false);
+      final lower = Rand.password(
+        uppercase: false,
+        digits: false,
+        symbols: false,
+      );
       check(lower.toLowerCase()).equals(lower);
 
-      final upper =
-          Rand.password(lowercase: false, digits: false, symbols: false);
+      final upper = Rand.password(
+        lowercase: false,
+        digits: false,
+        symbols: false,
+      );
       check(upper.toUpperCase()).equals(upper);
     });
 
@@ -126,20 +217,20 @@ void main() {
     final minEpoch = DateTime.utc(1970).microsecondsSinceEpoch;
     final maxEpoch = DateTime.utc(2038).microsecondsSinceEpoch;
 
-    test('duration returns value in range', () {
+    test('duration returns value in [min, max)', () {
       const max = Duration(days: 30);
       const min = Duration(days: 1);
       for (var i = 0; i < 100; i++) {
         final d = Rand.duration(min: min, max: max);
+        check(d.inMicroseconds).isGreaterOrEqual(min.inMicroseconds);
         check(d.inMicroseconds).isLessThan(max.inMicroseconds);
-        check(d.inMicroseconds).isGreaterThan(min.inMicroseconds);
       }
     });
 
     test('dateTime returns value in default range', () {
       for (var i = 0; i < 100; i++) {
         final dt = Rand.dateTime();
-        check(dt.microsecondsSinceEpoch).isGreaterThan(minEpoch);
+        check(dt.microsecondsSinceEpoch).isGreaterOrEqual(minEpoch);
         check(dt.microsecondsSinceEpoch).isLessThan(maxEpoch);
       }
     });
@@ -151,6 +242,10 @@ void main() {
       for (var i = 0; i < 100; i++) {
         check(list.contains(Rand.element(list))).isTrue();
       }
+    });
+
+    test('element throws StateError on empty', () {
+      check(() => Rand.element(<int>[])).throws<StateError>();
     });
 
     test('mapEntry returns entry from map', () {
@@ -177,16 +272,15 @@ void main() {
     });
 
     test('subSet returns unique elements', () {
-      check(Rand.subSet(<int>[], 0)).isEmpty();
-      check(Rand.subSet([1, 2, 2, 3, 3, 3], 3)).deepEquals({1, 2, 3});
+      check(Rand.subSet(<int>{}, 0)).isEmpty();
 
-      final array = List.generate(100, (i) => i).toSet();
-      check(Rand.subSet(array, 100)).length.equals(100);
-      check(Rand.subSet(array, 50)).length.equals(50);
+      final pool = List.generate(100, (i) => i).toSet();
+      check(Rand.subSet(pool, 100)).length.equals(100);
+      check(Rand.subSet(pool, 50)).length.equals(50);
     });
 
-    test('subSet throws when not enough unique elements', () {
-      check(() => Rand.subSet([1, 2, 2], 3)).throws<RangeError>();
+    test('subSet throws when count exceeds set size', () {
+      check(() => Rand.subSet({1, 2}, 3)).throws<RangeError>();
     });
   });
 
@@ -254,9 +348,9 @@ void main() {
       }
     });
 
-    test('color returns valid CSSColors', () {
+    test('color returns valid CssColors', () {
       for (var i = 0; i < 10; i++) {
-        check(CSSColors.values.contains(Rand.color())).isTrue();
+        check(CssColors.values.contains(Rand.color())).isTrue();
       }
     });
 
@@ -271,6 +365,18 @@ void main() {
         check(Rand.colorLight().isDark).isFalse();
       }
     });
+
+    test('CssColors exposes argb', () {
+      check(CssColors.coral.argb).equals(0xFFFF7F50);
+      check(CssColors.aliceBlue.argb).equals(0xFFF0F8FF);
+    });
+
+    test('CssColorsX.isDark classifies extremes correctly', () {
+      check(CssColors.black.isDark).isTrue();
+      check(CssColors.white.isDark).isFalse();
+      check(CssColors.navy.isDark).isTrue();
+      check(CssColors.ivory.isDark).isFalse();
+    });
   });
 
   group('Sampling', () {
@@ -280,19 +386,23 @@ void main() {
       check(result.every((e) => [1, 2, 3].contains(e))).isTrue();
     });
 
-    test('sample with weights returns weighted distribution', () {
-      for (var i = 0; i < 100; i++) {
-        final result = Rand.sample(
-          from: ['rare', 'common', 'veryCommon'],
-          count: 1110,
-          weights: [1, 10, 100],
-        );
-        final rare = result.where((e) => e == 'rare').length;
-        final common = result.where((e) => e == 'common').length;
-        final veryCommon = result.where((e) => e == 'veryCommon').length;
-        check(rare <= common).isTrue();
-        check(common <= veryCommon).isTrue();
-      }
+    test('sample with weights respects ratios', () {
+      Rand.seed(42);
+      final result = Rand.sample(
+        from: ['a', 'b', 'c'],
+        count: 100000,
+        weights: [1, 10, 100],
+      );
+      final a = result.where((e) => e == 'a').length;
+      final b = result.where((e) => e == 'b').length;
+      final c = result.where((e) => e == 'c').length;
+      // 1:10:100 → a ≈ 900, b ≈ 9009, c ≈ 90090. Wide tolerance.
+      check(a).isLessThan(b);
+      check(b).isLessThan(c);
+      check(a / b).isGreaterOrEqual(0.05);
+      check(a / b).isLessOrEqual(0.20);
+      check(b / c).isGreaterOrEqual(0.05);
+      check(b / c).isLessOrEqual(0.20);
     });
 
     test('sample handles empty inputs', () {
