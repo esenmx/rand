@@ -1,0 +1,64 @@
+name: Bug report
+description: Something is broken in rand
+title: "[bug] "
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear, concise description of the bug.
+      placeholder: |
+        I called `Rand.integer(min: 5, max: 5)` and got an ArgumentError.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: A minimal Dart snippet that reproduces the issue.
+      render: dart
+      placeholder: |
+        import 'package:rand/rand.dart';
+
+        void main() {
+          Rand.seed(42);
+          print(Rand.integer(min: 5, max: 5)); // expected 5, got ArgumentError
+        }
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: package-version
+    attributes:
+      label: rand version
+      placeholder: 4.0.0
+    validations:
+      required: true
+  - type: input
+    id: sdk-version
+    attributes:
+      label: Dart SDK version
+      description: Output of `dart --version`.
+      placeholder: 3.5.0
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Dart VM (Linux)
+        - Dart VM (macOS)
+        - Dart VM (Windows)
+        - Web (dart2js)
+        - Web (dart2wasm)
+        - Flutter (any platform)
+        - Other
+    validations:
+      required: true

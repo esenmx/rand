@@ -1,6 +1,9 @@
 include: package:very_good_analysis/analysis_options.yaml
+
 analyzer:
+  # Static data corpora (lorem corpus ~1k lines, 148 CSS color variants,
+  # name/city lists). Not logic — analyzing yields no actionable lint
+  # signal and slows the analyzer. Coverage also excludes this directory
+  # (see codecov.yml).
   exclude:
     - lib/data/*.dart
-linter:
-  rules:
