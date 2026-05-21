@@ -1,5 +1,36 @@
 # Changelog
 
+## 4.1.0
+
+**Identity & networking test data.** 12 new primitives, no breaking changes.
+
+### Added
+
+- **Networking** — `Rand.email({domain})`, `Rand.ipv4()`, `Rand.ipv6()`,
+  `Rand.mac({separator})`, `Rand.hex({length})`. `email` defaults to RFC 2606
+  example/test TLDs (`example.com`, `test.com`, etc.) — fixture-safe.
+  `ipv6` is returned in full uncompressed form so length is stable.
+  `hex` is general-purpose lowercase hex (git SHAs at `length: 40`, ETags, etc.)
+  and reproducible under `Rand.seed`.
+- **String synthesis** — `Rand.semver({maxMajor, maxMinor, maxPatch})` (no
+  pre-release suffix), `Rand.otp({length})` (zero-padded decimal digits),
+  `Rand.slug({wordCount, separator})` (unique lorem words),
+  `Rand.base64({byteLength})` (crypto-secure parallel to `nonce`).
+- **Collection ergonomics** — `Rand.enumValue<T extends Enum>(values)`
+  (type-safe wrapper over `element` for enums) and `Rand.shuffled<T>(list)`
+  (non-mutating copy + shuffle; distinct from `sample`/`subSet`).
+- **Geo** — `Rand.geoPoint({precision})` returns a named record
+  `({double lat, double lng})` composing `latitude` + `longitude`.
+- New mixin `_Networking` under `lib/src/_networking.dart`.
+- Example app (`example/main.dart`) gains Networking section and uses
+  the new methods in Geo, Collections, and Cryptographic sections.
+
+### Changed
+
+- README adds a Networking section and extends Collections with `enumValue`
+  / `shuffled` rows. SKILL.md description and "Picking the right call"
+  table updated to cover the new methods.
+
 ## 4.0.0
 
 **Breaking — major overhaul.**
@@ -12,16 +43,16 @@ namespaces).
 
 ### Breaking
 
-| v3.x | v4.0 |
-| --- | --- |
-| `CSSColors` (enum) | `CssColors` — modern Dart PascalCase |
-| `c.color` (int field) | `c.argb` — clarifies it's a 32-bit ARGB packed int |
-| `c.isDark` (stored field) | `c.isDark` (computed via `CssColorsX` extension, YIQ luminance) |
-| `Rand.bytes(32, true)` / `Rand.bytes(32, secure: true)` | `Rand.bytes(32)` — always secure |
-| `Rand.nonce(secure: true)` | `Rand.nonce()` — always secure |
-| `Rand.subSet([1, 2, 2], 2)` | `Rand.subSet({1, 2}, 2)` — `Set<T>` only |
-| `Rand.sample(..., secure: true)` | `Rand.useRng(Random.secure()); Rand.sample(...)` |
-| `Rand.element([])` → `RangeError` | `Rand.element([])` → `StateError` |
+|v3.x|v4.0|
+|---|---|
+|`CSSColors` (enum)|`CssColors` — modern Dart PascalCase|
+|`c.color` (int field)|`c.argb` — clarifies it's a 32-bit ARGB packed int|
+|`c.isDark` (stored field)|`c.isDark` (computed via `CssColorsX` extension, YIQ luminance)|
+|`Rand.bytes(32, true)` / `Rand.bytes(32, secure: true)`|`Rand.bytes(32)` — always secure|
+|`Rand.nonce(secure: true)`|`Rand.nonce()` — always secure|
+|`Rand.subSet([1, 2, 2], 2)`|`Rand.subSet({1, 2}, 2)` — `Set<T>` only|
+|`Rand.sample(..., secure: true)`|`Rand.useRng(Random.secure()); Rand.sample(...)`|
+|`Rand.element([])` → `RangeError`|`Rand.element([])` → `StateError`|
 
 ### Fixed
 

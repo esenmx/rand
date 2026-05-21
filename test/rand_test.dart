@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:checks/checks.dart';
 import 'package:rand/rand.dart';
 import 'package:test/test.dart';
+
+enum _TestEnum { alpha, beta, gamma, delta }
 
 void main() {
   setUp(() => Rand.seed(42));
@@ -145,6 +148,16 @@ void main() {
       }
     });
 
+    test('geoPoint returns record in valid lat/lng range', () {
+      for (var i = 0; i < 100; i++) {
+        final (:lat, :lng) = Rand.geoPoint();
+        check(lat).isGreaterOrEqual(-90);
+        check(lat).isLessOrEqual(90);
+        check(lng).isGreaterOrEqual(-180);
+        check(lng).isLessOrEqual(180);
+      }
+    });
+
     test('charCode returns base62 character', () {
       for (var i = 0; i < 1000; i++) {
         final c = Rand.charCode();
@@ -158,6 +171,42 @@ void main() {
       check(Rand.bytes(0)).length.equals(0);
       check(Rand.bytes(10)).length.equals(10);
       check(Rand.bytes(100)).length.equals(100);
+    });
+
+    test('semver returns dotted triple within bounds', () {
+      final pattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)$');
+      for (var i = 0; i < 100; i++) {
+        final v = Rand.semver(maxMajor: 3, maxMinor: 4, maxPatch: 5);
+        final m = pattern.firstMatch(v);
+        check(m).isNotNull();
+        check(int.parse(m!.group(1)!)).isLessOrEqual(3);
+        check(int.parse(m.group(2)!)).isLessOrEqual(4);
+        check(int.parse(m.group(3)!)).isLessOrEqual(5);
+      }
+    });
+
+    test('otp returns digit string of requested length', () {
+      const digits = '0123456789';
+      for (final len in [1, 6, 12]) {
+        final code = Rand.otp(length: len);
+        check(code).length.equals(len);
+        for (var i = 0; i < code.length; i++) {
+          check(digits.contains(code[i])).isTrue();
+        }
+      }
+    });
+
+    test('otp throws on non-positive length', () {
+      check(() => Rand.otp(length: 0)).throws<ArgumentError>();
+      check(() => Rand.otp(length: -3)).throws<ArgumentError>();
+    });
+
+    test('otp is reproducible under seed', () {
+      Rand.seed(42);
+      final a = List.generate(20, (_) => Rand.otp());
+      Rand.seed(42);
+      final b = List.generate(20, (_) => Rand.otp());
+      check(a).deepEquals(b);
     });
   });
 
@@ -210,6 +259,25 @@ void main() {
           symbols: false,
         ),
       ).throws<ArgumentError>();
+    });
+
+    test('base64 decodes to byteLength bytes', () {
+      for (final len in [1, 16, 32, 64]) {
+        final encoded = Rand.base64(byteLength: len);
+        check(base64Decode(encoded)).length.equals(len);
+      }
+    });
+
+    test('base64 throws on non-positive byteLength', () {
+      check(() => Rand.base64(byteLength: 0)).throws<ArgumentError>();
+    });
+
+    test('seed does not affect base64', () {
+      Rand.seed(42);
+      final a = Rand.base64();
+      Rand.seed(42);
+      final b = Rand.base64();
+      check(a).not((it) => it.equals(b));
     });
   });
 
@@ -282,6 +350,36 @@ void main() {
     test('subSet throws when count exceeds set size', () {
       check(() => Rand.subSet({1, 2}, 3)).throws<RangeError>();
     });
+
+    test('enumValue returns a member of the enum', () {
+      for (var i = 0; i < 50; i++) {
+        check(_TestEnum.values.contains(Rand.enumValue(_TestEnum.values)))
+            .isTrue();
+      }
+    });
+
+    test('shuffled returns same elements in a different order', () {
+      final input = List.generate(50, (i) => i);
+      final out = Rand.shuffled(input);
+      check(out).length.equals(input.length);
+      check(out.toSet()).deepEquals(input.toSet());
+      check(out).not((it) => it.deepEquals(input));
+    });
+
+    test('shuffled does not mutate input', () {
+      final input = [1, 2, 3, 4, 5];
+      final snapshot = List<int>.of(input);
+      Rand.shuffled(input);
+      check(input).deepEquals(snapshot);
+    });
+
+    test('shuffled is reproducible under seed', () {
+      Rand.seed(42);
+      final a = Rand.shuffled(List.generate(20, (i) => i));
+      Rand.seed(42);
+      final b = Rand.shuffled(List.generate(20, (i) => i));
+      check(a).deepEquals(b);
+    });
   });
 
   group('Text', () {
@@ -339,6 +437,20 @@ void main() {
       check(a).isNotEmpty();
       check(a.split('\n\n').length).isGreaterOrEqual(3);
     });
+
+    test('slug returns wordCount unique words joined by separator', () {
+      for (final wc in [1, 3, 5]) {
+        final s = Rand.slug(wordCount: wc);
+        final parts = s.split('-');
+        check(parts.length).equals(wc);
+        check(parts.toSet().length).equals(wc);
+      }
+      check(Rand.slug(separator: '_').split('_')).length.equals(3);
+    });
+
+    test('slug throws on non-positive wordCount', () {
+      check(() => Rand.slug(wordCount: 0)).throws<ArgumentError>();
+    });
   });
 
   group('Miscellaneous', () {
@@ -376,6 +488,81 @@ void main() {
       check(CssColors.white.isDark).isFalse();
       check(CssColors.navy.isDark).isTrue();
       check(CssColors.ivory.isDark).isFalse();
+    });
+  });
+
+  group('Networking', () {
+    test('email contains @ and a domain', () {
+      final ipv4Pattern = RegExp(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$');
+      for (var i = 0; i < 50; i++) {
+        final e = Rand.email();
+        check(e.contains('@')).isTrue();
+        final parts = e.split('@');
+        check(parts.length).equals(2);
+        check(parts[0]).isNotEmpty();
+        check(parts[1]).isNotEmpty();
+        check(ipv4Pattern.hasMatch(parts[1])).isFalse();
+      }
+    });
+
+    test('email honors explicit domain', () {
+      for (var i = 0; i < 20; i++) {
+        check(Rand.email(domain: 'mycompany.io')).endsWith('@mycompany.io');
+      }
+    });
+
+    test('ipv4 is dotted quad with each octet in 0..255', () {
+      final pattern = RegExp(r'^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$');
+      for (var i = 0; i < 200; i++) {
+        final ip = Rand.ipv4();
+        final m = pattern.firstMatch(ip);
+        check(m).isNotNull();
+        for (var g = 1; g <= 4; g++) {
+          final octet = int.parse(m!.group(g)!);
+          check(octet).isGreaterOrEqual(0);
+          check(octet).isLessOrEqual(255);
+        }
+      }
+    });
+
+    test('ipv6 is 8 groups of 4 lowercase hex chars', () {
+      final pattern = RegExp(r'^([0-9a-f]{4}:){7}[0-9a-f]{4}$');
+      for (var i = 0; i < 100; i++) {
+        check(pattern.hasMatch(Rand.ipv6())).isTrue();
+      }
+    });
+
+    test('mac is 6 hex bytes with configurable separator', () {
+      final colon = RegExp(r'^([0-9a-f]{2}:){5}[0-9a-f]{2}$');
+      final dash = RegExp(r'^([0-9a-f]{2}-){5}[0-9a-f]{2}$');
+      for (var i = 0; i < 50; i++) {
+        check(colon.hasMatch(Rand.mac())).isTrue();
+        check(dash.hasMatch(Rand.mac(separator: '-'))).isTrue();
+      }
+    });
+
+    test('hex returns lowercase hex of requested length', () {
+      const hexPool = '0123456789abcdef';
+      for (final len in [1, 8, 40, 64, 128]) {
+        final h = Rand.hex(length: len);
+        check(h).length.equals(len);
+        for (var i = 0; i < h.length; i++) {
+          check(hexPool.contains(h[i])).isTrue();
+        }
+      }
+    });
+
+    test('hex throws on non-positive length', () {
+      check(() => Rand.hex(length: 0)).throws<ArgumentError>();
+      check(() => Rand.hex(length: -1)).throws<ArgumentError>();
+    });
+
+    test('hex is reproducible under seed', () {
+      Rand.seed(42);
+      final a = List.generate(20, (_) => Rand.hex(length: 16));
+      Rand.seed(42);
+      final b = List.generate(20, (_) => Rand.hex(length: 16));
+      check(a).deepEquals(b);
     });
   });
 

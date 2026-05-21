@@ -19,4 +19,11 @@ mixin _Text on _Collections, _Numbers {
     final n = count ?? integer(min: 3, max: 7);
     return List.generate(n, (_) => paragraph()).join('\n\n');
   }
+
+  String slug({int wordCount = 3, String separator = '-'}) {
+    if (wordCount < 1) {
+      throw ArgumentError('wordCount must be >= 1, got $wordCount');
+    }
+    return subSet(_words.toSet(), wordCount).join(separator);
+  }
 }

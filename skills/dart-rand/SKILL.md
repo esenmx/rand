@@ -1,6 +1,6 @@
 ---
 name: dart-rand
-description: Use the `rand` Dart package correctly when generating random test data, fixtures, mock values, names, dates, CSS colors, weighted samples, or cryptographic tokens for testing. Covers the secure vs non-secure RNG split, `Rand.useRng` / `Rand.seed` semantics, `subSet` vs `sample` (without vs with replacement, weighted vs uniform), `CssColors` ARGB usage and the computed `isDark` extension, and common misuse patterns (off-by-one on `integer(max:)`, seeding crypto methods, using `nonce()` as a production secret). Trigger when the user's file imports `package:rand/rand.dart`, when the user asks for "random test data", "fake names", "test fixtures", "Lorem ipsum", "loot box weights", "weighted sampling", "CSS colors", or "secure tokens for tests". Skip for production secret/password generation (use `package:cryptography` or platform keystore), RFC 4122 UUIDs (use `package:uuid`), realistic locale-aware fake data (use `package:faker`), or a single `dart:math.Random.nextInt` call (no dep needed).
+description: Generate random test data and fixtures in Dart via `package:rand/rand.dart` — names, emails, IPv4/IPv6/MAC, hex, slugs, OTP, semver, lorem, CSS colors, weighted sampling, geo points, crypto tokens. Use when importing `package:rand`, building Dart test fixtures, mocking API responses, seeding demos, or the user asks for fake/random/seeded data in Dart. Skip for production secrets (use `package:cryptography`), UUIDs (use `package:uuid`), or locale-aware names (use `package:faker`).
 ---
 
 # rand
@@ -9,10 +9,10 @@ description: Use the `rand` Dart package correctly when generating random test d
 
 ## Two-RNG split — load-bearing
 
-| RNG | Methods | Reset by `useRng` / `seed`? |
+|RNG|Methods|Reset by `useRng` / `seed`?|
 |---|---|---|
-| `Random` (replaceable) | everything not in the next row | yes |
-| `Random.secure()` (fixed) | `password`, `nonce`, `bytes`, `secureCharCode` | **no** |
+|`Random` (replaceable)|everything not in the next row|yes|
+|`Random.secure()` (fixed)|`password`, `nonce`, `bytes`, `secureCharCode`|**no**|
 
 Consequences:
 
@@ -22,21 +22,65 @@ Consequences:
 
 ## Picking the right call
 
-| Goal | Use |
+|Goal|Use|
 |---|---|
-| One element | `Rand.element(iterable)` |
-| N unique elements | `Rand.subSet(set, N)` — requires `Set<T>` |
-| N elements, repeats okay | `Rand.sample(from: list, count: N)` |
-| Weighted draws | `Rand.sample(..., weights: [...])` |
-| Map key / value / entry | `Rand.mapKey` / `mapValue` / `mapEntry` |
-| Maybe-null fixture field | `Rand.nullable(value, chance)` |
+|One element|`Rand.element(iterable)`|
+|One enum member|`Rand.enumValue(MyEnum.values)`|
+|N unique elements|`Rand.subSet(set, N)` — requires `Set<T>`|
+|N elements, repeats okay|`Rand.sample(from: list, count: N)`|
+|Weighted draws|`Rand.sample(..., weights: [...])`|
+|Whole list, reordered|`Rand.shuffled(list)` — non-mutating copy|
+|Map key / value / entry|`Rand.mapKey` / `mapValue` / `mapEntry`|
+|Maybe-null fixture field|`Rand.nullable(value, chance)`|
 
 `subSet` is `Set<T>` only — dedupe explicitly with `.toSet()`. `weights.length >= from.length` for `sample`.
+
+## Common tasks
+
+Recipe shapes that show up in fixture / mock requests. `rand` is intentionally flat — compose the primitives. Full composer examples (User, Address, Order, Paginated, ChatHistory) live in [`example/recipes.dart`](../../example/recipes.dart).
+
+|Prompt|Recipe|
+|---|---|
+|*"10 fake users"*|`List.generate(10, (_) => (id: Rand.hex(length: 24), name: Rand.fullName(), email: Rand.email()))`|
+|*"Paginated response, 5 items"*|`(page: 1, totalPages: 7, items: List.generate(5, (_) => buildItem()))`|
+|*"Loot box: 1% legendary, 10% rare, 90% common"*|`Rand.sample(from: ['L','R','C'], count: 100, weights: [1, 10, 100])`|
+|*"Timestamps for the past hour, sorted"*|`[for (var i = 0; i < 20; i++) Rand.dateTime(DateTime.now().subtract(const Duration(hours: 1)), DateTime.now())]..sort((a, b) => a.compareTo(b))`|
+|*"Reproducible fixture I can rerun"*|`setUp(() => Rand.seed(42));` — non-crypto reproduces; `password`/`nonce`/`bytes`/`base64` stay live CSPRNG|
+|*"Opaque session/auth token for tests"*|`Rand.base64(byteLength: 32)` — crypto-secure source|
+|*"Git-style SHA"*|`Rand.hex(length: 40)`|
+|*"Mostly-present nullable field"*|`Rand.nullable(value, 20)` — 20% null (arg is `nullChance`, **not** `presenceChance`)|
+|*"Pick a random enum"*|`Rand.enumValue(MyEnum.values)`|
+|*"Shuffle a list non-destructively"*|`Rand.shuffled(list)` — returns a copy; `list..shuffle()` mutates|
 
 ## Bounds
 
 - `Rand.integer({min, max})` — **inclusive both ends**.
 - `Rand.float`, `Rand.duration`, `Rand.dateTime` — `[min, max)` half-open.
+
+## Networking primitives
+
+```dart
+Rand.email();                       // 'olivia42@example.com' — RFC 2606 safe TLDs
+Rand.email(domain: 'mycompany.io');
+Rand.ipv4();                        // not filtered for reserved ranges
+Rand.ipv6();                        // full form, no `::` collapse
+Rand.mac({separator: ':'});         // default colon; '-' also common
+Rand.hex({length: 8});              // generic lowercase hex — git SHAs (length: 40), ETags
+Rand.semver();                      // 'major.minor.patch', no pre-release suffix
+Rand.otp({length: 6});              // zero-padded decimal digits
+Rand.slug({wordCount: 3});          // unique lorem words, '-' separator
+```
+
+All use the non-secure RNG — reproducible under `Rand.seed`. `Rand.base64({byteLength: 16})` is the crypto-secure parallel for opaque payload fixtures.
+
+## Geo
+
+```dart
+final (:lat, :lng) = Rand.geoPoint();        // named record
+Rand.geoPoint(precision: 2);                  // (lat: 42.36, lng: -71.06)
+```
+
+`geoPoint` composes `latitude` + `longitude` — same precision contract.
 
 ## Colors
 
