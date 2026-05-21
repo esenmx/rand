@@ -39,4 +39,11 @@ mixin _Crypto {
         chars.codeUnitAt(secureRng.nextInt(chars.length)),
     ]);
   }
+
+  String base64({int byteLength = 16}) {
+    if (byteLength < 1) {
+      throw ArgumentError('byteLength must be >= 1, got $byteLength');
+    }
+    return base64Encode(bytes(byteLength));
+  }
 }

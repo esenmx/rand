@@ -10,7 +10,8 @@ class _RandImpl
         _Sampling,
         _Text,
         _Identity,
-        _Colors {
+        _Colors,
+        _Networking {
   @override
   Random rng = Random();
 

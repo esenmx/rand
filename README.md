@@ -6,11 +6,14 @@
 [![pub points](https://img.shields.io/pub/points/rand)](https://pub.dev/packages/rand/score)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**Random data for Dart.** Numbers, text, names, dates, CSS colors,
-cryptographic tokens. One static class, two RNGs, all six platforms.
+**Random data for Dart.** Numbers, text, names, dates, networking,
+CSS colors, cryptographic tokens. One static class, two RNGs, all six
+platforms.
 
 ```dart
 Rand.fullName();       // → 'Emma Rodriguez'
+Rand.email();          // → 'olivia42@example.com'
+Rand.ipv4();           // → '203.0.113.42'
 Rand.password();       // → 'k9#Mx!pL2@qR'
 Rand.color();          // → CssColors.coral
 Rand.dateTime();       // → 2024-03-15 14:32:07.000Z
@@ -34,6 +37,10 @@ Rand.sample(from: ['rare', 'common'], count: 10, weights: [1, 100]);
   platform CSPRNG, but the package's stability contract is "test data," not
   production secrets. Defaults may shift across major versions.
 - **Not a UUID library.** `Rand.nonce()` is opaque base62, not RFC 4122.
+
+For composing structured fixtures (User, Address, Order, paginated responses,
+chat history) on top of these primitives, see
+[`example/recipes.dart`](example/recipes.dart).
 
 ---
 
@@ -89,6 +96,31 @@ Rand.charCode();                   // base62 code point (int)
 
 ---
 
+## Networking
+
+```dart
+Rand.email();                       // 'olivia42@example.com'
+Rand.email(domain: 'mycompany.io'); // 'james7@mycompany.io'
+Rand.ipv4();                        // '203.0.113.42'
+Rand.ipv6();                        // '2001:0db8:85a3:0000:0000:8a2e:0370:7334'
+Rand.mac();                         // '3a:5f:9c:8e:2d:71'
+Rand.mac(separator: '-');           // '3a-5f-9c-8e-2d-71'
+Rand.hex(length: 40);               // git-SHA-shaped opaque hex
+Rand.semver();                      // '3.7.42'
+Rand.otp();                         // '047215'
+Rand.slug();                        // 'lorem-ipsum-dolor'
+```
+
+`email` defaults pick from a built-in list of RFC 2606 example/test
+TLDs — safe to ship in fixtures without collision risk. `ipv4` is not
+filtered for reserved ranges; compose your own filter if you need only
+routable addresses. `ipv6` is returned in full form (no `::` collapse)
+so fixture length stays stable. `hex` is general-purpose lowercase hex
+— git SHAs, ETags, opaque content hashes. `semver`, `otp`, `slug` use
+the non-secure RNG and are reproducible under `Rand.seed`.
+
+---
+
 ## Cryptographic — secure vs non-secure
 
 ```dart
@@ -97,6 +129,7 @@ Rand.nonce();                // 16-char base62, always Random.secure()
 Rand.nonce(length: 32);
 Rand.password();             // 12-char mixed-charset, always Random.secure()
 Rand.password(length: 20, symbols: false);
+Rand.base64();               // 16 bytes encoded, always Random.secure()
 Rand.secureCharCode();       // base62 code point, always Random.secure()
 ```
 
@@ -122,6 +155,7 @@ Rand.lastName();    // 'Thompson'
 Rand.fullName();    // 'James Michael Wilson' — 0..2 weighted middle names
 Rand.alias();       // 'ShadowHunter'
 Rand.city();        // 'Tokyo'
+Rand.geoPoint();    // (lat: 42.36011, lng: -71.05891) — named record
 ```
 
 Corpora are US/English-leaning. For locale-aware data, reach for
@@ -161,25 +195,30 @@ Rand.duration(min: const Duration(days: 1), max: const Duration(days: 30));
 ## Collections
 
 ```dart
+enum Status { active, suspended, deleted }
 final fruits = ['apple', 'orange', 'lemon', 'grape', 'kiwi'];
 final scores = {'Alice': 95, 'Bob': 87};
 
-Rand.element(fruits);          // 'orange'
-Rand.subSet({1, 2, 3, 4, 5}, 3); // {2, 5, 1} — unique elements
-Rand.mapKey(scores);           // 'Bob'
-Rand.mapValue(scores);         // 95
-Rand.mapEntry(scores);         // MapEntry('Alice', 95)
+Rand.element(fruits);              // 'orange'
+Rand.enumValue(Status.values);     // Status.suspended — typed enum draw
+Rand.subSet({1, 2, 3, 4, 5}, 3);   // {2, 5, 1} — unique elements
+Rand.shuffled(fruits);             // ['kiwi', 'grape', 'apple', ...] — copy
+Rand.mapKey(scores);               // 'Bob'
+Rand.mapValue(scores);             // 95
+Rand.mapEntry(scores);             // MapEntry('Alice', 95)
 ```
 
 Pick the right call:
 
-| Need                                | Use                              |
-| ----------------------------------- | -------------------------------- |
-| One element                         | `element(iterable)`              |
-| N unique elements                   | `subSet(set, N)`                 |
-| N elements, repeats okay            | `sample(from: list, count: N)`   |
-| N elements with weighted frequency  | `sample(..., weights: [...])`    |
-| One key / value / entry of a Map    | `mapKey` / `mapValue` / `mapEntry` |
+|Need|Use|
+|---|---|
+|One element|`element(iterable)`|
+|One enum member|`enumValue(MyEnum.values)`|
+|N unique elements|`subSet(set, N)`|
+|N elements, repeats okay|`sample(from: list, count: N)`|
+|N elements with weighted frequency|`sample(..., weights: [...])`|
+|Whole list, reordered|`shuffled(list)`|
+|One key / value / entry of a Map|`mapKey` / `mapValue` / `mapEntry`|
 
 `subSet` requires `Set<T>` — dedupe explicitly with `.toSet()` if your
 source has duplicates.
@@ -237,49 +276,17 @@ Rand.nullable('value', 90); // 90% null
 
 ---
 
-## LLM skill
+## Pitfalls
 
-A tool-agnostic skill ships at
-[`skills/dart-rand/SKILL.md`](skills/dart-rand/SKILL.md). The folder name
-is `dart-rand` to avoid colliding with other languages' `rand` namespaces
-(Go, Rust, etc.). Unlike an always-on rule, the skill activates **only**
-when its description matches the current task (file import, asked feature,
-keyword), so it stays out of the way for unrelated work. Vendor it into
-your agent's skills directory:
-
-```bash
-# Claude Code (user-level)
-mkdir -p ~/.claude/skills/dart-rand
-curl -L https://raw.githubusercontent.com/esenmx/rand/master/skills/dart-rand/SKILL.md \
-  -o ~/.claude/skills/dart-rand/SKILL.md
-
-# Claude Code (project-level)
-mkdir -p .claude/skills/dart-rand
-curl -L https://raw.githubusercontent.com/esenmx/rand/master/skills/dart-rand/SKILL.md \
-  -o .claude/skills/dart-rand/SKILL.md
-```
-
-Other agents: copy the SKILL.md body wherever your tool reads
-description-triggered context (`.cursor/`, `AGENTS.md` snippets, etc.).
-
----
-
-## Migrating from 3.x
-
-v4.0 is a breaking release. Highlights:
-
-- `CSSColors` → `CssColors`, `.color` → `.argb`.
-- `CssColors.isDark` is now a `CssColorsX` extension getter (computed
-  from `argb` via YIQ luminance), not a stored field. The boundary
-  values may shift slightly from the v3 hand-curated table.
-- `bytes()` and `nonce()` are always secure; the `secure:` parameter is gone.
-- `nonce()` now returns true base62 (the v3 implementation was bytes).
-- `subSet()` requires `Set<T>` — dedupe with `.toSet()` at the call site.
-- `sample()` drops `secure:` — call `Rand.useRng(Random.secure())` first.
-- `element([])` throws `StateError` (was a cryptic `RangeError`).
-- New `Rand.useRng(Random)` mutator; `seed(N)` is now `useRng(Random(N))`.
-
-Full table in [CHANGELOG.md](CHANGELOG.md).
+|❌|✅|
+|---|---|
+|`Rand.integer(max: list.length)` — inclusive, can return `list.length`|`Rand.element(list)` or `Rand.integer(max: list.length - 1)`|
+|`Rand.seed(42); Rand.password()` — seed never reaches CSPRNG|Build deterministic tokens from your own `Random(42)`|
+|`Rand.subSet([1, 2, 2], 2)` — list literal, duplicates collapse|Pass a `Set<T>`: `Rand.subSet({1, 2}, 2)`|
+|`Rand.nullable(x, 80)` thinking "80% present"|Arg is `nullChance` — 80% returns **null**. Flip to `Rand.nullable(x, 20)` for 80% present|
+|Shipping `Rand.nonce` / `Rand.password` as production secrets|Use `package:cryptography` or a platform keystore|
+|`setUpAll(() => Rand.seed(42))` for parallel tests|Use `setUp` — the global RNG is shared|
+|`list..shuffle()` to "get a random order" without keeping the original|`Rand.shuffled(list)` — non-mutating copy|
 
 ---
 
