@@ -36,8 +36,7 @@ mixin _Networking on _Numbers, _Collections, _Identity {
       throw ArgumentError('length must be >= 1, got $length');
     }
     return String.fromCharCodes([
-      for (var i = 0; i < length; i++)
-        _hexChars.codeUnitAt(rng.nextInt(16)),
+      for (var i = 0; i < length; i++) _hexChars.codeUnitAt(rng.nextInt(16)),
     ]);
   }
 }

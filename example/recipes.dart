@@ -56,8 +56,7 @@ void main() {
   String email,
   String? avatar,
   DateTime joinedAt,
-})
-_buildUser() {
+}) _buildUser() {
   return (
     id: Rand.hex(length: 24),
     name: Rand.fullName(),
@@ -72,7 +71,7 @@ _buildUser() {
 }
 
 ({String street, String city, String postalCode, String country})
-_buildAddress() {
+    _buildAddress() {
   return (
     street: '${Rand.integer(min: 1, max: 9999)} ${Rand.word()} St',
     city: Rand.city(),
@@ -121,8 +120,7 @@ _Order _buildOrder({required int itemCount}) {
   int totalPages,
   int totalItems,
   List<T> items,
-})
-_buildPage<T>({
+}) _buildPage<T>({
   required int page,
   required int pageSize,
   required int totalPages,
