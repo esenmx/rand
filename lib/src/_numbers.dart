@@ -24,7 +24,25 @@ mixin _Numbers {
     return double.parse(float(min: -180, max: 180).toStringAsFixed(precision));
   }
 
+  ({double lat, double lng}) geoPoint({int precision = 5}) {
+    return (lat: latitude(precision), lng: longitude(precision));
+  }
+
   int charCode() => rng.charCode();
 
   int secureCharCode() => secureRng.charCode();
+
+  String semver({int maxMajor = 9, int maxMinor = 9, int maxPatch = 99}) {
+    final major = integer(max: maxMajor);
+    final minor = integer(max: maxMinor);
+    final patch = integer(max: maxPatch);
+    return '$major.$minor.$patch';
+  }
+
+  String otp({int length = 6}) {
+    if (length < 1) {
+      throw ArgumentError('length must be >= 1, got $length');
+    }
+    return List<int>.generate(length, (_) => rng.nextInt(10)).join();
+  }
 }

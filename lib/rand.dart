@@ -20,6 +20,7 @@
 /// ```
 library;
 
+import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -33,6 +34,7 @@ part 'src/_sampling.dart';
 part 'src/_text.dart';
 part 'src/_identity.dart';
 part 'src/_colors.dart';
+part 'src/_networking.dart';
 part 'src/rand_impl.dart';
 part 'data/alias.dart';
 part 'data/cities.dart';
@@ -165,6 +167,20 @@ final class Rand {
   /// See also: [latitude].
   static double longitude([int precision = 5]) => _i.longitude(precision);
 
+  /// Random `(lat, lng)` record — composes [latitude] and [longitude].
+  ///
+  /// Returns a named record `({double lat, double lng})` so callers
+  /// destructure cleanly:
+  ///
+  /// ```dart
+  /// final (:lat, :lng) = Rand.geoPoint();
+  /// Rand.geoPoint(precision: 2);  // (lat: 42.36, lng: -71.06)
+  /// ```
+  ///
+  /// See also: [latitude], [longitude].
+  static ({double lat, double lng}) geoPoint({int precision = 5}) =>
+      _i.geoPoint(precision: precision);
+
   /// Random base62 character code (int).
   ///
   /// Returns a code point from `[0-9A-Za-z]`. Use [String.fromCharCode]
@@ -172,6 +188,36 @@ final class Rand {
   ///
   /// See also: [secureCharCode], [base62].
   static int charCode() => _i.charCode();
+
+  /// Random semantic-version string `"major.minor.patch"`.
+  ///
+  /// Each component independently uniform in `[0, maxX]` (inclusive).
+  ///
+  /// ```dart
+  /// Rand.semver();                    // '3.7.42'
+  /// Rand.semver(maxMajor: 1);          // '0.5.91' or '1.2.13' — 0 or 1 only
+  /// ```
+  ///
+  /// No pre-release suffixes (`-rc.1` etc.) — compose your own if needed.
+  static String semver({
+    int maxMajor = 9,
+    int maxMinor = 9,
+    int maxPatch = 99,
+  }) =>
+      _i.semver(maxMajor: maxMajor, maxMinor: maxMinor, maxPatch: maxPatch);
+
+  /// Random zero-padded decimal OTP code.
+  ///
+  /// Each digit drawn uniformly from `[0-9]`. Reproducible under
+  /// [Rand.seed] — useful for test fixtures, not for real one-time codes.
+  ///
+  /// ```dart
+  /// Rand.otp();              // '047215'
+  /// Rand.otp(length: 4);      // '8203'
+  /// ```
+  ///
+  /// Throws [ArgumentError] when [length] is less than 1.
+  static String otp({int length = 6}) => _i.otp(length: length);
 
   /// Cryptographically secure random base62 character code (int).
   ///
@@ -249,6 +295,24 @@ final class Rand {
         digits: digits,
         symbols: symbols,
       );
+
+  /// Cryptographically secure random base64-encoded string.
+  ///
+  /// {@macro rand.always_secure}
+  ///
+  /// Encodes [byteLength] random bytes via [base64Encode]. Output length
+  /// is `4 * ceil(byteLength / 3)` characters (padded with `=`).
+  ///
+  /// ```dart
+  /// Rand.base64();                  // 22 chars + '=='  for 16 bytes
+  /// Rand.base64(byteLength: 32);    // 44 chars
+  /// ```
+  ///
+  /// Throws [ArgumentError] when [byteLength] is less than 1.
+  ///
+  /// See also: [bytes], [nonce].
+  static String base64({int byteLength = 16}) =>
+      _i.base64(byteLength: byteLength);
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Time
@@ -328,6 +392,31 @@ final class Rand {
   ///
   /// See also: [mapKey], [mapEntry].
   static V mapValue<K, V>(Map<K, V> from) => _i.mapValue(from);
+
+  /// Random value from an enum.
+  ///
+  /// Pass `MyEnum.values` — the `T extends Enum` bound makes this
+  /// type-safe and IDE-discoverable.
+  ///
+  /// ```dart
+  /// enum Status { active, suspended, deleted }
+  /// Rand.enumValue(Status.values);  // Status.suspended
+  /// ```
+  ///
+  /// See also: [element].
+  static T enumValue<T extends Enum>(List<T> values) => _i.enumValue(values);
+
+  /// Returns a new shuffled copy of [from] — input is not mutated.
+  ///
+  /// Uses the global non-cryptographic RNG; reproducible under [Rand.seed].
+  ///
+  /// ```dart
+  /// Rand.shuffled([1, 2, 3, 4]);  // [3, 1, 4, 2]
+  /// ```
+  ///
+  /// For sampling with replacement, see [sample]. For unique-subset
+  /// draws, see [subSet].
+  static List<T> shuffled<T>(List<T> from) => _i.shuffled(from);
 
   /// Random subset of [count] unique elements from [from].
   ///
@@ -428,6 +517,22 @@ final class Rand {
   /// Random article of [count] paragraphs (default 3..7), joined by `"\n\n"`.
   static String article([int? count]) => _i.article(count);
 
+  /// Random URL slug — [wordCount] unique lorem words joined by [separator].
+  ///
+  /// Words never repeat within one slug (drawn via [subSet]).
+  ///
+  /// ```dart
+  /// Rand.slug();                     // 'lorem-ipsum-dolor'
+  /// Rand.slug(wordCount: 5);          // 'amet-consectetur-adipiscing-elit-sed'
+  /// Rand.slug(separator: '_');        // 'lorem_ipsum_dolor'
+  /// ```
+  ///
+  /// Throws [ArgumentError] when [wordCount] is less than 1.
+  ///
+  /// See also: [words].
+  static String slug({int wordCount = 3, String separator = '-'}) =>
+      _i.slug(wordCount: wordCount, separator: separator);
+
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Colors
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -457,6 +562,75 @@ final class Rand {
   ///
   /// See also: [color], [colorDark].
   static CssColors colorLight() => _i.colorLight();
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // Networking
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  /// Random email address.
+  ///
+  /// Synthesises `firstName + 1..99 + '@' + domain`. When [domain] is
+  /// `null`, picks from a built-in list of test/example TLDs (RFC 2606
+  /// safe — no real-world collisions).
+  ///
+  /// ```dart
+  /// Rand.email();                       // 'olivia42@example.com'
+  /// Rand.email(domain: 'mycompany.io'); // 'james7@mycompany.io'
+  /// ```
+  ///
+  /// See also: [firstName].
+  static String email({String? domain}) => _i.email(domain: domain);
+
+  /// Random IPv4 address as a dotted-quad string.
+  ///
+  /// Each octet uniform in `[0, 255]`. Output is not filtered for
+  /// reserved ranges (0.0.0.0/8, 127.0.0.0/8, etc.); compose your own
+  /// filter if you need only routable addresses.
+  ///
+  /// ```dart
+  /// Rand.ipv4();  // '203.0.113.42'
+  /// ```
+  ///
+  /// See also: [ipv6].
+  static String ipv4() => _i.ipv4();
+
+  /// Random IPv6 address — 8 hex groups joined by `:`.
+  ///
+  /// Returned in full form (no `::` collapse) so length is stable for
+  /// fixtures.
+  ///
+  /// ```dart
+  /// Rand.ipv6();  // '2001:0db8:85a3:0000:0000:8a2e:0370:7334'
+  /// ```
+  ///
+  /// See also: [ipv4].
+  static String ipv6() => _i.ipv6();
+
+  /// Random MAC address — 6 hex bytes joined by [separator].
+  ///
+  /// Common separators: `':'` (Unix-style, default), `'-'` (Windows-style).
+  ///
+  /// ```dart
+  /// Rand.mac();                  // '3a:5f:9c:8e:2d:71'
+  /// Rand.mac(separator: '-');    // '3a-5f-9c-8e-2d-71'
+  /// ```
+  static String mac({String separator = ':'}) => _i.mac(separator: separator);
+
+  /// Random lowercase hex string of [length] characters.
+  ///
+  /// General-purpose hex: covers git SHAs (`length: 40`), ETags, content
+  /// hashes, opaque test IDs. Uses the non-secure RNG — reproducible
+  /// under [Rand.seed].
+  ///
+  /// ```dart
+  /// Rand.hex();             // 'a3f2c91e'
+  /// Rand.hex(length: 40);   // git-SHA-shaped
+  /// ```
+  ///
+  /// Throws [ArgumentError] when [length] is less than 1.
+  ///
+  /// See also: [nonce] for crypto-secure base62 tokens.
+  static String hex({int length = 8}) => _i.hex(length: length);
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Sampling

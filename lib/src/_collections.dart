@@ -37,4 +37,8 @@ mixin _Collections {
     }
     return result;
   }
+
+  T enumValue<T extends Enum>(List<T> values) => element(values);
+
+  List<T> shuffled<T>(List<T> from) => List<T>.of(from)..shuffle(rng);
 }

@@ -21,6 +21,8 @@ void main() {
   _section('Geo');
   print('  Latitude:   ${Rand.latitude()}');
   print('  Longitude:  ${Rand.longitude()}');
+  final point = Rand.geoPoint();
+  print('  Geo Point:  (${point.lat}, ${point.lng})');
   print('  City:       ${Rand.city()}');
 
   _section('Identity');
@@ -37,11 +39,23 @@ void main() {
   print('  Paragraph (3 sentences):');
   print('  ${_indent(Rand.paragraph(3))}');
 
+  _section('Networking');
+  print('  Email:    ${Rand.email()}');
+  print('  Email:    ${Rand.email(domain: 'mycompany.io')}');
+  print('  IPv4:     ${Rand.ipv4()}');
+  print('  IPv6:     ${Rand.ipv6()}');
+  print('  MAC:      ${Rand.mac()}');
+  print('  Hex (40): ${Rand.hex(length: 40)}');
+  print('  Slug:     ${Rand.slug()}');
+  print('  Semver:   ${Rand.semver()}');
+  print('  OTP:      ${Rand.otp()}');
+
   _section('Cryptographic');
   print('  Nonce (32):    ${Rand.nonce(length: 32)}');
   print('  Password:      ${Rand.password()}');
   print('  Password (no symbols): ${Rand.password(symbols: false)}');
   print('  Bytes (8):     ${Rand.bytes(8)}');
+  print('  Base64 (32):   ${Rand.base64(byteLength: 32)}');
 
   _section('Time');
   print('  DateTime:             ${Rand.dateTime()}');
@@ -68,8 +82,10 @@ void main() {
   final scores = {'Alice': 95, 'Bob': 87, 'Charlie': 92};
   print('  Element:    ${Rand.element(fruits)} from $fruits');
   print('  SubSet(3):  ${Rand.subSet(fruits, 3)}');
+  print('  Shuffled:   ${Rand.shuffled(fruits.toList())}');
   print('  Map Key:    ${Rand.mapKey(scores)} from ${scores.keys}');
   print('  Map Value:  ${Rand.mapValue(scores)} from ${scores.values}');
+  print('  Enum:       ${Rand.enumValue(_DemoLevel.values)}');
 
   _section('Sampling');
   final positions = Rand.sample(
@@ -109,3 +125,5 @@ String _indent(String text, [int spaces = 2]) {
 
 String _hex(int color) =>
     '#${(color & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+
+enum _DemoLevel { info, warn, error }
