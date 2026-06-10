@@ -1,6 +1,6 @@
 ---
 name: dart-rand
-description: Generate random test data and fixtures in Dart via `package:rand/rand.dart` — names, emails, IPv4/IPv6/MAC, hex, slugs, OTP, semver, lorem, CSS colors, weighted sampling, geo points, crypto tokens. Use when importing `package:rand`, building Dart test fixtures, mocking API responses, seeding demos, or the user asks for fake/random/seeded data in Dart. Skip for production secrets (use `package:cryptography`), UUIDs (use `package:uuid`), or locale-aware names (use `package:faker`).
+description: Generate random Dart test data via `package:rand` — names, emails, IPv4/IPv6/MAC, hex, slugs, OTP, semver, lorem, colors, weighted sampling, geo points, crypto tokens. Use for test fixtures, mocked API responses, demo seeds, any fake/seeded data. Skip for production secrets (`cryptography`), UUIDs (`uuid`), locale-aware names (`faker`).
 ---
 
 # rand
