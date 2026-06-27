@@ -7,7 +7,7 @@ mixin _Booleans {
     if (trueChance < 0 || trueChance > 100) {
       throw ArgumentError('trueChance must be in [0, 100], got $trueChance');
     }
-    return trueChance > rng.nextInt(100);
+    return (rng.nextDouble() * 100) < trueChance;
   }
 
   T? nullable<T>(T value, [double nullChance = 50]) {

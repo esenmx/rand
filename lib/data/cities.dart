@@ -1,6 +1,6 @@
 part of '../rand.dart';
 
-final _cities = <String>[
+const _cities = <String>[
   'Adelaide',
   'Albury',
   'Amsterdam',

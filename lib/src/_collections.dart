@@ -28,12 +28,13 @@ mixin _Collections {
     if (count > from.length) {
       throw RangeError('count ($count) exceeds set size (${from.length})');
     }
-    final pool = Set<T>.of(from);
+    final list = from.toList();
     final result = <T>{};
     for (var i = 0; i < count; i++) {
-      final picked = pool.elementAt(rng.nextInt(pool.length));
+      final idx = rng.nextInt(list.length - i);
+      final picked = list[idx];
       result.add(picked);
-      pool.remove(picked);
+      list[idx] = list[list.length - 1 - i];
     }
     return result;
   }

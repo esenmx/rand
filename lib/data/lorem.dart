@@ -1,6 +1,6 @@
 part of '../rand.dart';
 
-final _words = <String>[
+const _words = <String>[
   'a',
   'ac',
   'accumsan',
@@ -170,7 +170,7 @@ final _words = <String>[
   'vulputate',
 ];
 
-final _sentences = <String>[
+const _sentences = <String>[
   'A arcu cursus vitae congue mauris rhoncus aenean vel elit.',
   'Accumsan in nisl nisi scelerisque eu ultrices vitae auctor eu.',
   'Accumsan sit amet nulla facilisi morbi.',

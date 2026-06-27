@@ -85,6 +85,14 @@ void main() {
       check(() => Rand.boolean(101)).throws<ArgumentError>();
     });
 
+    test('boolean respects double-precision probabilities', () {
+      var trueCount = 0;
+      for (var i = 0; i < 10000; i++) {
+        if (Rand.boolean(0.1)) trueCount++;
+      }
+      check(trueCount).isLessThan(50);
+    });
+
     test('nullable returns value or null based on probability', () {
       var nullCount = 0;
       for (var i = 0; i < 1000; i++) {
@@ -126,6 +134,19 @@ void main() {
         check(f).isGreaterOrEqual(10);
         check(f).isLessThan(20);
       }
+    });
+
+    test('float handles extremely wide ranges without overflow', () {
+      final f = Rand.float(
+        min: -double.maxFinite / 2,
+        max: double.maxFinite / 2,
+      );
+      check(f.isInfinite).isFalse();
+      check(f.isNaN).isFalse();
+
+      final f2 = Rand.float(min: -double.maxFinite);
+      check(f2.isInfinite).isFalse();
+      check(f2.isNaN).isFalse();
     });
 
     test('float throws on invalid range', () {
@@ -250,6 +271,34 @@ void main() {
       check(() => Rand.password(length: 3)).throws<ArgumentError>();
     });
 
+    test(
+        'password guarantees representation of all enabled character sets',
+        () {
+      const lowercaseSet = 'abcdefghijklmnopqrstuvwxyz';
+      const uppercaseSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const digitsSet = '0123456789';
+      const symbolsSet = '!@#\$%^&*()-_=+[]{}\\|;:\'",<.>/?`~';
+
+      for (var i = 0; i < 1000; i++) {
+        final p = Rand.password(length: 4);
+        var hasLower = false;
+        var hasUpper = false;
+        var hasDigit = false;
+        var hasSymbol = false;
+        for (var charIndex = 0; charIndex < p.length; charIndex++) {
+          final char = p[charIndex];
+          if (lowercaseSet.contains(char)) hasLower = true;
+          if (uppercaseSet.contains(char)) hasUpper = true;
+          if (digitsSet.contains(char)) hasDigit = true;
+          if (symbolsSet.contains(char)) hasSymbol = true;
+        }
+        check(hasLower).isTrue();
+        check(hasUpper).isTrue();
+        check(hasDigit).isTrue();
+        check(hasSymbol).isTrue();
+      }
+    });
+
     test('password throws when all char sets disabled', () {
       check(
         () => Rand.password(
@@ -300,6 +349,7 @@ void main() {
         final dt = Rand.dateTime();
         check(dt.microsecondsSinceEpoch).isGreaterOrEqual(minEpoch);
         check(dt.microsecondsSinceEpoch).isLessThan(maxEpoch);
+        check(dt.isUtc).isTrue();
       }
     });
   });

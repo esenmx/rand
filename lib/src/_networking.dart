@@ -20,23 +20,49 @@ mixin _Networking on _Numbers, _Collections, _Identity {
   }
 
   String ipv4() {
-    return List<int>.generate(4, (_) => integer(max: 255)).join('.');
+    return '${integer(max: 255)}.${integer(max: 255)}.'
+        '${integer(max: 255)}.${integer(max: 255)}';
   }
 
   String ipv6() {
-    return List<String>.generate(8, (_) => hex(length: 4)).join(':');
+    final codes = Uint16List(39); // 8 * 4 + 7 * 1 = 39 characters
+    var j = 0;
+    for (var i = 0; i < 8; i++) {
+      if (i > 0) {
+        codes[j++] = 58; // ':'
+      }
+      codes[j++] = _hexChars.codeUnitAt(rng.nextInt(16));
+      codes[j++] = _hexChars.codeUnitAt(rng.nextInt(16));
+      codes[j++] = _hexChars.codeUnitAt(rng.nextInt(16));
+      codes[j++] = _hexChars.codeUnitAt(rng.nextInt(16));
+    }
+    return String.fromCharCodes(codes);
   }
 
   String mac({String separator = ':'}) {
-    return List<String>.generate(6, (_) => hex(length: 2)).join(separator);
+    final totalLen = separator.isEmpty ? 12 : 12 + 5 * separator.length;
+    final codes = Uint16List(totalLen);
+    var j = 0;
+    for (var i = 0; i < 6; i++) {
+      if (i > 0 && separator.isNotEmpty) {
+        for (var k = 0; k < separator.length; k++) {
+          codes[j++] = separator.codeUnitAt(k);
+        }
+      }
+      codes[j++] = _hexChars.codeUnitAt(rng.nextInt(16));
+      codes[j++] = _hexChars.codeUnitAt(rng.nextInt(16));
+    }
+    return String.fromCharCodes(codes);
   }
 
   String hex({int length = 8}) {
     if (length < 1) {
       throw ArgumentError('length must be >= 1, got $length');
     }
-    return String.fromCharCodes([
-      for (var i = 0; i < length; i++) _hexChars.codeUnitAt(rng.nextInt(16)),
-    ]);
+    final codes = Uint16List(length);
+    for (var i = 0; i < length; i++) {
+      codes[i] = _hexChars.codeUnitAt(rng.nextInt(16));
+    }
+    return String.fromCharCodes(codes);
   }
 }
