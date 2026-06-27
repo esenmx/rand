@@ -55,7 +55,7 @@ Recipe shapes that show up in fixture / mock requests. `rand` is intentionally f
 ## Bounds
 
 - `Rand.integer({min, max})` — **inclusive both ends**.
-- `Rand.float`, `Rand.duration`, `Rand.dateTime` — `[min, max)` half-open.
+- `Rand.float`, `Rand.duration`, `Rand.dateTime` — `[min, max)` half-open. `Rand.dateTime` always returns a UTC representation.
 
 ## Networking primitives
 
@@ -112,6 +112,9 @@ final jwtKey = Rand.nonce(length: 32);
 Rand.password(length: 3);                                 // < 4 throws
 Rand.password(lowercase: false, uppercase: false,
               digits: false, symbols: false);             // all-off throws
+
+// Note: Since v4.1.1, Rand.password() guarantees that at least one character
+// from each enabled character set is present in the output.
 ```
 
 ## When NOT to use rand
