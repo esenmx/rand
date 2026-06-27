@@ -1,5 +1,20 @@
 # Changelog
 
+## 4.1.1
+
+**Performance optimizations and bug fixes.**
+
+### Fixed
+- **Correctness** — Fixed `Rand.boolean()` to respect double-precision probabilities instead of rounding.
+- **Correctness** — Fixed `Rand.dateTime()` to correctly return a UTC `DateTime` representation as documented.
+- **Correctness** — Guaranteed representation of all enabled character sets in `Rand.password()`.
+- **Correctness** — Fixed potential double overflow in boundary calculations.
+- **Performance** — Removed expensive string format/parsing roundtrips in latitude/longitude calculations.
+- **Performance** — Optimized `Rand.subSet()` set traversal complexity using Fisher-Yates list partition.
+- **Performance** — Library-level caching for CSS colors and unique words to avoid dynamic allocations and repeated lazy filtering.
+- **Performance** & **Memory** — Single-pass buffer allocation using `Uint16List` and direct `Uint8List` populations in cryptographic and networking primitives.
+- **Optimization** — Converted all data corpus variables to `const` lists.
+
 ## 4.1.0
 
 **Identity & networking test data.** 12 new primitives, no breaking changes.
