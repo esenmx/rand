@@ -1,11 +1,13 @@
 part of '../rand.dart';
 
+final Set<String> _wordSet = _words.toSet();
+
 mixin _Text on _Collections, _Numbers {
   String word() => element(_words);
 
   String words({int? count, String separator = ' '}) {
     final n = count ?? integer(min: 3, max: 10);
-    return subSet(_words.toSet(), n).join(separator);
+    return subSet(_wordSet, n).join(separator);
   }
 
   String sentence() => element(_sentences);
@@ -24,6 +26,6 @@ mixin _Text on _Collections, _Numbers {
     if (wordCount < 1) {
       throw ArgumentError('wordCount must be >= 1, got $wordCount');
     }
-    return subSet(_words.toSet(), wordCount).join(separator);
+    return subSet(_wordSet, wordCount).join(separator);
   }
 }

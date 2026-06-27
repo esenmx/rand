@@ -15,14 +15,15 @@ extension CssColorsX on CssColors {
   }
 }
 
+final List<CssColors> _darkColors =
+    CssColors.values.where((c) => c.isDark).toList(growable: false);
+final List<CssColors> _lightColors =
+    CssColors.values.where((c) => !c.isDark).toList(growable: false);
+
 mixin _Colors on _Collections {
   CssColors color() => element(CssColors.values);
 
-  CssColors colorDark() {
-    return element(CssColors.values.where((c) => c.isDark));
-  }
+  CssColors colorDark() => element(_darkColors);
 
-  CssColors colorLight() {
-    return element(CssColors.values.where((c) => !c.isDark));
-  }
+  CssColors colorLight() => element(_lightColors);
 }

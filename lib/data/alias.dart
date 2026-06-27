@@ -1,6 +1,6 @@
 part of '../rand.dart';
 
-final _alias = <String>[
+const _alias = <String>[
   'Achilles',
   'Adonis',
   'Aeacus',

@@ -14,7 +14,12 @@ const String base62 = _digits + _uppercase + _lowercase;
 final int _epochMin = DateTime.utc(1970).microsecondsSinceEpoch;
 final int _epochMax = DateTime.utc(2038).microsecondsSinceEpoch;
 
-double _lerp(num a, num b, double t) => a + (b - a) * t;
+double _lerp(num a, num b, double t) {
+  if (a.isInfinite || b.isInfinite) {
+    return a + (b - a) * t;
+  }
+  return a * (1.0 - t) + b * t;
+}
 
 T _weightedChoice<T>(List<T> items, List<int> weights, Random rng) {
   final total = weights.fold<int>(0, (sum, w) => sum + w);

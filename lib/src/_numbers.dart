@@ -17,11 +17,15 @@ mixin _Numbers {
   }
 
   double latitude([int precision = 5]) {
-    return double.parse(float(min: -90, max: 90).toStringAsFixed(precision));
+    final value = float(min: -90, max: 90);
+    final mod = pow(10, precision);
+    return (value * mod).roundToDouble() / mod;
   }
 
   double longitude([int precision = 5]) {
-    return double.parse(float(min: -180, max: 180).toStringAsFixed(precision));
+    final value = float(min: -180, max: 180);
+    final mod = pow(10, precision);
+    return (value * mod).roundToDouble() / mod;
   }
 
   ({double lat, double lng}) geoPoint({int precision = 5}) {

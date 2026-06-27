@@ -22,6 +22,6 @@ mixin _Time {
       end?.microsecondsSinceEpoch ?? _epochMax,
       rng.nextDouble(),
     );
-    return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt());
+    return DateTime.fromMicrosecondsSinceEpoch(epoch.toInt(), isUtc: true);
   }
 }

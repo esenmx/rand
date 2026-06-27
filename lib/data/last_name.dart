@@ -1,6 +1,6 @@
 part of '../rand.dart';
 
-final _lastNames = <String>[
+const _lastNames = <String>[
   'Adams',
   'Aguilar',
   'Alexander',
