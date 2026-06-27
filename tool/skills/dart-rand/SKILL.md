@@ -99,7 +99,7 @@ Rand.seed(42);
 Rand.password();
 // ✅ build deterministic tokens from your own Random
 
-// ❌ subSet on a list with duplicates — compile error post-v4
+// ❌ subSet on a list with duplicates — compile error (requires Set)
 Rand.subSet([1, 2, 2], 2);
 // ✅
 Rand.subSet({1, 2}, 2);
@@ -113,7 +113,7 @@ Rand.password(length: 3);                                 // < 4 throws
 Rand.password(lowercase: false, uppercase: false,
               digits: false, symbols: false);             // all-off throws
 
-// Note: Since v4.1.1, Rand.password() guarantees that at least one character
+// Note: Rand.password() guarantees that at least one character
 // from each enabled character set is present in the output.
 ```
 
