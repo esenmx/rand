@@ -203,8 +203,13 @@ final class Rand {
     int maxMajor = 9,
     int maxMinor = 9,
     int maxPatch = 99,
-  }) =>
-      _i.semver(maxMajor: maxMajor, maxMinor: maxMinor, maxPatch: maxPatch);
+  }) {
+    return _i.semver(
+      maxMajor: maxMajor,
+      maxMinor: maxMinor,
+      maxPatch: maxPatch,
+    );
+  }
 
   /// Random zero-padded decimal OTP code.
   ///
@@ -287,14 +292,15 @@ final class Rand {
     bool uppercase = true,
     bool digits = true,
     bool symbols = true,
-  }) =>
-      _i.password(
-        length: length,
-        lowercase: lowercase,
-        uppercase: uppercase,
-        digits: digits,
-        symbols: symbols,
-      );
+  }) {
+    return _i.password(
+      length: length,
+      lowercase: lowercase,
+      uppercase: uppercase,
+      digits: digits,
+      symbols: symbols,
+    );
+  }
 
   /// Cryptographically secure random base64-encoded string.
   ///
@@ -334,8 +340,9 @@ final class Rand {
   static Duration duration({
     required Duration max,
     Duration min = Duration.zero,
-  }) =>
-      _i.duration(max: max, min: min);
+  }) {
+    return _i.duration(max: max, min: min);
+  }
 
   /// Random UTC [DateTime] in `[start, end)` — half-open upper bound.
   ///
@@ -669,6 +676,7 @@ final class Rand {
     required List<T> from,
     required int count,
     List<int>? weights,
-  }) =>
-      _i.sample(from: from, count: count, weights: weights);
+  }) {
+    return _i.sample(from: from, count: count, weights: weights);
+  }
 }

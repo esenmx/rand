@@ -50,13 +50,15 @@ void main() {
 // ────────────────────────────────────────────────────────────────────
 
 /// User as a named record. Records keep test fixtures ceremony-free.
-({
+typedef _User = ({
   String id,
   String name,
   String email,
   String? avatar,
   DateTime joinedAt,
-}) _buildUser() {
+});
+
+_User _buildUser() {
   return (
     id: Rand.hex(length: 24),
     name: Rand.fullName(),
@@ -70,8 +72,14 @@ void main() {
   );
 }
 
-({String street, String city, String postalCode, String country})
-    _buildAddress() {
+typedef _Address = ({
+  String street,
+  String city,
+  String postalCode,
+  String country,
+});
+
+_Address _buildAddress() {
   return (
     street: '${Rand.integer(min: 1, max: 9999)} ${Rand.word()} St',
     city: Rand.city(),
@@ -114,13 +122,15 @@ _Order _buildOrder({required int itemCount}) {
 
 /// Generic paginated envelope. `item` produces one element of T per call —
 /// pass any fixture builder.
-({
+typedef _Page<T> = ({
   int page,
   int pageSize,
   int totalPages,
   int totalItems,
   List<T> items,
-}) _buildPage<T>({
+});
+
+_Page<T> _buildPage<T>({
   required int page,
   required int pageSize,
   required int totalPages,

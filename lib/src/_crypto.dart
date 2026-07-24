@@ -50,8 +50,8 @@ mixin _Crypto {
     // Fill the remaining characters from the combined pool
     final combined = pools.join();
     while (index < length) {
-      charCodes[index++] =
-          combined.codeUnitAt(secureRng.nextInt(combined.length));
+      final code = combined.codeUnitAt(secureRng.nextInt(combined.length));
+      charCodes[index++] = code;
     }
 
     // Shuffle the characters cryptographically
