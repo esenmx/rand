@@ -62,12 +62,11 @@ void main() {
   print(
     '  DateTime (2020-2025): ${Rand.dateTime(DateTime(2020), DateTime(2025))}',
   );
-  print(
-    '  Duration (1-30 days): ${Rand.duration(
-      min: const Duration(days: 1),
-      max: const Duration(days: 30),
-    )}',
+  final duration = Rand.duration(
+    min: const Duration(days: 1),
+    max: const Duration(days: 30),
   );
+  print('  Duration (1-30 days): $duration');
 
   _section('Colors');
   final color = Rand.color();

@@ -15,10 +15,12 @@ extension CssColorsX on CssColors {
   }
 }
 
-final List<CssColors> _darkColors =
-    CssColors.values.where((c) => c.isDark).toList(growable: false);
-final List<CssColors> _lightColors =
-    CssColors.values.where((c) => !c.isDark).toList(growable: false);
+List<CssColors> _colorsWhere(bool Function(CssColors) test) {
+  return CssColors.values.where(test).toList(growable: false);
+}
+
+final List<CssColors> _darkColors = _colorsWhere((c) => c.isDark);
+final List<CssColors> _lightColors = _colorsWhere((c) => !c.isDark);
 
 mixin _Colors on _Collections {
   CssColors color() => element(CssColors.values);

@@ -271,8 +271,7 @@ void main() {
       check(() => Rand.password(length: 3)).throws<ArgumentError>();
     });
 
-    test('password guarantees representation of all enabled character sets',
-        () {
+    test('password guarantees representation of enabled character sets', () {
       const lowercaseSet = 'abcdefghijklmnopqrstuvwxyz';
       const uppercaseSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       const digitsSet = '0123456789';
