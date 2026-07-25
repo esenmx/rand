@@ -1,6 +1,7 @@
 part of '../rand.dart';
 
 final Set<String> _wordSet = _words.toSet();
+final Set<String> _sentenceSet = _sentences.toSet();
 
 mixin _Text on _Collections, _Numbers {
   String word() => element(_words);
@@ -10,7 +11,11 @@ mixin _Text on _Collections, _Numbers {
     return subSet(_wordSet, n).join(separator);
   }
 
-  String sentence() => element(_sentences);
+  String sentence([int? count]) {
+    if (count == null) return element(_sentences);
+    if (count < 1) throw ArgumentError('count must be >= 1, got $count');
+    return subSet(_sentenceSet, count).join(' ');
+  }
 
   String paragraph([int? count]) {
     final n = count ?? integer(min: 5, max: 10);
