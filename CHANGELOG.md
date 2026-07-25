@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.2.0
+
+**Multi-sentence lorem.** No breaking changes.
+
+### Added
+
+- **Text** — `Rand.sentence([count])` accepts an optional count and returns that
+  many unique sentences joined by `" "`, drawn via `subSet` from the
+  856-sentence corpus. `Rand.sentence()` is unchanged. Throws `ArgumentError`
+  below 1, `RangeError` above the corpus size — unlike `paragraph(count)`,
+  which allows repeats.
+
 ## 4.1.1
 
 **Performance optimizations and bug fixes.**

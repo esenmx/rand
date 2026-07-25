@@ -511,12 +511,20 @@ final class Rand {
   static String words({int? count, String separator = ' '}) =>
       _i.words(count: count, separator: separator);
 
-  /// Random pre-built lorem sentence.
+  /// Random pre-built lorem sentence, or [count] unique ones joined by `" "`.
+  ///
+  /// Sentences are drawn via [subSet] — never repeats within one call.
   ///
   /// ```dart
-  /// Rand.sentence();  // 'Lorem ipsum dolor sit amet.'
+  /// Rand.sentence();   // 'Lorem ipsum dolor sit amet.'
+  /// Rand.sentence(2);  // 'Lorem ipsum dolor sit amet. Nunc sed velit dignissim.'
   /// ```
-  static String sentence() => _i.sentence();
+  ///
+  /// Throws [ArgumentError] when [count] is less than 1, [RangeError] when it
+  /// exceeds the 856-sentence corpus.
+  ///
+  /// See also: [paragraph] — repeats allowed, joined by `". "`.
+  static String sentence([int? count]) => _i.sentence(count);
 
   /// Random paragraph of [count] sentences (default 5..10), joined by `". "`.
   static String paragraph([int? count]) => _i.paragraph(count);

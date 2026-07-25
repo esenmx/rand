@@ -474,6 +474,23 @@ void main() {
       }
     });
 
+    test('sentence(count) returns count unique sentences', () {
+      for (final n in [1, 5, 50]) {
+        final parts = Rand.sentence(n).split('. ');
+        check(parts.length).equals(n);
+        check(parts.toSet().length).equals(n);
+      }
+    });
+
+    test('sentence rejects count below 1', () {
+      check(() => Rand.sentence(0)).throws<ArgumentError>();
+      check(() => Rand.sentence(-1)).throws<ArgumentError>();
+    });
+
+    test('sentence throws when count exceeds corpus', () {
+      check(() => Rand.sentence(100000)).throws<RangeError>();
+    });
+
     test('paragraph returns multiple sentences', () {
       final p = Rand.paragraph(5);
       check(p).isNotEmpty();

@@ -170,12 +170,14 @@ Rand.word();                       // 'lorem'
 Rand.words(count: 5);              // 'amet consectetur adipiscing elit sed'
 Rand.words(count: 3, separator: '-');
 Rand.sentence();                   // 'Lorem ipsum dolor sit amet.'
+Rand.sentence(3);                  // 3 unique sentences joined by ' '
 Rand.paragraph(3);                 // 3 sentences joined by '. '
 Rand.article(5);                   // 5 paragraphs separated by '\n\n'
 ```
 
-`words(count: N)` uses `subSet` — same word never repeats in one call. For
-repeats, call `word()` N times yourself.
+`words(count: N)` and `sentence(N)` use `subSet` — the same word/sentence never
+repeats in one call (corpora: 1023 words, 856 sentences). For repeats, call
+`word()` / `sentence()` N times yourself, or use `paragraph(N)`.
 
 ---
 
