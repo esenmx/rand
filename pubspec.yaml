@@ -1,8 +1,5 @@
 name: rand
-description: >-
-  Random data generator for Dart. Names, emails, networking (IPv4/IPv6/MAC),
-  text, dates, CSS colors, weighted samples, crypto tokens. Static, seedable,
-  pure Dart, all platforms.
+description: "Test-data generator: names, emails, IPv4/IPv6/MAC, hex, slugs, OTP, semver, lorem, CSS colors, geo, weighted samples, CSPRNG tokens. Pure Dart, seedable (non-crypto), LLM skill."
 version: 4.2.0
 homepage: https://mehmetesen.com
 repository: https://github.com/esenmx/rand
@@ -11,10 +8,10 @@ documentation: https://pub.dev/documentation/rand/latest/
 
 topics:
   - random
-  - testing
-  - mock
-  - generator
   - fixtures
+  - fake-data
+  - mock
+  - testing
 
 platforms:
   android:
