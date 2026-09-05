@@ -49,7 +49,7 @@ part 'data/lorem.dart';
 /// reproducibility. Cryptographic methods are always secure and ignore
 /// these mutators.
 final class Rand {
-  const Rand._();
+  const new _();
 
   static final _RandImpl _i = _RandImpl();
 

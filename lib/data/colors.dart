@@ -6,7 +6,10 @@ part of '../rand.dart';
 /// `Color(c.argb)` works without conversion. For "is this color dark
 /// enough to need a light foreground?" use the [CssColorsX.isDark]
 /// extension getter.
-enum CssColors implements Comparable<CssColors> {
+enum CssColors(
+  /// 32-bit ARGB packed value. Flutter: `Color(c.argb)`.
+  final int argb,
+) implements Comparable<CssColors> {
   aliceBlue(0xFFF0F8FF),
   antiqueWhite(0xFFFAEBD7),
   aqua(0xFF00FFFF),
@@ -155,11 +158,6 @@ enum CssColors implements Comparable<CssColors> {
   whiteSmoke(0xFFF5F5F5),
   yellow(0xFFFFFF00),
   yellowGreen(0xFF9ACD32);
-
-  const CssColors(this.argb);
-
-  /// 32-bit ARGB packed value. Flutter: `Color(c.argb)`.
-  final int argb;
 
   @override
   int compareTo(CssColors other) => index.compareTo(other.index);

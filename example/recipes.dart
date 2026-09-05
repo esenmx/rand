@@ -89,7 +89,7 @@ _Address _buildAddress() {
 }
 
 class _LineItem {
-  _LineItem({required this.sku, required this.qty, required this.price});
+  new({required this.sku, required this.qty, required this.price});
 
   final String sku;
   final int qty;
@@ -97,7 +97,7 @@ class _LineItem {
 }
 
 class _Order {
-  _Order({required this.id, required this.items, required this.total});
+  new({required this.id, required this.items, required this.total});
 
   final String id;
   final List<_LineItem> items;
