@@ -3,7 +3,7 @@ description: Example demonstrating the Rand package.
 publish_to: "none"
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ^3.13.0
 
 dependencies:
   rand:
