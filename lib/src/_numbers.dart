@@ -24,7 +24,8 @@ mixin _Numbers {
     }
     if (min > max) throw ArgumentError('min ($min) must be <= max ($max)');
     if (min == max) return min.toDouble();
-    return _lerp(min, max, rng.nextDouble());
+    final v = _lerp(min, max, rng.nextDouble());
+    return v < max ? v : min.toDouble();
   }
 
   double latitude([int precision = 5]) {

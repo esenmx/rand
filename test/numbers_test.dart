@@ -113,6 +113,22 @@ void main() {
       }
     });
 
+    test('float stays below max on adjacent doubles', () {
+      for (final (lo, hi) in [
+        (1.0, 1.0000000000000002),
+        (1700000000.0, 1700000000.0 + 2.384185791015625e-7),
+        (-1.0000000000000002, -1.0),
+      ]) {
+        check((lo + hi) / 2)
+            .anyOf([(it) => it.equals(lo), (it) => it.equals(hi)]);
+        for (var i = 0; i < 1000; i++) {
+          check(Rand.float(min: lo, max: hi))
+            ..isGreaterOrEqual(lo)
+            ..isLessThan(hi);
+        }
+      }
+    });
+
     test('equal-bound float consumes no draw', () {
       Rand.seed(5);
       Rand.float(min: 123.456, max: 123.456);
