@@ -4,11 +4,11 @@ const List<String> _domains = [
   'example.com',
   'example.org',
   'example.net',
-  'test.com',
+  'acme.test',
   'mail.test',
-  'demo.dev',
-  'sample.app',
-  'fake.io',
+  'demo.test',
+  'sample.test',
+  'fake.test',
 ];
 
 const String _hexChars = '0123456789abcdef';

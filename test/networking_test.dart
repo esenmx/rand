@@ -2,6 +2,13 @@ import 'package:checks/checks.dart';
 import 'package:rand/rand.dart';
 import 'package:test/test.dart';
 
+bool _isRfc2606(String domain) {
+  const reservedSld = {'example.com', 'example.net', 'example.org'};
+  const reservedTld = {'test', 'example', 'invalid', 'localhost'};
+  return reservedSld.contains(domain) ||
+      reservedTld.contains(domain.split('.').last);
+}
+
 void main() {
   setUp(() => Rand.seed(42));
 
@@ -85,6 +92,24 @@ void main() {
       Rand.seed(42);
       final b = List.generate(20, (_) => Rand.hex(length: 16));
       check(a).deepEquals(b);
+    });
+
+    test('every default email domain is RFC 2606 reserved', () {
+      Rand.seed(5);
+      final domains = {
+        for (var i = 0; i < 2000; i++) Rand.email().split('@').last,
+      };
+      check(domains.where((d) => !_isRfc2606(d))).isEmpty();
+    });
+
+    test('email passes a conservative RFC 5322 dot-atom check', () {
+      final pattern = RegExp(
+        r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*"
+        r'@[a-z0-9-]+(\.[a-z0-9-]+)+$',
+      );
+      for (var i = 0; i < 2000; i++) {
+        check(Rand.email()).matchesPattern(pattern);
+      }
     });
   });
 }

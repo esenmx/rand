@@ -313,7 +313,7 @@ final class Rand {
   ///
   /// Suitable for opaque tokens, request IDs, CSRF nonces — short random
   /// handles that survive URL and header transport without
-  /// percent-encoding. 16 chars ≈ 95 bits of entropy.
+  /// percent-encoding. 16 chars ≈ 95 bits (log2 62 ≈ 5.95 bits/char).
   ///
   /// ```dart
   /// Rand.nonce();            // 'a8X2nQ4kZpL1mYbR'
@@ -579,10 +579,10 @@ final class Rand {
   /// Throws [ArgumentError] when [count] is less than 1, [RangeError] when it
   /// exceeds the 856-sentence corpus.
   ///
-  /// See also: [paragraph] — repeats allowed, joined by `". "`.
+  /// See also: [paragraph] — repeats allowed, joined by `" "`.
   static String sentence([int? count]) => _i.sentence(count);
 
-  /// Random paragraph of [count] sentences (default 5..10), joined by `". "`.
+  /// Random paragraph of [count] sentences (default 5..10), joined by `" "`.
   static String paragraph([int? count]) => _i.paragraph(count);
 
   /// Random article of [count] paragraphs (default 3..7), joined by `"\n\n"`.

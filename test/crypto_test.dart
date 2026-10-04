@@ -8,6 +8,20 @@ import 'package:checks/checks.dart';
 import 'package:rand/rand.dart';
 import 'package:test/test.dart';
 
+double _chiSquareBase62(String s) {
+  final counts = <int, int>{};
+  for (final c in s.codeUnits) {
+    counts[c] = (counts[c] ?? 0) + 1;
+  }
+  final expected = s.length / base62.length;
+  var chi = 0.0;
+  for (final c in base62.codeUnits) {
+    final d = (counts[c] ?? 0) - expected;
+    chi += d * d / expected;
+  }
+  return chi;
+}
+
 void main() {
   setUp(() => Rand.seed(42));
 
@@ -166,6 +180,15 @@ void main() {
       Rand.seed(42);
       final b = Rand.base64();
       check(a).not((it) => it.equals(b));
+    });
+
+    test('nonce characters are uniform over base62', () {
+      final s = List.generate(4000, (_) => Rand.nonce()).join();
+      final digits = s.codeUnits.where((c) => c < 58).length;
+      final chi = _chiSquareBase62(s);
+      printOnFailure('digit share ${digits / s.length}, chi2 $chi');
+      check(digits / s.length).isCloseTo(10 / 62, 0.012);
+      check(chi).isLessThan(200);
     });
   });
 }

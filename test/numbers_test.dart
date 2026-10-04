@@ -9,6 +9,20 @@ final _semverOrg = RegExp(
   r'(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$',
 );
 
+double _chiSquareBase62(String s) {
+  final counts = <int, int>{};
+  for (final c in s.codeUnits) {
+    counts[c] = (counts[c] ?? 0) + 1;
+  }
+  final expected = s.length / base62.length;
+  var chi = 0.0;
+  for (final c in base62.codeUnits) {
+    final d = (counts[c] ?? 0) - expected;
+    chi += d * d / expected;
+  }
+  return chi;
+}
+
 void main() {
   setUp(() => Rand.seed(42));
 
@@ -137,6 +151,14 @@ void main() {
       Rand.seed(42);
       final b = List.generate(20, (_) => Rand.otp());
       check(a).deepEquals(b);
+    });
+
+    test('seeded charCode is uniform over base62', () {
+      Rand.seed(3);
+      final s = String.fromCharCodes(
+        List.generate(64000, (_) => Rand.charCode()),
+      );
+      check(_chiSquareBase62(s)).isLessThan(125);
     });
   });
 }

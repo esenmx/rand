@@ -89,5 +89,18 @@ void main() {
     test('slug throws on non-positive wordCount', () {
       check(() => Rand.slug(wordCount: 0)).throws<ArgumentError>();
     });
+
+    test('paragraph does not produce double periods', () {
+      for (var i = 0; i < 200; i++) {
+        check(Rand.paragraph()).not((it) => it.contains('..'));
+      }
+    });
+
+    test('paragraph joins sentences with a single space', () {
+      Rand.seed(9);
+      final expected = '${Rand.sentence()} ${Rand.sentence()}';
+      Rand.seed(9);
+      check(Rand.paragraph(2)).equals(expected);
+    });
   });
 }

@@ -19,7 +19,7 @@ mixin _Text on _Collections, _Numbers {
 
   String paragraph([int? count]) {
     final n = count ?? integer(min: 5, max: 10);
-    return List.generate(n, (_) => sentence()).join('. ');
+    return List.generate(n, (_) => sentence()).join(' ');
   }
 
   String article([int? count]) {

@@ -13,11 +13,18 @@
 
 - Requires Dart 3.13 / Flutter 3.47 (was Dart `>=3.0.0`).
 - `sample` throws `ArgumentError` naming `weights` for negative weights, all-zero weights, or weights summing past 2^32 (was a silent skew or an unnamed error).
+- Seeded `charCode` sequences change (now uniform over base62).
+- Seeded default `email` domains change: `test.com`, `demo.dev`, `sample.app`, `fake.io` became `acme.test`, `demo.test`, `sample.test`, `fake.test`.
+- `paragraph`/`article` text changes: sentences are joined by `" "` (single periods).
 
 ### Fixed
 
 - `sample` with `weights` longer than `from` no longer throws `RangeError`; the extra weights are ignored, as documented.
 - `sample` with an empty `from` returns a growable list.
+- `nonce`, `secureCharCode` and `charCode` are uniform over base62. Digits were 33 % of characters instead of 16 %, so a 16-char nonce had 78.5 bits of min-entropy instead of ~95.
+- Default `email` domains are all RFC 2606 reserved; `test.com`, `demo.dev`, `sample.app` and `fake.io` are real domains.
+- `paragraph` and `article` no longer emit `..` between sentences.
+- `fullName` never repeats a name within one result.
 - Non-cryptographic methods no longer create `Random.secure()`, so they work where it is unavailable (e.g. `dart test -p node`).
 
 ### Removed

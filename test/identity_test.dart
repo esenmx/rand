@@ -37,5 +37,16 @@ void main() {
         check(Rand.city()).isNotEmpty();
       }
     });
+
+    test('fullName never repeats a name', () {
+      Rand.seed(1);
+      for (var i = 0; i < 50000; i++) {
+        final parts = Rand.fullName().split(' ');
+        check(
+          parts.toSet(),
+          because: parts.join(' '),
+        ).length.equals(parts.length);
+      }
+    });
   });
 }

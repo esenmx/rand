@@ -54,12 +54,5 @@ T _weightedChoice<T>(List<T> items, List<int> weights, Random rng) {
 }
 
 extension on Random {
-  int charCode() {
-    return switch (nextInt(3)) {
-      0 => nextInt(10) + 48, // 0-9
-      1 => nextInt(26) + 65, // A-Z
-      2 => nextInt(26) + 97, // a-z
-      _ => throw StateError('unreachable'),
-    };
-  }
+  int charCode() => base62.codeUnitAt(nextInt(base62.length));
 }

@@ -8,14 +8,22 @@ mixin _Identity on _Collections, _Booleans {
   String lastName() => element(_lastNames);
 
   String fullName() {
-    final buffer = StringBuffer(firstName());
+    final parts = [firstName()];
     final middleCount = _weightedChoice([0, 1, 2], [100, 10, 1], rng);
     for (var i = 0; i < middleCount; i++) {
-      buffer.write(' ${boolean() ? firstName() : lastName()}');
+      parts.add(_fresh(parts, () => boolean() ? firstName() : lastName()));
     }
-    buffer.write(' ${lastName()}');
-    return buffer.toString();
+    parts.add(_fresh(parts, lastName));
+    return parts.join(' ');
   }
 
   String city() => element(_cities);
+}
+
+String _fresh(List<String> used, String Function() draw) {
+  var name = draw();
+  while (used.contains(name)) {
+    name = draw();
+  }
+  return name;
 }

@@ -170,7 +170,7 @@ Rand.words(count: 5);              // 'amet consectetur adipiscing elit sed'
 Rand.words(count: 3, separator: '-');
 Rand.sentence();                   // 'Lorem ipsum dolor sit amet.'
 Rand.sentence(3);                  // 3 unique sentences joined by ' '
-Rand.paragraph(3);                 // 3 sentences joined by '. '
+Rand.paragraph(3);                 // 3 sentences joined by ' '
 Rand.article(5);                   // 5 paragraphs separated by '\n\n'
 ```
 
