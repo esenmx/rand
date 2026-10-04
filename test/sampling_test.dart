@@ -58,11 +58,11 @@ void main() {
           .contains('weights');
     });
 
-    test('sample rejects negative weights', () {
+    test('sample rejects negative weights naming weights', () {
       check(
         () =>
             Rand.sample(from: ['a', 'b', 'c'], count: 10, weights: [3, -5, 10]),
-      ).throws<ArgumentError>();
+      ).throws<ArgumentError>().has((e) => e.name, 'name').equals('weights');
     });
 
     test('sample rejects a negative count naming count', () {
@@ -77,10 +77,10 @@ void main() {
       }
     });
 
-    test('sample rejects weights summing past 2^32', () {
+    test('sample rejects weights summing past 2^32 naming weights', () {
       check(
         () => Rand.sample(from: ['a', 'b'], count: 1, weights: [4294967296, 1]),
-      ).throws<ArgumentError>();
+      ).throws<ArgumentError>().has((e) => e.name, 'name').equals('weights');
     });
   });
 }
