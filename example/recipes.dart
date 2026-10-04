@@ -70,7 +70,7 @@ _User _buildUser() {
       'https://i.pravatar.cc/${Rand.integer(min: 64, max: 256)}',
       20,
     ),
-    joinedAt: Rand.dateTime(DateTime(2020), _anchor),
+    joinedAt: Rand.dateTime(DateTime.utc(2020), _anchor),
   );
 }
 

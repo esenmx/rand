@@ -20,8 +20,10 @@
 - Negative counts and lengths throw `ArgumentError` naming the parameter: `words`, `paragraph`, `article`, `subSet`, `sample`, `bytes`, `nonce`. A count or length of 0 still returns an empty result.
 - `duration` and `dateTime` throw `ArgumentError` on reversed ranges, including `dateTime(start)` with `start` after 2038-01-01 and no `end` (was a silently reversed range).
 - `latitude`, `longitude` and `geoPoint` throw `RangeError` outside precision 0..15.
-- NaN `boolean`/`nullable` chances and non-finite `float` bounds throw `ArgumentError`.
-- Seeded negative-range `duration` and pre-1970 `dateTime` values change (now floored into `[min, max)`).
+- NaN `boolean`/`nullable` chances and non-finite `float` bounds throw `ArgumentError`; chance errors name `trueChance` or `nullChance` (a bad `nullable` chance used to report `trueChance`).
+- Seeded `duration` and `dateTime` values change: negative and pre-1970 ranges are floored (were truncated toward zero), and a draw that rounded up to `max` on a positive range now returns `max` − 1 µs.
+- Seeded `float` draws that rounded to exactly `max` on a narrow range now return `min`.
+- `integer` span errors are a plain `ArgumentError` naming `max` (was a `RangeError` naming `difference`), so `on RangeError` handlers no longer catch them.
 - `float`, `duration` and `dateTime` no longer consume a draw when `min == max`, so later draws from a seeded stream that makes such calls shift.
 - Agent skill directory renamed `skills/dart-rand` → `skills/rand-test-data` (installable with `dart run skills@ get --package rand --all`).
 
@@ -34,9 +36,10 @@
 - `paragraph` and `article` no longer emit `..` between sentences.
 - `fullName` never repeats a name within one result.
 - Non-cryptographic methods no longer create `Random.secure()`, so they work where it is unavailable (e.g. `dart test -p node`).
-- Half-open `[min, max)` holds for negative `duration` and pre-1970 `dateTime` ranges; truncation toward zero could return `max` and never `min`.
+- Half-open `[min, max)` holds for every `duration` and `dateTime` range. Truncation toward zero could return `max` and never `min` on negative and pre-1970 ranges, and rounding could return `max` on narrow positive ones (a 1 µs range returned `max` in ~14 % of draws).
 - `float` returns exactly `min` when `min == max` (could be off by one ulp).
-- `integer` accepts spans up to 2^32 − 1 (was 2^31 − 1), and its range error names `max` (was `difference`).
+- `float` never returns `max`. On narrow ranges the interpolation could round to exactly `max` (adjacent doubles: a quarter to three quarters of draws).
+- `integer` accepts spans up to 2^32 − 1 (was 2^31 − 1).
 - `bytes` draws 4 bytes per CSPRNG call.
 - `dateTime`'s documented default end is 2038-01-01 (was documented as 2038-01-19).
 - The agent skill's networking snippet compiles (named arguments, not set literals).
