@@ -2,6 +2,8 @@
 // Demo of every Rand.* public method with formatted CLI output.
 // ignore_for_file: avoid_print
 
+import 'dart:math';
+
 import 'package:rand/rand.dart';
 
 void main() {
@@ -106,6 +108,13 @@ void main() {
   print(
     '  Loot box (20 items): $legendary legendary, $rare rare, $common common',
   );
+
+  _section('IDs & seeding');
+  print('  UUID v4:            ${Rand.uuidV4()}');
+  print('  UUID v7:            ${Rand.uuidV7()}');
+  print('  ULID:               ${Rand.ulid()}');
+  print('  RandGen(Random(1)): ${RandGen(Random(1)).fullName()}');
+  print('  withSeed(7, email): ${Rand.withSeed(7, Rand.email)}');
 
   _section('Nullable');
   print('  nullable("value", 50%): ${Rand.nullable("value") ?? "null"}');

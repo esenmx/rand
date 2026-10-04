@@ -1,9 +1,9 @@
 ---
-name: dart-rand
-description: Generate random Dart test data via `package:rand` — names, emails, IPv4/IPv6/MAC, hex, slugs, OTP, semver, lorem, colors, weighted sampling, geo points, crypto tokens. Use for test fixtures, mocked API responses, demo seeds, any fake/seeded data. Skip for production secrets (`cryptography`), UUIDs (`uuid`), locale-aware names (`faker`).
+name: rand-test-data
+description: Generate random Dart test data via `package:rand` — names, emails, IPv4/IPv6/MAC, hex, slugs, OTP, semver, lorem, colors, weighted sampling, geo points, UUID v4/v7 and ULID test IDs, crypto tokens; isolated streams (`RandGen`), scoped seeds (`withSeed`), seed reporting. Use for test fixtures, mocked API responses, demo seeds, any fake/seeded data. Skip for production secrets (`cryptography`), locale-aware names (`faker`).
 ---
 
-# rand
+# rand-test-data
 
 `import 'package:rand/rand.dart';` then `Rand.x()`. Static API, all methods discoverable by IDE / dartdoc. This skill covers only the non-obvious choices.
 
@@ -12,7 +12,7 @@ description: Generate random Dart test data via `package:rand` — names, emails
 |RNG|Methods|Reset by `useRng` / `seed`?|
 |---|---|---|
 |`Random` (replaceable)|everything not in the next row|yes|
-|`Random.secure()` (fixed)|`password`, `nonce`, `bytes`, `secureCharCode`|**no**|
+|`Random.secure()` (fixed)|`password`, `nonce`, `bytes`, `base64`, `secureCharCode`|**no**|
 
 Consequences:
 
@@ -32,6 +32,10 @@ Consequences:
 |Whole list, reordered|`Rand.shuffled(list)` — non-mutating copy|
 |Map key / value / entry|`Rand.mapKey` / `mapValue` / `mapEntry`|
 |Maybe-null fixture field|`Rand.nullable(value, chance)`|
+|Independent stream injected into code under test|`RandGen(Random(1))` — same non-crypto API as `Rand`, no crypto methods|
+|Seed one call tree without touching the global|`Rand.withSeed(7, () => …)` — zone-scoped, follows `await`, nests|
+|Random seed per run, replayable on failure|`Rand.seed(); printOnFailure('Rand seed: ${Rand.currentSeed}')` in `setUp`|
+|Seedable test IDs|`Rand.uuidV4()` / `Rand.uuidV7(time: t)` / `Rand.ulid(time: t)` — reproducible under `seed`/`withSeed`|
 
 `subSet` is `Set<T>` only — dedupe explicitly with `.toSet()`. `weights.length >= from.length` for `sample`.
 
@@ -64,14 +68,14 @@ Rand.email();                       // 'olivia42@example.com' — RFC 2606 safe 
 Rand.email(domain: 'mycompany.io');
 Rand.ipv4();                        // not filtered for reserved ranges
 Rand.ipv6();                        // full form, no `::` collapse
-Rand.mac({separator: ':'});         // default colon; '-' also common
-Rand.hex({length: 8});              // generic lowercase hex — git SHAs (length: 40), ETags
+Rand.mac(separator: ':');           // default colon; '-' also common
+Rand.hex(length: 8);                // generic lowercase hex — git SHAs (length: 40), ETags
 Rand.semver();                      // 'major.minor.patch', no pre-release suffix
-Rand.otp({length: 6});              // zero-padded decimal digits
-Rand.slug({wordCount: 3});          // unique lorem words, '-' separator
+Rand.otp(length: 6);                // zero-padded decimal digits
+Rand.slug(wordCount: 3);            // unique lorem words, '-' separator
 ```
 
-All use the non-secure RNG — reproducible under `Rand.seed`. `Rand.base64({byteLength: 16})` is the crypto-secure parallel for opaque payload fixtures.
+All use the non-secure RNG — reproducible under `Rand.seed`. `Rand.base64(byteLength: 16)` is the crypto-secure parallel for opaque payload fixtures.
 
 ## Geo
 
@@ -89,6 +93,8 @@ Rand.geoPoint(precision: 2);                  // (lat: 42.36, lng: -71.06)
 ## Common traps
 
 ```dart
+final list = [1, 2, 3];
+
 // ❌ inclusive max — can return list.length (out of bounds)
 final idx = Rand.integer(max: list.length);
 // ✅
@@ -99,8 +105,8 @@ Rand.seed(42);
 Rand.password();
 // ✅ build deterministic tokens from your own Random
 
-// ❌ subSet on a list with duplicates — compile error (requires Set)
-Rand.subSet([1, 2, 2], 2);
+// ❌ subSet on a list with duplicates — compile error (requires Set):
+// Rand.subSet([1, 2, 2], 2);
 // ✅
 Rand.subSet({1, 2}, 2);
 
@@ -119,7 +125,7 @@ Rand.password(lowercase: false, uppercase: false,
 
 ## When NOT to use rand
 
-- Stable IDs across runs → UUID v4 or app-issued IDs.
+- Production IDs → `package:uuid`.
 - Locale-aware data → `package:faker`.
 - A single `nextDouble` / `nextInt` → `dart:math.Random` directly, skip the dep.
 - Tokens your security depends on → `package:cryptography` or platform keystore.
@@ -127,5 +133,5 @@ Rand.password(lowercase: false, uppercase: false,
 ## Determinism
 
 - `seed(N)` reproduces across runs on the **same Dart SDK / platform**. Not guaranteed across major SDK upgrades — `math.Random` internals can change.
-- In parallel tests set in `setUp`, not `setUpAll` — the global RNG is shared.
+- Seed in `setUp`, not `setUpAll` — each test starts from the same state whatever ran before it (`--name`, `--test-randomize-ordering-seed`).
 - Crypto methods ignore `seed` / `useRng`.

@@ -6,8 +6,8 @@
 /// Configure the global non-cryptographic RNG via [Rand.useRng] or
 /// [Rand.seed], scope a seed to one call tree with [Rand.withSeed], or
 /// inject an independent stream with [RandGen]. Cryptographic methods
-/// ([Rand.password], [Rand.nonce], [Rand.bytes], [Rand.secureCharCode])
-/// always use [Random.secure] and are not affected.
+/// ([Rand.password], [Rand.nonce], [Rand.bytes], [Rand.base64],
+/// [Rand.secureCharCode]) always use [Random.secure] and are not affected.
 ///
 /// ```dart
 /// import 'package:rand/rand.dart';
@@ -64,8 +64,8 @@ final class Rand {
   ///
   /// Affects every non-cryptographic generator (numbers, text, time,
   /// collections, sampling). Cryptographic methods ([password], [nonce],
-  /// [bytes], [secureCharCode]) always use [Random.secure] and ignore
-  /// this setting. Inside [withSeed] it replaces only that scope's RNG.
+  /// [bytes], [base64], [secureCharCode]) always use [Random.secure] and
+  /// ignore this setting. Inside [withSeed] it replaces only that scope's RNG.
   /// Clears [currentSeed].
   ///
   /// ```dart
@@ -76,8 +76,9 @@ final class Rand {
   /// Rand.sample(from: items, count: 3); // CSPRNG-backed
   /// ```
   ///
-  /// In parallel tests, call this in `setUp`, not `setUpAll` — the
-  /// global is shared.
+  /// In tests, call this in `setUp`, not `setUpAll`, so each test starts
+  /// from the same state whatever ran before it (`--name`,
+  /// `--test-randomize-ordering-seed`).
   static void useRng(Random rng) => _scope
     ..gen = RandGen(rng)
     ..seed = null;
@@ -524,7 +525,7 @@ final class Rand {
   /// Random alias / nickname from a built-in corpus.
   ///
   /// ```dart
-  /// Rand.alias();  // 'ShadowHunter'
+  /// Rand.alias();  // 'Achilles'
   /// ```
   static String alias() => _i.alias();
 
@@ -560,7 +561,7 @@ final class Rand {
   /// Random city name from a built-in corpus.
   ///
   /// ```dart
-  /// Rand.city();  // 'Tokyo'
+  /// Rand.city();  // 'Boston'
   /// ```
   static String city() => _i.city();
 

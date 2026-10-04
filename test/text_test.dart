@@ -48,6 +48,13 @@ void main() {
       check(() => Rand.sentence(100000)).throws<RangeError>();
     });
 
+    test('corpora hold 167 unique words and 856 sentences', () {
+      check(Rand.words(count: 167).split(' ')).length.equals(167);
+      check(() => Rand.words(count: 168)).throws<RangeError>();
+      check(Rand.sentence(856).split('. ')).length.equals(856);
+      check(() => Rand.sentence(857)).throws<RangeError>();
+    });
+
     test('paragraph returns multiple sentences', () {
       final p = Rand.paragraph(5);
       check(p).isNotEmpty();

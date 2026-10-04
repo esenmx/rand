@@ -10,6 +10,8 @@
 
 import 'package:rand/rand.dart';
 
+final _anchor = DateTime.utc(2026);
+
 void main() {
   Rand.seed(42); // reproducible output for the recipes
 
@@ -68,7 +70,7 @@ _User _buildUser() {
       'https://i.pravatar.cc/${Rand.integer(min: 64, max: 256)}',
       20,
     ),
-    joinedAt: Rand.dateTime(DateTime(2020), DateTime.now()),
+    joinedAt: Rand.dateTime(DateTime(2020), _anchor),
   );
 }
 
@@ -149,10 +151,7 @@ _Page<T> _buildPage<T>({
   return (
     sender: sender,
     body: Rand.sentence(),
-    at: Rand.dateTime(
-      DateTime.now().subtract(const Duration(hours: 1)),
-      DateTime.now(),
-    ),
+    at: Rand.dateTime(_anchor.subtract(const Duration(hours: 1)), _anchor),
   );
 }
 

@@ -21,6 +21,7 @@
 - `latitude`, `longitude` and `geoPoint` throw `RangeError` outside precision 0..15.
 - NaN `boolean`/`nullable` chances and non-finite `float` bounds throw `ArgumentError`.
 - Seeded negative-range `duration` and pre-1970 `dateTime` values change (now floored into `[min, max)`).
+- Agent skill directory renamed `skills/dart-rand` → `skills/rand-test-data` (installable with `dart run skills@ get --package rand --all`).
 
 ### Fixed
 
@@ -36,6 +37,8 @@
 - `integer` accepts spans up to 2^32 − 1 (was 2^31 − 1), and its range error names `max` (was `difference`).
 - `bytes` draws 4 bytes per CSPRNG call.
 - `dateTime`'s documented default end is 2038-01-01 (was documented as 2038-01-19).
+- The agent skill's networking snippet compiles (named arguments, not set literals).
+- README: corpus size (167 unique words, not 1023), the `subSet` pitfall (a list literal is a compile error), example values, and the reason to seed in `setUp` corrected.
 
 ### Removed
 
