@@ -26,13 +26,13 @@ void _checkWeights(List<int> weights) {
     if (w < 0) {
       throw ArgumentError('weights must be >= 0, got $w', 'weights');
     }
-    total += w;
-    if (total > 0x100000000) {
+    if (w > 0x100000000 - total) {
       throw ArgumentError(
-        'weights must sum to 1..4294967296, got $total',
+        'weights must sum to 1..4294967296, got more than 4294967296',
         'weights',
       );
     }
+    total += w;
   }
   if (total < 1) {
     throw ArgumentError(

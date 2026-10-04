@@ -82,5 +82,18 @@ void main() {
         () => Rand.sample(from: ['a', 'b'], count: 1, weights: [4294967296, 1]),
       ).throws<ArgumentError>().has((e) => e.name, 'name').equals('weights');
     });
+
+    test('sample accepts weights summing to exactly 2^32', () {
+      check(Rand.sample(from: ['a', 'b'], count: 5, weights: [4294967295, 1]))
+          .length
+          .equals(5);
+    });
+
+    test('sample rejects weights whose 64-bit sum would wrap', () {
+      final m = int.parse('9223372036854775807');
+      check(
+        () => Rand.sample(from: ['a', 'b', 'c'], count: 1, weights: [3, m, m]),
+      ).throws<ArgumentError>().has((e) => e.name, 'name').equals('weights');
+    });
   });
 }
