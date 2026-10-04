@@ -429,8 +429,8 @@ final class Rand {
   /// ```
   ///
   /// Throws [ArgumentError] when the effective start is after the effective
-  /// end — including a [start] after 2038-01-01 with no [end]; pass [end]
-  /// then.
+  /// end — including a [start] after 2038-01-01 with no [end] (pass [end])
+  /// and an [end] before 1970-01-01 with no [start] (pass [start]).
   ///
   /// See also: [duration].
   static DateTime dateTime([DateTime? start, DateTime? end]) =>

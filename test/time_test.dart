@@ -53,6 +53,22 @@ void main() {
       check(() => Rand.dateTime(DateTime.utc(2050))).throws<ArgumentError>();
     });
 
+    test('reversed dateTime errors say which bound to pass', () {
+      check(() => Rand.dateTime(DateTime.utc(2025), DateTime.utc(2020)))
+          .throws<ArgumentError>()
+          .has((e) => '${e.message}', 'message')
+        ..contains('start must be <= end')
+        ..not((it) => it.contains('2038'));
+      check(() => Rand.dateTime(DateTime.utc(2050)))
+          .throws<ArgumentError>()
+          .has((e) => '${e.message}', 'message')
+          .contains('pass end');
+      check(() => Rand.dateTime(null, DateTime.utc(1969)))
+          .throws<ArgumentError>()
+          .has((e) => '${e.message}', 'message')
+          .contains('pass start');
+    });
+
     test('duration and dateTime return min when min == max', () {
       const d = Duration(seconds: 3);
       check(Rand.duration(min: d, max: d)).equals(d);

@@ -20,6 +20,12 @@ void _checkNonNegative(int value, String name) {
   if (value < 0) throw ArgumentError('$name must be >= 0, got $value', name);
 }
 
+void _checkChance(double chance, String name) {
+  if (!(chance >= 0 && chance <= 100)) {
+    throw ArgumentError('$name must be in [0, 100], got $chance', name);
+  }
+}
+
 void _checkWeights(List<int> weights) {
   var total = 0;
   for (final w in weights) {

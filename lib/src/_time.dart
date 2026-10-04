@@ -19,10 +19,15 @@ mixin _Time {
     final from = start?.microsecondsSinceEpoch ?? _epochMin;
     final to = end?.microsecondsSinceEpoch ?? _epochMax;
     if (from > to) {
-      throw ArgumentError(
-        'start must be <= end, got start: $start, end: '
-        '${end ?? 'default 2038-01-01'}; pass end for a start past 2038-01-01',
-      );
+      throw ArgumentError(switch ((start, end)) {
+        (_, null) =>
+          'start must be <= 2038-01-01 when end is omitted, got $start; '
+              'pass end',
+        (null, _) =>
+          'end must be >= 1970-01-01 when start is omitted, got $end; '
+              'pass start',
+        _ => 'start must be <= end, got start: $start, end: $end',
+      });
     }
     return DateTime.fromMicrosecondsSinceEpoch(
       _halfOpen(from, to, rng),

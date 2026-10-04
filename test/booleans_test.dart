@@ -22,9 +22,17 @@ void main() {
       check(() => Rand.boolean(101)).throws<ArgumentError>();
     });
 
-    test('boolean and nullable reject a NaN chance', () {
-      check(() => Rand.boolean(double.nan)).throws<ArgumentError>();
-      check(() => Rand.nullable(1, double.nan)).throws<ArgumentError>();
+    test('boolean and nullable reject a bad chance naming the parameter', () {
+      for (final chance in [double.nan, -1.0, 101.0]) {
+        check(() => Rand.boolean(chance))
+            .throws<ArgumentError>()
+            .has((e) => e.name, 'name')
+            .equals('trueChance');
+        check(() => Rand.nullable(1, chance))
+            .throws<ArgumentError>()
+            .has((e) => e.name, 'name')
+            .equals('nullChance');
+      }
     });
 
     test('boolean respects double-precision probabilities', () {

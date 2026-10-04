@@ -4,13 +4,12 @@ mixin _Booleans {
   Random get rng;
 
   bool boolean([double trueChance = 50]) {
-    if (!(trueChance >= 0 && trueChance <= 100)) {
-      throw ArgumentError('trueChance must be in [0, 100], got $trueChance');
-    }
+    _checkChance(trueChance, 'trueChance');
     return (rng.nextDouble() * 100) < trueChance;
   }
 
   T? nullable<T>(T value, [double nullChance = 50]) {
+    _checkChance(nullChance, 'nullChance');
     return boolean(nullChance) ? null : value;
   }
 }
