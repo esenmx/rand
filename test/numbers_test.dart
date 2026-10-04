@@ -51,6 +51,28 @@ void main() {
       check(() => Rand.integer(min: 2, max: 1)).throws<ArgumentError>();
     });
 
+    test('integer accepts spans up to 2^32 - 1', () {
+      for (var i = 0; i < 1000; i++) {
+        check(Rand.integer(max: 0xFFFFFFFF))
+          ..isGreaterOrEqual(0)
+          ..isLessOrEqual(0xFFFFFFFF);
+        check(Rand.integer(min: -0x7FFFFFFF, max: 0x80000000))
+          ..isGreaterOrEqual(-0x7FFFFFFF)
+          ..isLessOrEqual(0x80000000);
+      }
+    });
+
+    test('integer rejects spans past 2^32 - 1 naming max', () {
+      check(() => Rand.integer(max: 0x100000000))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('max');
+      check(() => Rand.integer(min: -1099511627776, max: 1099511627776))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('max');
+    });
+
     test('float returns value in [min, max)', () {
       for (var i = 0; i < 100; i++) {
         final f = Rand.float(min: 10, max: 20);
@@ -74,6 +96,43 @@ void main() {
 
     test('float throws on invalid range', () {
       check(() => Rand.float(min: 20, max: 10)).throws<ArgumentError>();
+    });
+
+    test('float rejects non-finite bounds', () {
+      check(() => Rand.float(max: double.infinity)).throws<ArgumentError>();
+      check(() => Rand.float(min: double.negativeInfinity))
+          .throws<ArgumentError>();
+      check(() => Rand.float(min: double.nan)).throws<ArgumentError>();
+      check(() => Rand.float(max: double.nan)).throws<ArgumentError>();
+    });
+
+    test('float returns min when min == max', () {
+      check(Rand.float(min: 1, max: 1)).equals(1);
+      for (var i = 0; i < 100; i++) {
+        check(Rand.float(min: 123.456, max: 123.456)).equals(123.456);
+      }
+    });
+
+    test(
+      'latitude and longitude are finite and in range for precision 0..15',
+      () {
+        for (var p = 0; p <= 15; p++) {
+          final lat = Rand.latitude(p);
+          final lng = Rand.longitude(p);
+          check(lat.isFinite).isTrue();
+          check(lat.abs()).isLessOrEqual(90);
+          check(lng.isFinite).isTrue();
+          check(lng.abs()).isLessOrEqual(180);
+        }
+      },
+    );
+
+    test('latitude, longitude and geoPoint reject precision outside 0..15', () {
+      for (final p in [16, 64, -1]) {
+        check(() => Rand.latitude(p)).throws<RangeError>();
+        check(() => Rand.longitude(p)).throws<RangeError>();
+        check(() => Rand.geoPoint(precision: p)).throws<RangeError>();
+      }
     });
 
     test('latitude returns valid range', () {

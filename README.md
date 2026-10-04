@@ -183,13 +183,15 @@ repeats in one call (corpora: 1023 words, 856 sentences). For repeats, call
 ## Time
 
 ```dart
-Rand.dateTime();                                       // 1970-01-01..2038-01-19 UTC
+Rand.dateTime();                                       // [1970-01-01, 2038-01-01) UTC
 Rand.dateTime(DateTime(2020), DateTime(2025));         // custom range, half-open
 Rand.duration(max: const Duration(days: 30));          // 0 to 30 days
 Rand.duration(min: const Duration(days: 1), max: const Duration(days: 30));
 ```
 
-`dateTime` and `duration` are `[min, max)` half-open.
+`dateTime` and `duration` are `[min, max)` half-open, return `min` when
+`min == max`, and throw `ArgumentError` on a reversed range — including
+`dateTime(start)` with `start` after 2038-01-01 and no `end`.
 
 ---
 

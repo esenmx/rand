@@ -65,6 +65,18 @@ void main() {
       ).throws<ArgumentError>();
     });
 
+    test('sample rejects a negative count naming count', () {
+      for (final from in [
+        [1],
+        <int>[],
+      ]) {
+        check(() => Rand.sample(from: from, count: -1))
+            .throws<ArgumentError>()
+            .has((e) => '${e.message}', 'message')
+            .contains('count must be >= 0');
+      }
+    });
+
     test('sample rejects weights summing past 2^32', () {
       check(
         () => Rand.sample(from: ['a', 'b'], count: 1, weights: [4294967296, 1]),

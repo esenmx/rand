@@ -79,6 +79,30 @@ void main() {
       check(Rand.bytes(100)).length.equals(100);
     });
 
+    test('bytes and nonce reject a negative length', () {
+      check(() => Rand.bytes(-1))
+          .throws<ArgumentError>()
+          .has((e) => '${e.message}', 'message')
+          .contains('length must be');
+      check(() => Rand.nonce(length: -1))
+          .throws<ArgumentError>()
+          .has((e) => '${e.message}', 'message')
+          .contains('length must be');
+    });
+
+    test('bytes(0) and nonce(length: 0) are empty', () {
+      check(Rand.bytes(0)).isEmpty();
+      check(Rand.nonce(length: 0)).equals('');
+    });
+
+    test('bytes covers all 256 values in every byte lane', () {
+      final b = Rand.bytes(65536);
+      for (var lane = 0; lane < 4; lane++) {
+        check({for (var i = lane; i < b.length; i += 4) b[i]}).length
+            .equals(256);
+      }
+    });
+
     test('nonce returns correct length', () {
       for (var i = 0; i < 100; i++) {
         final len = Rand.integer(max: 100);

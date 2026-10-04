@@ -25,6 +25,7 @@ mixin _Collections {
   V mapValue<K, V>(Map<K, V> from) => from[mapKey(from)] as V;
 
   Set<T> subSet<T>(Set<T> from, int count) {
+    _checkNonNegative(count, 'count');
     if (count > from.length) {
       throw RangeError('count ($count) exceeds set size (${from.length})');
     }

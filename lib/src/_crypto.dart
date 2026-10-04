@@ -6,14 +6,20 @@ mixin _Crypto {
   int secureCharCode() => secureRng.charCode();
 
   Uint8List bytes(int length) {
+    _checkNonNegative(length, 'length');
     final list = Uint8List(length);
-    for (var i = 0; i < length; i++) {
-      list[i] = secureRng.nextInt(256);
+    for (var i = 0; i < length; i += 4) {
+      var word = secureRng.nextInt(0x100000000);
+      for (var j = i; j < i + 4 && j < length; j++) {
+        list[j] = word % 256;
+        word ~/= 256;
+      }
     }
     return list;
   }
 
   String nonce({int length = 16}) {
+    _checkNonNegative(length, 'length');
     final codes = Uint16List(length);
     for (var i = 0; i < length; i++) {
       codes[i] = secureRng.charCode();

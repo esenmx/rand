@@ -90,6 +90,25 @@ void main() {
       check(() => Rand.slug(wordCount: 0)).throws<ArgumentError>();
     });
 
+    test('words, paragraph and article reject a negative count', () {
+      for (final draw in [
+        () => Rand.words(count: -1),
+        () => Rand.paragraph(-1),
+        () => Rand.article(-1),
+      ]) {
+        check(draw)
+            .throws<ArgumentError>()
+            .has((e) => '${e.message}', 'message')
+            .contains('count must be >= 0');
+      }
+    });
+
+    test('words, paragraph and article return empty for count 0', () {
+      check(Rand.words(count: 0)).equals('');
+      check(Rand.paragraph(0)).equals('');
+      check(Rand.article(0)).equals('');
+    });
+
     test('paragraph does not produce double periods', () {
       for (var i = 0; i < 200; i++) {
         check(Rand.paragraph()).not((it) => it.contains('..'));

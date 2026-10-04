@@ -8,6 +8,7 @@ mixin _Sampling {
     required int count,
     List<int>? weights,
   }) {
+    _checkNonNegative(count, 'count');
     if (from.isEmpty || count == 0) return <T>[];
     final w = weights ?? List<int>.filled(from.length, 1);
     if (w.length < from.length) {

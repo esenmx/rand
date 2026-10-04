@@ -22,6 +22,11 @@ void main() {
       check(() => Rand.boolean(101)).throws<ArgumentError>();
     });
 
+    test('boolean and nullable reject a NaN chance', () {
+      check(() => Rand.boolean(double.nan)).throws<ArgumentError>();
+      check(() => Rand.nullable(1, double.nan)).throws<ArgumentError>();
+    });
+
     test('boolean respects double-precision probabilities', () {
       var trueCount = 0;
       for (var i = 0; i < 10000; i++) {

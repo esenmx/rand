@@ -4,26 +4,40 @@ mixin _Numbers {
   Random get rng;
 
   int integer({int min = 0, int max = _maxInt}) {
-    if (max == min) return max;
     if (min > max) throw ArgumentError('min ($min) must be <= max ($max)');
-    RangeError.checkValueInInterval(max - min, 1, _maxInt, 'difference');
-    return rng.nextInt(max - min + 1) + min;
+    if (max == min) return max;
+    final span = max - min;
+    if (span < 0 || span > 0xFFFFFFFF) {
+      throw ArgumentError(
+        'max - min must be <= 4294967295, got min: $min, max: $max',
+        'max',
+      );
+    }
+    return rng.nextInt(span + 1) + min;
   }
 
   double float({num min = 0, num max = double.maxFinite}) {
+    if (!min.isFinite || !max.isFinite) {
+      throw ArgumentError(
+        'min and max must be finite, got min: $min, max: $max',
+      );
+    }
     if (min > max) throw ArgumentError('min ($min) must be <= max ($max)');
+    if (min == max) return min.toDouble();
     return _lerp(min, max, rng.nextDouble());
   }
 
   double latitude([int precision = 5]) {
+    RangeError.checkValueInInterval(precision, 0, 15, 'precision');
     final value = float(min: -90, max: 90);
-    final mod = pow(10, precision);
+    final mod = pow(10.0, precision);
     return (value * mod).roundToDouble() / mod;
   }
 
   double longitude([int precision = 5]) {
+    RangeError.checkValueInInterval(precision, 0, 15, 'precision');
     final value = float(min: -180, max: 180);
-    final mod = pow(10, precision);
+    final mod = pow(10.0, precision);
     return (value * mod).roundToDouble() / mod;
   }
 

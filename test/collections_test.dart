@@ -58,6 +58,13 @@ void main() {
       check(() => Rand.subSet({1, 2}, 3)).throws<RangeError>();
     });
 
+    test('subSet rejects a negative count', () {
+      check(() => Rand.subSet({1, 2, 3}, -1))
+          .throws<ArgumentError>()
+          .has((e) => '${e.message}', 'message')
+          .contains('count must be >= 0');
+    });
+
     test('subSet is uniform: each of 10 lands in a 3-subset ~30%', () {
       Rand.seed(8);
       final pool = Set.of(List.generate(10, (i) => i));

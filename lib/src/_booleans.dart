@@ -4,7 +4,7 @@ mixin _Booleans {
   Random get rng;
 
   bool boolean([double trueChance = 50]) {
-    if (trueChance < 0 || trueChance > 100) {
+    if (!(trueChance >= 0 && trueChance <= 100)) {
       throw ArgumentError('trueChance must be in [0, 100], got $trueChance');
     }
     return (rng.nextDouble() * 100) < trueChance;

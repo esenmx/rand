@@ -27,5 +27,61 @@ void main() {
         check(dt.isUtc).isTrue();
       }
     });
+
+    test('default dateTime stays before 2038-01-01', () {
+      final end = DateTime.utc(2038);
+      for (var i = 0; i < 10000; i++) {
+        check(Rand.dateTime().isBefore(end)).isTrue();
+      }
+    });
+
+    test('duration throws when min > max', () {
+      check(
+        () => Rand.duration(
+          min: const Duration(days: 10),
+          max: const Duration(days: 1),
+        ),
+      ).throws<ArgumentError>();
+    });
+
+    test('dateTime throws when start > end', () {
+      check(() => Rand.dateTime(DateTime.utc(2025), DateTime.utc(2020)))
+          .throws<ArgumentError>();
+    });
+
+    test('dateTime(start) after the default end throws', () {
+      check(() => Rand.dateTime(DateTime.utc(2050))).throws<ArgumentError>();
+    });
+
+    test('duration and dateTime return min when min == max', () {
+      const d = Duration(seconds: 3);
+      check(Rand.duration(min: d, max: d)).equals(d);
+      final t = DateTime.utc(2020);
+      check(Rand.dateTime(t, t)).equals(t);
+    });
+
+    test('negative duration range honours half-open [min, max)', () {
+      const min = Duration(microseconds: -10);
+      const max = Duration(microseconds: -5);
+      final seen = {
+        for (var i = 0; i < 2000; i++)
+          Rand.duration(min: min, max: max).inMicroseconds,
+      };
+      printOnFailure('observed ${seen.toList()..sort()}');
+      check(seen).contains(-10);
+      check(seen).not((it) => it.contains(-5));
+    });
+
+    test('pre-1970 dateTime range honours half-open [start, end)', () {
+      final start = DateTime.utc(1969, 12, 31, 23, 59, 59, 999, 990);
+      final end = start.add(const Duration(microseconds: 5));
+      final seen = {
+        for (var i = 0; i < 2000; i++)
+          Rand.dateTime(start, end).microsecondsSinceEpoch,
+      };
+      printOnFailure('observed ${seen.toList()..sort()}');
+      check(seen).contains(start.microsecondsSinceEpoch);
+      check(seen).not((it) => it.contains(end.microsecondsSinceEpoch));
+    });
   });
 }

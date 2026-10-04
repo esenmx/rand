@@ -154,7 +154,7 @@ final class Rand {
   /// Rand.boolean(99.9);  // 99.9% true
   /// ```
   ///
-  /// Throws [ArgumentError] when [trueChance] is outside `[0, 100]`.
+  /// Throws [ArgumentError] when [trueChance] is outside `[0, 100]` or NaN.
   static bool boolean([double trueChance = 50]) => _i.boolean(trueChance);
 
   /// Returns [value] with `(100 - nullChance)%` probability, else `null`.
@@ -163,6 +163,8 @@ final class Rand {
   /// Rand.nullable('value');       // 50% null
   /// Rand.nullable('value', 90);   // 90% null
   /// ```
+  ///
+  /// Throws [ArgumentError] when [nullChance] is outside `[0, 100]` or NaN.
   ///
   /// See also: [boolean].
   static T? nullable<T>(T value, [double nullChance = 50]) =>
@@ -180,9 +182,9 @@ final class Rand {
   /// Rand.integer(min: -10, max: 10);
   /// ```
   ///
-  /// Maximum range (`max - min`) is `2^31 - 1`.
+  /// Maximum range (`max - min`) is `2^32 - 1`.
   ///
-  /// Throws [ArgumentError] when `min > max`.
+  /// Throws [ArgumentError] when `min > max` or `max - min > 2^32 - 1`.
   ///
   /// For a list index use `max: list.length - 1`, or call [element].
   ///
@@ -197,7 +199,9 @@ final class Rand {
   /// Rand.float(min: 0, max: 1);    // [0.0, 1.0)
   /// ```
   ///
-  /// Throws [ArgumentError] when `min > max`.
+  /// Returns [min] when `min == max`.
+  ///
+  /// Throws [ArgumentError] when `min > max` or either bound is not finite.
   ///
   /// See also: [integer].
   static double float({num min = 0, num max = double.maxFinite}) =>
@@ -210,6 +214,8 @@ final class Rand {
   /// Rand.latitude(2);  // 42.36
   /// ```
   ///
+  /// Throws [RangeError] unless `0 <= precision <= 15`.
+  ///
   /// See also: [longitude].
   static double latitude([int precision = 5]) => _i.latitude(precision);
 
@@ -219,6 +225,8 @@ final class Rand {
   /// Rand.longitude();   // -71.05891
   /// Rand.longitude(2);  // -71.06
   /// ```
+  ///
+  /// Throws [RangeError] unless `0 <= precision <= 15`.
   ///
   /// See also: [latitude].
   static double longitude([int precision = 5]) => _i.longitude(precision);
@@ -232,6 +240,8 @@ final class Rand {
   /// final (:lat, :lng) = Rand.geoPoint();
   /// Rand.geoPoint(precision: 2);  // (lat: 42.36, lng: -71.06)
   /// ```
+  ///
+  /// Throws [RangeError] unless `0 <= precision <= 15`.
   ///
   /// See also: [latitude], [longitude].
   static ({double lat, double lng}) geoPoint({int precision = 5}) =>
@@ -304,6 +314,8 @@ final class Rand {
   /// For reproducible (non-secure) byte streams, generate them from your
   /// own seeded [Random] instance.
   ///
+  /// Throws [ArgumentError] when [length] is negative.
+  ///
   /// See also: [nonce], [password].
   static Uint8List bytes(int length) => _s.bytes(length);
 
@@ -319,6 +331,8 @@ final class Rand {
   /// Rand.nonce();            // 'a8X2nQ4kZpL1mYbR'
   /// Rand.nonce(length: 32);  // 32-char token
   /// ```
+  ///
+  /// Throws [ArgumentError] when [length] is negative.
   ///
   /// See also: [password], [bytes], [base62].
   static String nonce({int length = 16}) => _s.nonce(length: length);
@@ -390,7 +404,10 @@ final class Rand {
   /// );
   /// ```
   ///
-  /// [max] is required — no implicit upper bound.
+  /// [max] is required — no implicit upper bound. Returns [min] when
+  /// `min == max`.
+  ///
+  /// Throws [ArgumentError] when `min > max`.
   ///
   /// See also: [dateTime].
   static Duration duration({
@@ -402,13 +419,17 @@ final class Rand {
 
   /// Random UTC [DateTime] in `[start, end)` — half-open upper bound.
   ///
-  /// Defaults to `[1970-01-01, 2038-01-19)` UTC if [start] / [end] are
-  /// omitted.
+  /// Defaults to `[1970-01-01, 2038-01-01)` UTC if [start] / [end] are
+  /// omitted. Returns [start] when `start == end`.
   ///
   /// ```dart
   /// Rand.dateTime();
   /// Rand.dateTime(DateTime(2020), DateTime(2025));
   /// ```
+  ///
+  /// Throws [ArgumentError] when the effective start is after the effective
+  /// end — including a [start] after 2038-01-01 with no [end]; pass [end]
+  /// then.
   ///
   /// See also: [duration].
   static DateTime dateTime([DateTime? start, DateTime? end]) =>
@@ -488,7 +509,8 @@ final class Rand {
   /// Rand.subSet([1, 2, 2, 3].toSet(), 2); // dedupe explicitly
   /// ```
   ///
-  /// Throws [RangeError] when `count > from.length`.
+  /// Throws [ArgumentError] when [count] is negative, [RangeError] when
+  /// `count > from.length`.
   ///
   /// For sampling **with** replacement, use [sample].
   ///
@@ -564,6 +586,9 @@ final class Rand {
   /// Rand.words(count: 5);                   // 'amet consectetur adipiscing elit sed'
   /// Rand.words(count: 3, separator: '-');   // 'lorem-ipsum-dolor'
   /// ```
+  ///
+  /// Throws [ArgumentError] when [count] is negative, [RangeError] when it
+  /// exceeds the corpus.
   static String words({int? count, String separator = ' '}) =>
       _i.words(count: count, separator: separator);
 
@@ -583,9 +608,13 @@ final class Rand {
   static String sentence([int? count]) => _i.sentence(count);
 
   /// Random paragraph of [count] sentences (default 5..10), joined by `" "`.
+  ///
+  /// Throws [ArgumentError] when [count] is negative.
   static String paragraph([int? count]) => _i.paragraph(count);
 
   /// Random article of [count] paragraphs (default 3..7), joined by `"\n\n"`.
+  ///
+  /// Throws [ArgumentError] when [count] is negative.
   static String article([int? count]) => _i.article(count);
 
   /// Random URL slug — [wordCount] unique lorem words joined by [separator].
@@ -784,9 +813,9 @@ final class Rand {
   ///
   /// Returns an empty list when [from] is empty or [count] is 0.
   ///
-  /// Throws [ArgumentError] when `weights.length < from.length`, when a used
-  /// weight is negative, or when the used weights sum to 0 or more than
-  /// `2^32`.
+  /// Throws [ArgumentError] when [count] is negative, when
+  /// `weights.length < from.length`, when a used weight is negative, or when
+  /// the used weights sum to 0 or more than `2^32`.
   ///
   /// For sampling **without** replacement, use [subSet]. For a
   /// cryptographically secure sample, call

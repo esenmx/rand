@@ -16,6 +16,11 @@
 - Seeded `charCode` sequences change (now uniform over base62).
 - Seeded default `email` domains change: `test.com`, `demo.dev`, `sample.app`, `fake.io` became `acme.test`, `demo.test`, `sample.test`, `fake.test`.
 - `paragraph`/`article` text changes: sentences are joined by `" "` (single periods).
+- Negative counts and lengths throw `ArgumentError` naming the parameter: `words`, `paragraph`, `article`, `subSet`, `sample`, `bytes`, `nonce`. A count or length of 0 still returns an empty result.
+- `duration` and `dateTime` throw `ArgumentError` on reversed ranges, including `dateTime(start)` with `start` after 2038-01-01 and no `end` (was a silently reversed range).
+- `latitude`, `longitude` and `geoPoint` throw `RangeError` outside precision 0..15.
+- NaN `boolean`/`nullable` chances and non-finite `float` bounds throw `ArgumentError`.
+- Seeded negative-range `duration` and pre-1970 `dateTime` values change (now floored into `[min, max)`).
 
 ### Fixed
 
@@ -26,6 +31,11 @@
 - `paragraph` and `article` no longer emit `..` between sentences.
 - `fullName` never repeats a name within one result.
 - Non-cryptographic methods no longer create `Random.secure()`, so they work where it is unavailable (e.g. `dart test -p node`).
+- Half-open `[min, max)` holds for negative `duration` and pre-1970 `dateTime` ranges; truncation toward zero could return `max` and never `min`.
+- `float` returns exactly `min` when `min == max` (could be off by one ulp). `float`, `duration` and `dateTime` no longer consume a draw for equal bounds.
+- `integer` accepts spans up to 2^32 − 1 (was 2^31 − 1), and its range error names `max` (was `difference`).
+- `bytes` draws 4 bytes per CSPRNG call.
+- `dateTime`'s documented default end is 2038-01-01 (was documented as 2038-01-19).
 
 ### Removed
 
