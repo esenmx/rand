@@ -3,6 +3,8 @@ part of '../rand.dart';
 mixin _Crypto {
   Random get secureRng;
 
+  int secureCharCode() => secureRng.charCode();
+
   Uint8List bytes(int length) {
     final list = Uint8List(length);
     for (var i = 0; i < length; i++) {

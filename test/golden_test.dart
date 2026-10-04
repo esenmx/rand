@@ -176,4 +176,12 @@ void main() {
     );
     check(actual).deepEquals(_golden);
   });
+
+  test('Rand.withSeed(42, …) reproduces the golden values', () {
+    final actual = {
+      for (final MapEntry(:key, :value) in _draws.entries)
+        key: Rand.withSeed(42, value),
+    };
+    check(actual).deepEquals(_golden);
+  });
 }

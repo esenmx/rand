@@ -2,9 +2,19 @@
 
 ## Unreleased
 
+### Added
+
+- `RandGen` — the non-cryptographic API as an instance over your own `Random`: `RandGen(Random(1)).fullName()`. Independent instances are independent streams.
+- `Rand.withSeed(seed, body)` — runs `body` with every non-cryptographic `Rand.*` call drawing from `Random(seed)`. Zone-scoped: follows async continuations, nests, and never touches the global RNG.
+- `Rand.seed()` without a value picks a random seed; `Rand.currentSeed` reports it (`setUp(() { Rand.seed(); printOnFailure('Rand seed: ${Rand.currentSeed}'); })`).
+
 ### Changed
 
 - Requires Dart 3.13 / Flutter 3.47 (was Dart `>=3.0.0`).
+
+### Fixed
+
+- Non-cryptographic methods no longer create `Random.secure()`, so they work where it is unavailable (e.g. `dart test -p node`).
 
 ### Removed
 

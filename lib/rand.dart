@@ -4,9 +4,10 @@
 /// names, dates, CSS colors, cryptographic tokens, and weighted samples.
 ///
 /// Configure the global non-cryptographic RNG via [Rand.useRng] or
-/// [Rand.seed]. Cryptographic methods ([Rand.password], [Rand.nonce],
-/// [Rand.bytes], [Rand.secureCharCode]) always use [Random.secure] and
-/// are not affected.
+/// [Rand.seed], scope a seed to one call tree with [Rand.withSeed], or
+/// inject an independent stream with [RandGen]. Cryptographic methods
+/// ([Rand.password], [Rand.nonce], [Rand.bytes], [Rand.secureCharCode])
+/// always use [Random.secure] and are not affected.
 ///
 /// ```dart
 /// import 'package:rand/rand.dart';
@@ -20,6 +21,7 @@
 /// ```
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -46,19 +48,24 @@ part 'data/lorem.dart';
 /// Random data generator. All methods are static.
 ///
 /// Use [seed] or [useRng] to control the non-cryptographic RNG for
-/// reproducibility. Cryptographic methods are always secure and ignore
-/// these mutators.
+/// reproducibility, or [withSeed] to scope a seed to one callback. For an
+/// explicitly injected, independent stream use [RandGen]. Cryptographic
+/// methods are always secure and ignore these mutators.
 final class Rand {
   const new _();
 
-  static final _RandImpl _i = _RandImpl();
+  static final _Scope _root = _Scope(RandGen(Random()), null);
+  static final _Secure _s = _Secure();
+  static _Scope get _scope => Zone.current[_scopeKey] as _Scope? ?? _root;
+  static RandGen get _i => _scope.gen;
 
   /// Replaces the global non-cryptographic RNG.
   ///
   /// Affects every non-cryptographic generator (numbers, text, time,
   /// collections, sampling). Cryptographic methods ([password], [nonce],
   /// [bytes], [secureCharCode]) always use [Random.secure] and ignore
-  /// this setting.
+  /// this setting. Inside [withSeed] it replaces only that scope's RNG.
+  /// Clears [currentSeed].
   ///
   /// ```dart
   /// Rand.useRng(Random(42));
@@ -70,21 +77,69 @@ final class Rand {
   ///
   /// In parallel tests, call this in `setUp`, not `setUpAll` — the
   /// global is shared.
-  // ignore: use_setters_to_change_properties — verb-form pairs with `seed`
-  static void useRng(Random rng) => _i.rng = rng;
+  static void useRng(Random rng) => _scope
+    ..gen = RandGen(rng)
+    ..seed = null;
 
-  /// Seeds the global non-cryptographic RNG.
+  /// Seeds the global non-cryptographic RNG and records the seed in
+  /// [currentSeed].
   ///
-  /// Shortcut for `useRng(Random(value))`. Cryptographic methods are
-  /// not affected.
+  /// `seed(value)` is `useRng(Random(value))` plus seed reporting.
+  /// Without [value], picks a random seed in `[0, 2^32)`. Inside [withSeed]
+  /// it re-seeds only that scope. Cryptographic methods are not affected.
   ///
   /// ```dart
   /// Rand.seed(42);
   /// Rand.integer(max: 100);  // same value across runs for this seed
   /// ```
   ///
-  /// See also: [useRng].
-  static void seed(int value) => useRng(Random(value));
+  /// Random per run, replayable on failure:
+  ///
+  /// ```dart
+  /// setUp(() {
+  ///   Rand.seed();
+  ///   printOnFailure('Rand seed: ${Rand.currentSeed}');
+  /// });
+  /// ```
+  ///
+  /// See also: [useRng], [currentSeed], [withSeed].
+  static void seed([int? value]) {
+    final s = value ?? Random().nextInt(0x100000000);
+    _scope
+      ..gen = RandGen(Random(s))
+      ..seed = s;
+  }
+
+  /// The seed last set by [seed] in the current scope.
+  ///
+  /// `null` before any [seed] call and after [useRng]. Inside [withSeed]
+  /// it reflects the innermost scope.
+  static int? get currentSeed => _scope.seed;
+
+  /// Runs [body] with every non-cryptographic `Rand` method drawing from
+  /// `Random(seed)`, and returns its result.
+  ///
+  /// The scope is a [Zone]: it follows [body]'s async continuations
+  /// (`await`, and futures or timers created inside it) and never touches
+  /// the global RNG, so the global stream continues unchanged afterwards.
+  /// Scopes nest — the inner one shadows the outer. [Rand.seed] and
+  /// [Rand.useRng] inside [body] re-seed only the innermost scope. Code
+  /// scheduled from another zone (timers created before the call) does not
+  /// see the scope; spawned isolates never do. If [body] throws, the error
+  /// propagates unchanged and there is nothing to restore.
+  ///
+  /// Draws equal those of `RandGen(Random(seed))`. Cryptographic methods
+  /// are not affected.
+  ///
+  /// ```dart
+  /// final user = Rand.withSeed(7, () => (Rand.fullName(), Rand.email()));
+  /// ```
+  ///
+  /// See also: [Rand.seed], [RandGen].
+  static R withSeed<R>(int seed, R Function() body) => runZoned(
+    body,
+    zoneValues: {_scopeKey: _Scope(RandGen(Random(seed)), seed)},
+  );
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Boolean & Nullable
@@ -231,7 +286,7 @@ final class Rand {
   /// {@endtemplate}
   ///
   /// See also: [charCode], [nonce].
-  static int secureCharCode() => _i.secureCharCode();
+  static int secureCharCode() => _s.secureCharCode();
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Cryptographic
@@ -249,7 +304,7 @@ final class Rand {
   /// own seeded [Random] instance.
   ///
   /// See also: [nonce], [password].
-  static Uint8List bytes(int length) => _i.bytes(length);
+  static Uint8List bytes(int length) => _s.bytes(length);
 
   /// Cryptographically secure random base62 string.
   ///
@@ -265,7 +320,7 @@ final class Rand {
   /// ```
   ///
   /// See also: [password], [bytes], [base62].
-  static String nonce({int length = 16}) => _i.nonce(length: length);
+  static String nonce({int length = 16}) => _s.nonce(length: length);
 
   /// Cryptographically secure random password with configurable character sets.
   ///
@@ -293,7 +348,7 @@ final class Rand {
     bool digits = true,
     bool symbols = true,
   }) {
-    return _i.password(
+    return _s.password(
       length: length,
       lowercase: lowercase,
       uppercase: uppercase,
@@ -318,7 +373,7 @@ final class Rand {
   ///
   /// See also: [bytes], [nonce].
   static String base64({int byteLength = 16}) =>
-      _i.base64(byteLength: byteLength);
+      _s.base64(byteLength: byteLength);
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Time

@@ -36,6 +36,12 @@ void main() {
       check(a).not((it) => it.deepEquals(b));
     });
 
+    test('withSeed does not affect nonce', () {
+      final a = Rand.withSeed(42, Rand.nonce);
+      final b = Rand.withSeed(42, Rand.nonce);
+      check(a).not((it) => it.equals(b));
+    });
+
     test('seed does not affect secureCharCode', () {
       Rand.seed(42);
       final a = List.generate(50, (_) => Rand.secureCharCode());

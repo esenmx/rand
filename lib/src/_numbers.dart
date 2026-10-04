@@ -2,7 +2,6 @@ part of '../rand.dart';
 
 mixin _Numbers {
   Random get rng;
-  Random get secureRng;
 
   int integer({int min = 0, int max = _maxInt}) {
     if (max == min) return max;
@@ -33,8 +32,6 @@ mixin _Numbers {
   }
 
   int charCode() => rng.charCode();
-
-  int secureCharCode() => secureRng.charCode();
 
   String semver({int maxMajor = 9, int maxMinor = 9, int maxPatch = 99}) {
     final major = integer(max: maxMajor);
