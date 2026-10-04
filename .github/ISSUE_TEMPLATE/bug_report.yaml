@@ -18,13 +18,7 @@ body:
       label: Minimal reproduction
       description: A minimal Dart snippet that reproduces the issue.
       render: dart
-      placeholder: |
-        import 'package:rand/rand.dart';
-
-        void main() {
-          Rand.seed(42);
-          print(Rand.integer(min: 5, max: 5)); // expected 5, got ArgumentError
-        }
+      placeholder: // minimal reproduction
     validations:
       required: true
   - type: textarea
@@ -37,7 +31,7 @@ body:
     id: package-version
     attributes:
       label: rand version
-      placeholder: 4.0.0
+      placeholder: 4.3.0
     validations:
       required: true
   - type: input
@@ -45,7 +39,7 @@ body:
     attributes:
       label: Dart SDK version
       description: Output of `dart --version`.
-      placeholder: 3.5.0
+      placeholder: 3.13.0
     validations:
       required: true
   - type: dropdown

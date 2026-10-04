@@ -1,3 +1,5 @@
+// One value per CSS named color; the names document themselves.
+// ignore_for_file: public_member_api_docs
 part of '../rand.dart';
 
 /// CSS named colors with their ARGB values.

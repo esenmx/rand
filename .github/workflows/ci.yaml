@@ -2,10 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [master, main]
+    branches: [main]
   pull_request:
-    branches: [master, main]
+    branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,65 +16,79 @@ concurrency:
 
 jobs:
   format:
-    name: Format
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
-      - run: dart pub get
-      - run: dart format --output=none --set-exit-if-changed .
+      - run: git ls-files -z -- '*.dart' | xargs -0 dart format --output=none --set-exit-if-changed
 
   analyze:
-    name: Analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
       - run: dart pub get
       - run: dart analyze --fatal-infos --fatal-warnings
+      - run: dart pub get
+        working-directory: example
+      - run: dart analyze --fatal-infos --fatal-warnings
+        working-directory: example
 
   test:
-    name: Test (Dart ${{ matrix.sdk }})
+    name: test (${{ matrix.name }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        sdk: [stable, beta]
+        include:
+          - { name: floor, sdk: '3.13.0' }
+          - { name: stable, sdk: stable }
+          - { name: beta, sdk: beta }
     steps:
       - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
       - run: dart pub get
-      - run: dart pub global activate coverage
-      - run: dart test --coverage=coverage
-      - run: dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --report-on=lib
-        if: matrix.sdk == 'stable'
-      - name: Upload coverage
-        if: matrix.sdk == 'stable'
-        uses: codecov/codecov-action@v7
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage/lcov.info
-          fail_ci_if_error: false
+      - run: dart test
+
+  downgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub downgrade
+      - run: dart analyze --fatal-warnings
+      - run: dart test
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub get
+      - run: dart test -p chrome
+      - run: dart test -p chrome -c dart2wasm
+      - run: dart test -p node
 
   pana:
-    name: Pana score
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
-      - run: dart pub get
       - run: dart pub global activate pana
-      - run: pana --no-warning --exit-code-threshold 10
+      - run: dart pub global run pana --no-warning --exit-code-threshold 0
 
-  example:
-    name: Example analyze
+  publish-dry-run:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
-      - run: dart pub get
-        working-directory: example
-      - run: dart analyze --fatal-infos --fatal-warnings
-        working-directory: example
+      - run: dart pub publish --dry-run

@@ -284,8 +284,8 @@ final class Rand {
   /// Throws [ArgumentError] when `length < 4` or all character sets are
   /// disabled.
   ///
-  /// Not for production secrets — see SECURITY.md for the package's
-  /// stability contract.
+  /// Not for production secrets — see the README's "Cryptographic" section
+  /// for the package's stability contract.
   static String password({
     int length = 12,
     bool lowercase = true,

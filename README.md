@@ -2,7 +2,6 @@
 
 [![pub](https://img.shields.io/pub/v/rand.svg)](https://pub.dev/packages/rand)
 [![CI](https://github.com/esenmx/rand/actions/workflows/ci.yaml/badge.svg)](https://github.com/esenmx/rand/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/esenmx/rand/branch/master/graph/badge.svg)](https://codecov.io/gh/esenmx/rand)
 [![pub points](https://img.shields.io/pub/points/rand)](https://pub.dev/packages/rand/score)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 

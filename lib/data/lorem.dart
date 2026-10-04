@@ -1,3 +1,5 @@
+// Corpus sentences are single string literals.
+// ignore_for_file: lines_longer_than_80_chars
 part of '../rand.dart';
 
 const _words = <String>[

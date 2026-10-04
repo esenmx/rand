@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Requires Dart 3.13 / Flutter 3.47 (was Dart `>=3.0.0`).
+
+### Removed
+
+- `SECURITY.md` (no private vulnerability-report channel; the crypto-scope guidance is in the README).
+
 ## 4.2.0
 
 **Multi-sentence lorem.** No breaking changes.
@@ -156,6 +166,10 @@ namespaces).
 - Removed `id()` — use `nonce()` (now has default length of 16)
 - `latitude()` / `longitude()` now use decimal places (not significant figures)
 
+## 3.0.2
+
+- Not documented.
+
 ## 3.0.1
 
 - `integer()` and `float()` now use named parameters (`min:`, `max:`)
@@ -169,9 +183,21 @@ namespaces).
 - `ArgumentError` exceptions instead of assertions
 - Comprehensive tests with `checks` package
 
+## 3.0.0
+
+- Not documented.
+
 ## 2.0.3
 
 - Updated dependencies
+
+## 2.0.2+2
+
+- Not documented.
+
+## 2.0.2+1
+
+- Not documented.
 
 ## 2.0.2
 
@@ -187,6 +213,18 @@ namespaces).
 - Removed `documentId`, `uid` — use `id()`
 - Renamed `mayBeNull` → `nullable`
 - Added `alias`, `firstName`, `lastName`, `city`, `latitude`, `longitude`
+
+## 1.0.3
+
+- Not documented.
+
+## 1.0.2
+
+- Not documented.
+
+## 1.0.1
+
+- Not documented.
 
 ## 1.0.0
 
