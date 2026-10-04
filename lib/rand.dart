@@ -37,6 +37,7 @@ part 'src/_text.dart';
 part 'src/_identity.dart';
 part 'src/_colors.dart';
 part 'src/_networking.dart';
+part 'src/_ids.dart';
 part 'src/rand_impl.dart';
 part 'data/alias.dart';
 part 'data/cities.dart';
@@ -701,6 +702,61 @@ final class Rand {
   ///
   /// See also: [nonce] for crypto-secure base62 tokens.
   static String hex({int length = 8}) => _i.hex(length: length);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // IDs
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  /// Random UUID version 4 (RFC 9562), lowercase hex with dashes.
+  ///
+  /// {@template rand.seedable_ids}
+  /// Drawn from the non-cryptographic RNG, so reproducible under [seed],
+  /// [withSeed] and [RandGen] — meant for test IDs. For production IDs use
+  /// `package:uuid`.
+  /// {@endtemplate}
+  ///
+  /// ```dart
+  /// Rand.uuidV4();  // '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+  /// ```
+  ///
+  /// See also: [uuidV7], [ulid].
+  static String uuidV4() => _i.uuidV4();
+
+  /// Random UUID version 7 (RFC 9562): a 48-bit Unix-millisecond timestamp
+  /// from [time] (default `DateTime.now()`) followed by random bits.
+  ///
+  /// {@macro rand.seedable_ids}
+  ///
+  /// IDs sort by time across milliseconds but are not monotonic within one.
+  ///
+  /// ```dart
+  /// Rand.uuidV7();
+  /// Rand.uuidV7(time: DateTime.utc(2026, 10, 3, 12, 34, 56, 789));
+  /// // '01a101c2-a895-7…' — time prefix, then random bits
+  /// ```
+  ///
+  /// Throws [ArgumentError] when [time] is before 1970 or past the 48-bit
+  /// millisecond range (year 10889).
+  ///
+  /// See also: [uuidV4], [ulid].
+  static String uuidV7({DateTime? time}) => _i.uuidV7(time: time);
+
+  /// Random ULID: 10 Crockford base32 characters of 48-bit Unix-millisecond
+  /// timestamp from [time] (default `DateTime.now()`), then 16 random ones.
+  ///
+  /// {@macro rand.seedable_ids}
+  ///
+  /// IDs sort by time across milliseconds but are not monotonic within one.
+  ///
+  /// ```dart
+  /// Rand.ulid();  // '01M40W5A4N…' — 26 chars
+  /// ```
+  ///
+  /// Throws [ArgumentError] when [time] is before 1970 or past the 48-bit
+  /// millisecond range (year 10889).
+  ///
+  /// See also: [uuidV4], [uuidV7].
+  static String ulid({DateTime? time}) => _i.ulid(time: time);
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Sampling

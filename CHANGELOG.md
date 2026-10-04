@@ -7,6 +7,7 @@
 - `RandGen` — the non-cryptographic API as an instance over your own `Random`: `RandGen(Random(1)).fullName()`. Independent instances are independent streams.
 - `Rand.withSeed(seed, body)` — runs `body` with every non-cryptographic `Rand.*` call drawing from `Random(seed)`. Zone-scoped: follows async continuations, nests, and never touches the global RNG.
 - `Rand.seed()` without a value picks a random seed; `Rand.currentSeed` reports it (`setUp(() { Rand.seed(); printOnFailure('Rand seed: ${Rand.currentSeed}'); })`).
+- Seedable test IDs: `Rand.uuidV4()`, `Rand.uuidV7({time})`, `Rand.ulid({time})` (also on `RandGen`). Drawn from the non-cryptographic RNG, so reproducible under `seed`/`withSeed`; `time` defaults to now; not monotonic within a millisecond. Production IDs → `package:uuid`.
 
 ### Changed
 

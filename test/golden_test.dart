@@ -8,6 +8,7 @@ enum _E { a, b, c, d }
 
 final _pre1970 = DateTime.utc(1969, 12, 31, 23, 59, 59, 999, 990);
 const _map = {'a': 1, 'b': 2, 'c': 3};
+final _t = DateTime.utc(2026, 10, 3, 12, 34, 56, 789);
 
 List<Object?> _n(int n, Object? Function() draw) =>
     List.generate(n, (_) => draw());
@@ -95,6 +96,9 @@ final Map<String, Object? Function()> _draws = {
   'ipv6': Rand.ipv6,
   'mac': Rand.mac,
   'hex': () => Rand.hex(length: 16),
+  'uuidV4': () => _n(2, Rand.uuidV4),
+  'uuidV7': () => Rand.uuidV7(time: _t),
+  'ulid': () => Rand.ulid(time: _t),
 };
 
 const Map<String, Object?> _golden = {
@@ -159,6 +163,12 @@ const Map<String, Object?> _golden = {
   'ipv6': '3e4d:58fd:08f4:33da:797e:4af0:a4e0:0584',
   'mac': '3e:4d:58:fd:08:f4',
   'hex': '3e4d58fd08f433da',
+  'uuidV4': [
+    '33aec45d-b568-4f3d-b0b8-ffe433734d1a',
+    'a759e7ae-a41a-4f20-9a64-6e50a0558894',
+  ],
+  'uuidV7': '01a101c2-a895-7f3d-b0b8-ffe433734d1a',
+  'ulid': '01M40W5A4NKE4XN8FXGRZ4KKDT',
 };
 
 void main() {

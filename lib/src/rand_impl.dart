@@ -26,7 +26,8 @@ final class RandGen
         _Text,
         _Identity,
         _Colors,
-        _Networking {
+        _Networking,
+        _Ids {
   /// Creates a generator drawing from [rng].
   new(this.rng);
 
