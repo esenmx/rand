@@ -8,13 +8,15 @@ mixin _Sampling {
     required int count,
     List<int>? weights,
   }) {
-    if (from.isEmpty || count == 0) return const [];
+    if (from.isEmpty || count == 0) return <T>[];
     final w = weights ?? List<int>.filled(from.length, 1);
     if (w.length < from.length) {
       throw ArgumentError(
         'weights.length (${w.length}) must be >= from.length (${from.length})',
       );
     }
-    return List<T>.generate(count, (_) => _weightedChoice(from, w, rng));
+    final used = w.length == from.length ? w : w.sublist(0, from.length);
+    _checkWeights(used);
+    return List<T>.generate(count, (_) => _weightedChoice(from, used, rng));
   }
 }

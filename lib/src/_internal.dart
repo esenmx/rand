@@ -21,6 +21,28 @@ double _lerp(num a, num b, double t) {
   return a * (1.0 - t) + b * t;
 }
 
+void _checkWeights(List<int> weights) {
+  var total = 0;
+  for (final w in weights) {
+    if (w < 0) {
+      throw ArgumentError('weights must be >= 0, got $w', 'weights');
+    }
+    total += w;
+    if (total > 0x100000000) {
+      throw ArgumentError(
+        'weights must sum to 1..4294967296, got $total',
+        'weights',
+      );
+    }
+  }
+  if (total < 1) {
+    throw ArgumentError(
+      'weights must sum to 1..4294967296, got $total',
+      'weights',
+    );
+  }
+}
+
 T _weightedChoice<T>(List<T> items, List<int> weights, Random rng) {
   final total = weights.fold<int>(0, (sum, w) => sum + w);
   var threshold = rng.nextInt(total);

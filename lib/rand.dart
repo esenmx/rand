@@ -768,7 +768,7 @@ final class Rand {
   ///
   /// If [weights] is `null` all items have equal probability. Otherwise
   /// `weights[i]` is the relative weight for `from[i]`; `weights.length`
-  /// must be `>= from.length`.
+  /// must be `>= from.length`, and weights beyond `from.length` are ignored.
   ///
   /// ```dart
   /// // Equal probability
@@ -782,9 +782,11 @@ final class Rand {
   /// );
   /// ```
   ///
-  /// Returns `const []` when [from] is empty or [count] is 0.
+  /// Returns an empty list when [from] is empty or [count] is 0.
   ///
-  /// Throws [ArgumentError] when `weights.length < from.length`.
+  /// Throws [ArgumentError] when `weights.length < from.length`, when a used
+  /// weight is negative, or when the used weights sum to 0 or more than
+  /// `2^32`.
   ///
   /// For sampling **without** replacement, use [subSet]. For a
   /// cryptographically secure sample, call

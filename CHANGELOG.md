@@ -12,9 +12,12 @@
 ### Changed
 
 - Requires Dart 3.13 / Flutter 3.47 (was Dart `>=3.0.0`).
+- `sample` throws `ArgumentError` naming `weights` for negative weights, all-zero weights, or weights summing past 2^32 (was a silent skew or an unnamed error).
 
 ### Fixed
 
+- `sample` with `weights` longer than `from` no longer throws `RangeError`; the extra weights are ignored, as documented.
+- `sample` with an empty `from` returns a growable list.
 - Non-cryptographic methods no longer create `Random.secure()`, so they work where it is unavailable (e.g. `dart test -p node`).
 
 ### Removed

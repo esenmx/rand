@@ -40,5 +40,35 @@ void main() {
       check(() => Rand.sample(from: [1, 2], count: 1, weights: [1]))
           .throws<ArgumentError>();
     });
+
+    test('sample ignores weights beyond from.length', () {
+      final result = Rand.sample(from: [1], count: 200, weights: [1, 1000]);
+      check(result.every((e) => e == 1)).isTrue();
+    });
+
+    test('sample returns a growable list when from is empty', () {
+      final empty = Rand.sample(from: <int>[], count: 3);
+      check(() => empty.add(1)).returnsNormally();
+    });
+
+    test('sample rejects all-zero weights naming weights', () {
+      check(() => Rand.sample(from: ['a', 'b'], count: 1, weights: [0, 0]))
+          .throws<ArgumentError>()
+          .has((e) => '${e.message}', 'message')
+          .contains('weights');
+    });
+
+    test('sample rejects negative weights', () {
+      check(
+        () =>
+            Rand.sample(from: ['a', 'b', 'c'], count: 10, weights: [3, -5, 10]),
+      ).throws<ArgumentError>();
+    });
+
+    test('sample rejects weights summing past 2^32', () {
+      check(
+        () => Rand.sample(from: ['a', 'b'], count: 1, weights: [4294967296, 1]),
+      ).throws<ArgumentError>();
+    });
   });
 }
