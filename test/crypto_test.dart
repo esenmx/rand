@@ -103,6 +103,20 @@ void main() {
       }
     });
 
+    test('adjacent bytes of one CSPRNG word are uncorrelated', () {
+      // 16384 words, expected 1/256 ≈ 0.39 % equal; P(>= 1 %) < 3e-25.
+      final b = Rand.bytes(65536);
+      final words = b.length ~/ 4;
+      for (var lane = 0; lane < 3; lane++) {
+        var equal = 0;
+        for (var i = lane; i < b.length; i += 4) {
+          if (b[i] == b[i + 1]) equal++;
+        }
+        printOnFailure('lane $lane: $equal of $words words equal');
+        check(equal / words).isLessThan(0.01);
+      }
+    });
+
     test('nonce returns correct length', () {
       for (var i = 0; i < 100; i++) {
         final len = Rand.integer(max: 100);

@@ -113,6 +113,14 @@ void main() {
       }
     });
 
+    test('equal-bound float consumes no draw', () {
+      Rand.seed(5);
+      Rand.float(min: 123.456, max: 123.456);
+      final next = Rand.integer();
+      Rand.seed(5);
+      check(next).equals(Rand.integer());
+    });
+
     test(
       'latitude and longitude are finite and in range for precision 0..15',
       () {

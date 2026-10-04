@@ -60,6 +60,37 @@ void main() {
       check(Rand.dateTime(t, t)).equals(t);
     });
 
+    test('equal-bound duration and dateTime consume no draw', () {
+      const d = Duration(seconds: 3);
+      final t = DateTime.utc(2020);
+      for (final call in [
+        () => Rand.duration(min: d, max: d),
+        () => Rand.dateTime(t, t),
+      ]) {
+        Rand.seed(5);
+        call();
+        final next = Rand.integer();
+        Rand.seed(5);
+        check(next).equals(Rand.integer());
+      }
+    });
+
+    test('a 1µs dateTime range always returns start', () {
+      final start = DateTime.utc(2020);
+      final end = start.add(const Duration(microseconds: 1));
+      for (var i = 0; i < 1000; i++) {
+        check(Rand.dateTime(start, end)).equals(start);
+      }
+    });
+
+    test('a 1µs duration range always returns min', () {
+      const min = Duration(days: 20000);
+      const max = Duration(days: 20000, microseconds: 1);
+      for (var i = 0; i < 1000; i++) {
+        check(Rand.duration(min: min, max: max)).equals(min);
+      }
+    });
+
     test('negative duration range honours half-open [min, max)', () {
       const min = Duration(microseconds: -10);
       const max = Duration(microseconds: -5);
