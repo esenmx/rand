@@ -32,6 +32,15 @@ void main() {
       }
     });
 
+    test('email rejects empty or @-containing domain naming domain', () {
+      for (final bad in ['', 'a@b.com', '@example.com']) {
+        check(() => Rand.email(domain: bad))
+            .throws<ArgumentError>()
+            .has((e) => e.name, 'name')
+            .equals('domain');
+      }
+    });
+
     test('ipv4 is dotted quad with each octet in 0..255', () {
       final pattern = RegExp(r'^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$');
       for (var i = 0; i < 200; i++) {
@@ -81,9 +90,13 @@ void main() {
       }
     });
 
-    test('hex throws on non-positive length', () {
-      check(() => Rand.hex(length: 0)).throws<ArgumentError>();
-      check(() => Rand.hex(length: -1)).throws<ArgumentError>();
+    test('hex throws on non-positive length naming length', () {
+      for (final len in [0, -1]) {
+        check(() => Rand.hex(length: len))
+            .throws<ArgumentError>()
+            .has((e) => e.name, 'name')
+            .equals('length');
+      }
     });
 
     test('hex is reproducible under seed', () {
