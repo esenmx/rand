@@ -137,6 +137,27 @@ void main() {
       check(next).equals(Rand.integer());
     });
 
+    test('float with 64-bit int bounds > 2^53 honours [lo, hi)', () {
+      final minCollapsed = int.parse('9007199254740995');
+      final maxCollapsed = int.parse('9007199254740996');
+      Rand.seed(5);
+      final collapsed = Rand.float(min: minCollapsed, max: maxCollapsed);
+      final next = Rand.integer();
+      Rand.seed(5);
+      check(collapsed).equals(minCollapsed.toDouble());
+      check(next).equals(Rand.integer());
+
+      final minSpan = int.parse('9007199254740993');
+      final maxSpan = int.parse('9007199254740994');
+      final lo = minSpan.toDouble();
+      final hi = maxSpan.toDouble();
+      for (var i = 0; i < 1000; i++) {
+        check(Rand.float(min: minSpan, max: maxSpan))
+          ..isGreaterOrEqual(lo)
+          ..isLessThan(hi);
+      }
+    });
+
     test(
       'latitude and longitude are finite and in range for precision 0..15',
       () {
@@ -212,6 +233,26 @@ void main() {
       }
     });
 
+    test('semver validates maxMajor, maxMinor, maxPatch upfront', () {
+      for (final (call, param) in [
+        (() => Rand.semver(maxMajor: -1), 'maxMajor'),
+        (() => Rand.semver(maxMajor: 0x100000000), 'maxMajor'),
+        (() => Rand.semver(maxMinor: -1), 'maxMinor'),
+        (() => Rand.semver(maxMinor: 0x100000000), 'maxMinor'),
+        (() => Rand.semver(maxPatch: -1), 'maxPatch'),
+        (() => Rand.semver(maxPatch: 0x100000000), 'maxPatch'),
+      ]) {
+        Rand.seed(5);
+        check(call)
+            .throws<ArgumentError>()
+            .has((e) => e.name, 'name')
+            .equals(param);
+        final next = Rand.integer();
+        Rand.seed(5);
+        check(next).equals(Rand.integer());
+      }
+    });
+
     test('otp returns digit string of requested length', () {
       const digits = '0123456789';
       for (final len in [1, 6, 12]) {
@@ -223,9 +264,13 @@ void main() {
       }
     });
 
-    test('otp throws on non-positive length', () {
-      check(() => Rand.otp(length: 0)).throws<ArgumentError>();
-      check(() => Rand.otp(length: -3)).throws<ArgumentError>();
+    test('otp throws on non-positive length naming length', () {
+      for (final len in [0, -3]) {
+        check(() => Rand.otp(length: len))
+            .throws<ArgumentError>()
+            .has((e) => e.name, 'name')
+            .equals('length');
+      }
     });
 
     test('otp is reproducible under seed', () {
