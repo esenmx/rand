@@ -40,7 +40,7 @@ void main() {
       check(sorted).deepEquals(CssColors.values);
     });
 
-    test('CssColorsX.isDark classifies extremes correctly', () {
+    test('CssColors.isDark classifies extremes correctly', () {
       check(CssColors.black.isDark).isTrue();
       check(CssColors.white.isDark).isFalse();
       check(CssColors.navy.isDark).isTrue();

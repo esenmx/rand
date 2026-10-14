@@ -88,7 +88,7 @@ Rand.geoPoint(precision: 2);                  // (lat: 42.36, lng: -71.06)
 
 ## Colors
 
-`Rand.color()` / `colorDark()` / `colorLight()` → `CssColors` (148 variants). `.argb` is a 32-bit ARGB int (`Color(c.argb)` in Flutter). `.isDark` is a `CssColorsX` extension getter — computed YIQ luminance, not stored. For proper Flutter contrast picking, use `fluiver`'s `Color.contrastText`.
+`Rand.color()` / `colorDark()` / `colorLight()` → `CssColors` (148 variants). `.argb` is a 32-bit ARGB int (`Color(c.argb)` in Flutter). `.isDark` is a `CssColors` getter — computed YIQ luminance, not stored. For proper Flutter contrast picking, use `fluiver`'s `Color.contrastText`.
 
 ## Common traps
 
