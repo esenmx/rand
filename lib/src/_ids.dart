@@ -14,6 +14,7 @@ mixin _Ids {
     return b;
   }
 
+  /// See [Rand.uuidV4].
   String uuidV4() {
     final b = _randomBytes(16);
     b[6] = (b[6] & 0x0F) | 0x40;
@@ -21,6 +22,7 @@ mixin _Ids {
     return _formatUuid(b);
   }
 
+  /// See [Rand.uuidV7].
   String uuidV7({DateTime? time}) {
     var ms = _unixMs48(time);
     final b = _randomBytes(16);
@@ -33,6 +35,7 @@ mixin _Ids {
     return _formatUuid(b);
   }
 
+  /// See [Rand.ulid].
   String ulid({DateTime? time}) {
     var ms = _unixMs48(time);
     final codes = Uint16List(26);
