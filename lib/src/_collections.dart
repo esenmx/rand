@@ -3,6 +3,7 @@ part of '../rand.dart';
 mixin _Collections {
   Random get rng;
 
+  /// See [Rand.element].
   T element<T>(Iterable<T> from) {
     if (from.isEmpty) {
       throw StateError('Rand.element: cannot draw from empty iterable');
@@ -13,8 +14,15 @@ mixin _Collections {
     return from.elementAt(rng.nextInt(from.length));
   }
 
-  MapEntry<K, V> mapEntry<K, V>(Map<K, V> from) => element(from.entries);
+  /// See [Rand.mapEntry].
+  MapEntry<K, V> mapEntry<K, V>(Map<K, V> from) {
+    if (from.isEmpty) {
+      throw StateError('Rand.mapEntry: cannot draw from empty map');
+    }
+    return from.entries.elementAt(rng.nextInt(from.length));
+  }
 
+  /// See [Rand.mapKey].
   K mapKey<K, V>(Map<K, V> from) {
     if (from.isEmpty) {
       throw StateError('Rand.mapKey: cannot draw from empty map');
@@ -22,8 +30,15 @@ mixin _Collections {
     return from.keys.elementAt(rng.nextInt(from.length));
   }
 
-  V mapValue<K, V>(Map<K, V> from) => from[mapKey(from)] as V;
+  /// See [Rand.mapValue].
+  V mapValue<K, V>(Map<K, V> from) {
+    if (from.isEmpty) {
+      throw StateError('Rand.mapValue: cannot draw from empty map');
+    }
+    return from.values.elementAt(rng.nextInt(from.length));
+  }
 
+  /// See [Rand.subSet].
   Set<T> subSet<T>(Set<T> from, int count) {
     _checkNonNegative(count, 'count');
     if (count > from.length) {
@@ -40,7 +55,9 @@ mixin _Collections {
     return result;
   }
 
+  /// See [Rand.enumValue].
   T enumValue<T extends Enum>(List<T> values) => element(values);
 
+  /// See [Rand.shuffled].
   List<T> shuffled<T>(List<T> from) => List<T>.of(from)..shuffle(rng);
 }

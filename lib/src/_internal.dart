@@ -1,6 +1,7 @@
 part of '../rand.dart';
 
 const int _maxInt = (1 << 31) - 1;
+const int _maxIntSpan = 0xFFFFFFFF;
 const String _lowercase = 'abcdefghijklmnopqrstuvwxyz';
 const String _uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const String _digits = '0123456789';
@@ -26,7 +27,7 @@ void _checkChance(double chance, String name) {
   }
 }
 
-void _checkWeights(List<int> weights) {
+int _checkWeights(List<int> weights) {
   var total = 0;
   for (final w in weights) {
     if (w < 0) {
@@ -46,10 +47,10 @@ void _checkWeights(List<int> weights) {
       'weights',
     );
   }
+  return total;
 }
 
-T _weightedChoice<T>(List<T> items, List<int> weights, Random rng) {
-  final total = weights.fold<int>(0, (sum, w) => sum + w);
+T _weightedChoice<T>(List<T> items, List<int> weights, int total, Random rng) {
   var threshold = rng.nextInt(total);
   for (var i = 0; i < weights.length; i++) {
     if (weights[i] > threshold) return items[i];

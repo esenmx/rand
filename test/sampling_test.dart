@@ -36,9 +36,24 @@ void main() {
       check(Rand.sample(from: [1], count: 0)).isEmpty();
     });
 
-    test('sample throws on mismatched weights length', () {
+    test('sample throws on mismatched weights length naming weights', () {
       check(() => Rand.sample(from: [1, 2], count: 1, weights: [1]))
-          .throws<ArgumentError>();
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('weights');
+    });
+
+    test('sample validates weights before short-circuiting on count == 0', () {
+      for (final weights in [
+        [1],
+        [-1, 1],
+        [0, 0],
+      ]) {
+        check(() => Rand.sample(from: ['a', 'b'], count: 0, weights: weights))
+            .throws<ArgumentError>()
+            .has((e) => e.name, 'name')
+            .equals('weights');
+      }
     });
 
     test('sample ignores weights beyond from.length', () {
