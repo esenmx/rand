@@ -152,8 +152,11 @@ void main() {
       check(upper.toUpperCase()).equals(upper);
     });
 
-    test('password throws on invalid length', () {
-      check(() => Rand.password(length: 3)).throws<ArgumentError>();
+    test('password throws on invalid length naming length', () {
+      check(() => Rand.password(length: 3))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('length');
     });
 
     test('password guarantees representation of enabled character sets', () {
@@ -208,8 +211,11 @@ void main() {
       }
     });
 
-    test('base64 throws on non-positive byteLength', () {
-      check(() => Rand.base64(byteLength: 0)).throws<ArgumentError>();
+    test('base64 throws on non-positive byteLength naming byteLength', () {
+      check(() => Rand.base64(byteLength: 0))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('byteLength');
     });
 
     test('seed does not affect base64', () {

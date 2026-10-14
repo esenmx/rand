@@ -35,7 +35,7 @@ mixin _Crypto {
     bool symbols = true,
   }) {
     if (length < 4) {
-      throw ArgumentError('length must be >= 4, got $length');
+      throw ArgumentError('length must be >= 4, got $length', 'length');
     }
     final pools = <String>[];
     if (lowercase) pools.add(_lowercase);
@@ -75,7 +75,10 @@ mixin _Crypto {
 
   String base64({int byteLength = 16}) {
     if (byteLength < 1) {
-      throw ArgumentError('byteLength must be >= 1, got $byteLength');
+      throw ArgumentError(
+        'byteLength must be >= 1, got $byteLength',
+        'byteLength',
+      );
     }
     return base64Encode(bytes(byteLength));
   }
