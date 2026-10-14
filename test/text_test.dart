@@ -39,9 +39,13 @@ void main() {
       }
     });
 
-    test('sentence rejects count below 1', () {
-      check(() => Rand.sentence(0)).throws<ArgumentError>();
-      check(() => Rand.sentence(-1)).throws<ArgumentError>();
+    test('sentence rejects count below 1 naming count', () {
+      for (final n in [0, -1]) {
+        check(() => Rand.sentence(n))
+            .throws<ArgumentError>()
+            .has((e) => e.name, 'name')
+            .equals('count');
+      }
     });
 
     test('sentence throws when count exceeds corpus', () {
@@ -93,9 +97,21 @@ void main() {
       }
     });
 
-    test('slug throws on non-positive wordCount', () {
-      check(() => Rand.slug(wordCount: 0)).throws<ArgumentError>();
-    });
+    test(
+      'slug throws on non-positive or excessive wordCount naming wordCount',
+      () {
+        for (final wc in [0, -1]) {
+          check(() => Rand.slug(wordCount: wc))
+              .throws<ArgumentError>()
+              .has((e) => e.name, 'name')
+              .equals('wordCount');
+        }
+        check(() => Rand.slug(wordCount: 168))
+            .throws<RangeError>()
+            .has((e) => e.name, 'name')
+            .equals('wordCount');
+      },
+    );
 
     test('words, paragraph and article reject a negative count', () {
       for (final draw in [
