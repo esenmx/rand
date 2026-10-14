@@ -14,16 +14,26 @@ const List<String> _domains = [
 const String _hexChars = '0123456789abcdef';
 
 mixin _Networking on _Numbers, _Collections, _Identity {
+  /// See [Rand.email].
   String email({String? domain}) {
+    if (domain != null && (domain.isEmpty || domain.contains('@'))) {
+      throw ArgumentError.value(
+        domain,
+        'domain',
+        'must not be empty or contain "@"',
+      );
+    }
     final user = '${firstName().toLowerCase()}${integer(min: 1, max: 99)}';
     return '$user@${domain ?? element(_domains)}';
   }
 
+  /// See [Rand.ipv4].
   String ipv4() {
     return '${integer(max: 255)}.${integer(max: 255)}.'
         '${integer(max: 255)}.${integer(max: 255)}';
   }
 
+  /// See [Rand.ipv6].
   String ipv6() {
     final codes = Uint16List(39); // 8 * 4 + 7 * 1 = 39 characters
     var j = 0;
@@ -39,6 +49,7 @@ mixin _Networking on _Numbers, _Collections, _Identity {
     return String.fromCharCodes(codes);
   }
 
+  /// See [Rand.mac].
   String mac({String separator = ':'}) {
     final totalLen = separator.isEmpty ? 12 : 12 + 5 * separator.length;
     final codes = Uint16List(totalLen);
@@ -55,9 +66,10 @@ mixin _Networking on _Numbers, _Collections, _Identity {
     return String.fromCharCodes(codes);
   }
 
+  /// See [Rand.hex].
   String hex({int length = 8}) {
     if (length < 1) {
-      throw ArgumentError('length must be >= 1, got $length');
+      throw ArgumentError('length must be >= 1, got $length', 'length');
     }
     final codes = Uint16List(length);
     for (var i = 0; i < length; i++) {
