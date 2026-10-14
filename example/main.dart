@@ -62,7 +62,8 @@ void main() {
   _section('Time');
   print('  DateTime:             ${Rand.dateTime()}');
   print(
-    '  DateTime (2020-2025): ${Rand.dateTime(DateTime(2020), DateTime(2025))}',
+    '  DateTime (2020-2025): '
+    '${Rand.dateTime(DateTime.utc(2020), DateTime.utc(2025))}',
   );
   final duration = Rand.duration(
     min: const Duration(days: 1),

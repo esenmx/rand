@@ -14,9 +14,9 @@
 ///
 /// void main() {
 ///   Rand.seed(42);
-///   print(Rand.fullName());  // 'Emma Rodriguez'
-///   print(Rand.password());  // 'k9#Mx!pL2@qR'
-///   print(Rand.color());     // CssColors.coral
+///   print(Rand.fullName());  // 'Sophia Tran'
+///   print(Rand.password());  // 12 chars, CSPRNG — not seeded
+///   print(Rand.color());     // CssColors.rosyBrown
 /// }
 /// ```
 library;
@@ -266,6 +266,9 @@ final class Rand {
   /// ```
   ///
   /// No pre-release suffixes (`-rc.1` etc.) — compose your own if needed.
+  ///
+  /// Throws [ArgumentError] when [maxMajor], [maxMinor], or [maxPatch] is
+  /// negative or exceeds `2^32 - 1`.
   static String semver({
     int maxMajor = 9,
     int maxMinor = 9,
@@ -421,11 +424,12 @@ final class Rand {
   /// Random UTC [DateTime] in `[start, end)` — half-open upper bound.
   ///
   /// Defaults to `[1970-01-01, 2038-01-01)` UTC if [start] / [end] are
-  /// omitted. Returns [start] when `start == end`.
+  /// omitted. Returns `start.toUtc()` when [start] and [end] are at the same
+  /// instant.
   ///
   /// ```dart
   /// Rand.dateTime();
-  /// Rand.dateTime(DateTime(2020), DateTime(2025));
+  /// Rand.dateTime(DateTime.utc(2020), DateTime.utc(2025));
   /// ```
   ///
   /// Throws [ArgumentError] when the effective start is after the effective
@@ -628,7 +632,8 @@ final class Rand {
   /// Rand.slug(separator: '_');        // 'lorem_ipsum_dolor'
   /// ```
   ///
-  /// Throws [ArgumentError] when [wordCount] is less than 1.
+  /// Throws [ArgumentError] when [wordCount] is less than 1, [RangeError] when
+  /// it exceeds the corpus.
   ///
   /// See also: [words].
   static String slug({int wordCount = 3, String separator = '-'}) =>
@@ -644,22 +649,22 @@ final class Rand {
   /// final c = Rand.color();
   /// c.name;    // 'coral'
   /// c.argb;    // 0xFFFF7F50 — Flutter-friendly: Color(c.argb)
-  /// c.isDark;  // computed via CssColorsX extension
+  /// c.isDark;  // YIQ luminance
   /// ```
   ///
-  /// See also: [colorDark], [colorLight], [CssColors], [CssColorsX.isDark].
+  /// See also: [colorDark], [colorLight], [CssColors], [CssColors.isDark].
   static CssColors color() => _i.color();
 
   /// Random dark CSS color — good for light backgrounds.
   ///
-  /// Darkness is computed via [CssColorsX.isDark] (YIQ luminance).
+  /// Darkness is computed via [CssColors.isDark] (YIQ luminance).
   ///
   /// See also: [color], [colorLight].
   static CssColors colorDark() => _i.colorDark();
 
   /// Random light CSS color — good for dark backgrounds.
   ///
-  /// Lightness is the complement of [CssColorsX.isDark].
+  /// Lightness is the complement of [CssColors.isDark].
   ///
   /// See also: [color], [colorDark].
   static CssColors colorLight() => _i.colorLight();
@@ -678,6 +683,8 @@ final class Rand {
   /// Rand.email();                       // 'olivia42@example.com'
   /// Rand.email(domain: 'mycompany.io'); // 'james7@mycompany.io'
   /// ```
+  ///
+  /// Throws [ArgumentError] when [domain] is empty or contains `'@'`.
   ///
   /// See also: [firstName].
   static String email({String? domain}) => _i.email(domain: domain);
