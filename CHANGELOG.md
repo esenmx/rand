@@ -1,5 +1,29 @@
 # Changelog
 
+## Unreleased
+
+### Breaking
+
+- `CssColors.isDark` is now a direct getter on `CssColors` (removes the `CssColorsX` extension).
+
+### Added
+
+- `RandGen.seeded([seed])` — convenience constructor for `RandGen(Random(seed))` without importing `dart:math`.
+
+### Changed
+
+- `Rand.semver` validates `maxMajor`, `maxMinor`, and `maxPatch` upfront (naming the offending parameter) before drawing from the RNG.
+- `Rand.slug` validates `wordCount` upfront (naming `'wordCount'`) before drawing from the RNG.
+- `Rand.email` throws `ArgumentError` naming `'domain'` when `domain` is empty or contains `'@'`.
+- `Rand.sample` validates `weights` even when `count == 0` (when `from` is non-empty).
+- `Rand.otp`, `Rand.sentence`, `Rand.slug`, `Rand.hex`, `Rand.password`, `Rand.base64`, and `Rand.sample` populate `ArgumentError.name` on invalid arguments.
+- `Rand.dateTime` reversed-range error messages format timestamps in UTC (`toUtc()`).
+- `Rand.float` no longer consumes a draw when two distinct `int` bounds round to the same `double` (above 2^53), so later draws from a seeded stream that makes such calls shift. Returned values are unchanged.
+
+### Fixed
+
+- `Rand.mapValue` no longer performs a secondary `from[key]` lookup, fixing throws on maps with `double.nan` keys and ensuring `Rand.mapValue({})` / `Rand.mapEntry({})` report their own method names in `StateError`.
+
 ## 4.3.0 - 2026-10-04
 
 ### Added

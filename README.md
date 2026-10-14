@@ -11,12 +11,13 @@ CSS colors, seedable test IDs, cryptographic tokens. One static class (plus
 Flutter dependency.
 
 ```dart
-Rand.fullName();       // → 'Emma Rodriguez'
-Rand.email();          // → 'olivia42@example.com'
-Rand.ipv4();           // → '203.0.113.42'
-Rand.password();       // → 'k9#Mx!pL2@qR'
-Rand.color();          // → CssColors.coral
-Rand.dateTime();       // → 2024-03-15 14:32:07.000Z
+Rand.seed(42);
+Rand.fullName();       // → 'Sophia Tran'
+Rand.email();          // → 'david88@example.com'
+Rand.ipv4();           // → '143.61.48.184'
+Rand.password();       // → 12 chars, CSPRNG — not seeded
+Rand.color();          // → CssColors.darkKhaki
+Rand.dateTime();       // → 1972-02-25 21:42:51.597617Z
 Rand.sample(from: ['rare', 'common'], count: 10, weights: [1, 100]);
 ```
 
@@ -222,7 +223,7 @@ repeats in one call (corpora: 167 unique words, 856 sentences). For repeats, cal
 
 ```dart
 Rand.dateTime();                                       // [1970-01-01, 2038-01-01) UTC
-Rand.dateTime(DateTime(2020), DateTime(2025));         // custom range, half-open
+Rand.dateTime(DateTime.utc(2020), DateTime.utc(2025)); // custom range, half-open
 Rand.duration(max: const Duration(days: 30));          // 0 to 30 days
 Rand.duration(min: const Duration(days: 1), max: const Duration(days: 30));
 ```
@@ -291,15 +292,15 @@ final dice = Rand.sample(from: [1, 2, 3, 4, 5, 6], count: 10);
 final c = Rand.color();
 c.name;     // 'coral'
 c.argb;     // 0xFFFF7F50 — ARGB packed int
-c.isDark;   // computed via CssColorsX extension (YIQ luminance)
+c.isDark;   // computed via YIQ luminance
 
 Rand.colorDark();   // dark colors only — good for light backgrounds
 Rand.colorLight();  // light colors only — good for dark backgrounds
 ```
 
 148 CSS named variants. The `argb` int is Flutter-friendly:
-`Color(c.argb)` works without conversion. `isDark` is a `CssColorsX`
-extension getter — computed from `argb` via the YIQ luminance formula,
+`Color(c.argb)` works without conversion. `isDark` is a `CssColors`
+getter — computed from `argb` via the YIQ luminance formula,
 not stored on the enum. Use it (or your own contrast helper, e.g.
 [`fluiver`](https://pub.dev/packages/fluiver)'s `Color.contrastText`)
 to pick a foreground.
