@@ -140,5 +140,13 @@ void main() {
       }
       check(xs).deepEquals(ys);
     });
+
+    test('RandGen.seeded matches RandGen(Random(seed))', () {
+      final a = RandGen.seeded(5);
+      final b = RandGen(Random(5));
+      check(List.generate(20, (_) => a.integer()))
+          .deepEquals(List.generate(20, (_) => b.integer()));
+      check(RandGen.seeded().fullName()).isNotEmpty();
+    });
   });
 }
