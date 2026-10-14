@@ -15,8 +15,18 @@ void main() {
       }
     });
 
+    test('element returns item from non-List Iterable', () {
+      final set = {1, 2, 3};
+      for (var i = 0; i < 50; i++) {
+        check(set.contains(Rand.element(set))).isTrue();
+      }
+    });
+
     test('element throws StateError on empty', () {
-      check(() => Rand.element(<int>[])).throws<StateError>();
+      check(() => Rand.element(<int>[]))
+          .throws<StateError>()
+          .has((e) => e.message, 'message')
+          .contains('Rand.element');
     });
 
     test('mapEntry returns entry from map', () {
@@ -28,6 +38,13 @@ void main() {
       }
     });
 
+    test('mapEntry throws StateError naming Rand.mapEntry on empty', () {
+      check(() => Rand.mapEntry(<String, int>{}))
+          .throws<StateError>()
+          .has((e) => e.message, 'message')
+          .contains('Rand.mapEntry');
+    });
+
     test('mapKey returns key from map', () {
       final map = {'a': 1, 'b': 2, 'c': 3};
       for (var i = 0; i < 100; i++) {
@@ -36,13 +53,40 @@ void main() {
     });
 
     test('mapKey throws StateError on empty', () {
-      check(() => Rand.mapKey(<String, int>{})).throws<StateError>();
+      check(() => Rand.mapKey(<String, int>{}))
+          .throws<StateError>()
+          .has((e) => e.message, 'message')
+          .contains('Rand.mapKey');
     });
 
     test('mapValue returns value from map', () {
       final map = {'a': 1, 'b': 2, 'c': 3};
       for (var i = 0; i < 100; i++) {
         check(map.containsValue(Rand.mapValue(map))).isTrue();
+      }
+    });
+
+    test('mapValue works when map has a NaN key', () {
+      check(Rand.mapValue({double.nan: 'a'})).equals('a');
+    });
+
+    test('mapValue throws StateError naming Rand.mapValue on empty', () {
+      check(() => Rand.mapValue(<String, int>{}))
+          .throws<StateError>()
+          .has((e) => e.message, 'message')
+          .contains('Rand.mapValue');
+    });
+
+    test('sample validates weights even when count is 0', () {
+      for (final weights in [
+        [1],
+        [-1, 1],
+        [0, 0],
+      ]) {
+        check(() => Rand.sample(from: ['a', 'b'], count: 0, weights: weights))
+            .throws<ArgumentError>()
+            .has((e) => e.name, 'name')
+            .equals('weights');
       }
     });
 

@@ -1,15 +1,19 @@
 part of '../rand.dart';
 
 mixin _Identity on _Collections, _Booleans {
+  /// See [Rand.alias].
   String alias() => element(_alias);
 
+  /// See [Rand.firstName].
   String firstName() => element(_firstNames);
 
+  /// See [Rand.lastName].
   String lastName() => element(_lastNames);
 
+  /// See [Rand.fullName].
   String fullName() {
     final parts = [firstName()];
-    final middleCount = _weightedChoice([0, 1, 2], [100, 10, 1], rng);
+    final middleCount = _weightedChoice([0, 1, 2], [100, 10, 1], 111, rng);
     for (var i = 0; i < middleCount; i++) {
       parts.add(_fresh(parts, () => boolean() ? firstName() : lastName()));
     }
@@ -17,6 +21,7 @@ mixin _Identity on _Collections, _Booleans {
     return parts.join(' ');
   }
 
+  /// See [Rand.city].
   String city() => element(_cities);
 }
 
