@@ -53,20 +53,29 @@ void main() {
       check(() => Rand.dateTime(DateTime.utc(2050))).throws<ArgumentError>();
     });
 
-    test('reversed dateTime errors say which bound to pass', () {
-      check(() => Rand.dateTime(DateTime.utc(2025), DateTime.utc(2020)))
-          .throws<ArgumentError>()
-          .has((e) => '${e.message}', 'message')
+    test('reversed dateTime errors say which bound to pass in UTC', () {
+      check(
+          () => Rand.dateTime(
+            DateTime.utc(2025).toLocal(),
+            DateTime.utc(2020).toLocal(),
+          ),
+        ).throws<ArgumentError>().has((e) => '${e.message}', 'message')
         ..contains('start must be <= end')
+        ..contains('2025-01-01 00:00:00.000Z')
+        ..contains('2020-01-01 00:00:00.000Z')
         ..not((it) => it.contains('2038'));
-      check(() => Rand.dateTime(DateTime.utc(2050)))
+      check(() => Rand.dateTime(DateTime.utc(2050).toLocal()))
           .throws<ArgumentError>()
           .has((e) => '${e.message}', 'message')
-          .contains('pass end');
-      check(() => Rand.dateTime(null, DateTime.utc(1969)))
+        ..contains('2038-01-01 UTC')
+        ..contains('2050-01-01 00:00:00.000Z')
+        ..contains('pass end');
+      check(() => Rand.dateTime(null, DateTime.utc(1969).toLocal()))
           .throws<ArgumentError>()
           .has((e) => '${e.message}', 'message')
-          .contains('pass start');
+        ..contains('1970-01-01 UTC')
+        ..contains('1969-01-01 00:00:00.000Z')
+        ..contains('pass start');
     });
 
     test('duration and dateTime return min when min == max', () {
