@@ -1,5 +1,7 @@
 // Pinned lorem strings exceed 80 columns.
 // ignore_for_file: lines_longer_than_80_chars
+import 'dart:math';
+
 import 'package:checks/checks.dart';
 import 'package:rand/rand.dart';
 import 'package:test/test.dart';
@@ -20,85 +22,145 @@ Object? _seeded(Object? Function() draw) {
 
 String _lit(Object? v) => switch (v) {
   final String s =>
-    "'${s.replaceAll(r'\', r'\\').replaceAll("'", r"\'").replaceAll(r'$', r'\$')}'",
+    "'${s.replaceAll(r'\', r'\\').replaceAll("'", r"\'").replaceAll('\n', r'\n').replaceAll(r'$', r'\$')}'",
   final List<Object?> l => '[${l.map(_lit).join(', ')}]',
   _ => '$v',
 };
 
-final Map<String, Object? Function()> _draws = {
-  'integer': () => _n(3, Rand.integer),
-  'integerRange': () => _n(5, () => Rand.integer(min: -10, max: 10)),
-  'float': () => _n(3, () => Rand.float(max: 1)),
-  'floatDefault': () => _n(2, Rand.float),
-  'boolean': () => _n(8, Rand.boolean),
-  'nullable': () => _n(6, () => Rand.nullable(1)),
-  'latitude': () => _n(2, Rand.latitude),
-  'latitude0': () => _n(4, () => Rand.latitude(0)),
-  'longitude': () => _n(2, () => Rand.longitude(2)),
-  'geoPoint': () {
-    final (:lat, :lng) = Rand.geoPoint();
+final Map<String, Object? Function([RandGen?])> _draws = {
+  'integer': ([g]) => _n(3, g == null ? Rand.integer : g.integer),
+  'integerRange': ([g]) => _n(
+    5,
+    () => g == null
+        ? Rand.integer(min: -10, max: 10)
+        : g.integer(min: -10, max: 10),
+  ),
+  'float': ([g]) =>
+      _n(3, () => g == null ? Rand.float(max: 1) : g.float(max: 1)),
+  'floatDefault': ([g]) => _n(2, g == null ? Rand.float : g.float),
+  'boolean': ([g]) => _n(8, g == null ? Rand.boolean : g.boolean),
+  'nullable': ([g]) =>
+      _n(6, () => g == null ? Rand.nullable(1) : g.nullable(1)),
+  'latitude': ([g]) => _n(2, g == null ? Rand.latitude : g.latitude),
+  'latitude0': ([g]) =>
+      _n(4, () => g == null ? Rand.latitude(0) : g.latitude(0)),
+  'longitude': ([g]) =>
+      _n(2, () => g == null ? Rand.longitude(2) : g.longitude(2)),
+  'geoPoint': ([g]) {
+    final (:lat, :lng) = g == null ? Rand.geoPoint() : g.geoPoint();
     return [lat, lng];
   },
-  'charCode': () => _n(8, Rand.charCode),
-  'semver': () => _n(2, Rand.semver),
-  'otp': () => _n(2, Rand.otp),
-  'duration': () =>
-      _n(3, () => Rand.duration(max: const Duration(days: 30)).inMicroseconds),
-  'durationNegative': () => _n(
-    8,
-    () => Rand.duration(
-      min: const Duration(microseconds: -10),
-      max: const Duration(microseconds: -5),
-    ).inMicroseconds,
-  ),
-  'dateTime': () => _n(3, () => Rand.dateTime().microsecondsSinceEpoch),
-  'dateTimeRange': () => _n(
+  'charCode': ([g]) => _n(8, g == null ? Rand.charCode : g.charCode),
+  'semver': ([g]) => _n(2, g == null ? Rand.semver : g.semver),
+  'otp': ([g]) => _n(2, g == null ? Rand.otp : g.otp),
+  'duration': ([g]) => _n(
     3,
-    () => Rand.dateTime(
-      DateTime.utc(2020),
-      DateTime.utc(2025),
-    ).microsecondsSinceEpoch,
+    () =>
+        (g == null
+                ? Rand.duration(max: const Duration(days: 30))
+                : g.duration(max: const Duration(days: 30)))
+            .inMicroseconds,
   ),
-  'datePre1970': () => _n(
+  'durationNegative': ([g]) => _n(
     8,
-    () => Rand.dateTime(
-      _pre1970,
-      _pre1970.add(const Duration(microseconds: 5)),
-    ).microsecondsSinceEpoch,
+    () =>
+        (g == null
+                ? Rand.duration(
+                    min: const Duration(microseconds: -10),
+                    max: const Duration(microseconds: -5),
+                  )
+                : g.duration(
+                    min: const Duration(microseconds: -10),
+                    max: const Duration(microseconds: -5),
+                  ))
+            .inMicroseconds,
   ),
-  'element': () => _n(4, () => Rand.element([1, 2, 3, 4, 5])),
-  'elementSet': () => _n(4, () => Rand.element({'a', 'b', 'c'})),
-  'mapEntry': () => _n(2, () => Rand.mapEntry(_map).key),
-  'mapValue': () => _n(2, () => Rand.mapValue(_map)),
-  'enumValue': () => _n(3, () => Rand.enumValue(_E.values).name),
-  'shuffled': () => Rand.shuffled(List.generate(10, (i) => i)),
-  'subSet': () => Rand.subSet(Set.of(List.generate(10, (i) => i)), 4).toList(),
-  'sample': () => Rand.sample(from: ['a', 'b', 'c'], count: 10),
-  'sampleWeighted': () =>
-      Rand.sample(from: ['a', 'b', 'c'], count: 10, weights: [1, 10, 100]),
-  'alias': () => _n(2, Rand.alias),
-  'firstName': () => _n(2, Rand.firstName),
-  'lastName': () => _n(2, Rand.lastName),
-  'city': () => _n(2, Rand.city),
-  'fullName': () => _n(4, Rand.fullName),
-  'word': () => _n(3, Rand.word),
-  'words': () => Rand.words(count: 4),
-  'sentence': Rand.sentence,
-  'sentences': () => Rand.sentence(2),
-  'paragraph': () => Rand.paragraph(2),
-  'article': () => Rand.article(1),
-  'slug': Rand.slug,
-  'color': () => _n(3, () => Rand.color().name),
-  'colorDark': () => Rand.colorDark().name,
-  'colorLight': () => Rand.colorLight().name,
-  'email': () => _n(8, Rand.email),
-  'ipv4': Rand.ipv4,
-  'ipv6': Rand.ipv6,
-  'mac': Rand.mac,
-  'hex': () => Rand.hex(length: 16),
-  'uuidV4': () => _n(2, Rand.uuidV4),
-  'uuidV7': () => Rand.uuidV7(time: _t),
-  'ulid': () => Rand.ulid(time: _t),
+  'dateTime': ([g]) => _n(
+    3,
+    () => (g == null ? Rand.dateTime() : g.dateTime()).microsecondsSinceEpoch,
+  ),
+  'dateTimeRange': ([g]) => _n(
+    3,
+    () =>
+        (g == null
+                ? Rand.dateTime(DateTime.utc(2020), DateTime.utc(2025))
+                : g.dateTime(DateTime.utc(2020), DateTime.utc(2025)))
+            .microsecondsSinceEpoch,
+  ),
+  'datePre1970': ([g]) => _n(
+    8,
+    () =>
+        (g == null
+                ? Rand.dateTime(
+                    _pre1970,
+                    _pre1970.add(const Duration(microseconds: 5)),
+                  )
+                : g.dateTime(
+                    _pre1970,
+                    _pre1970.add(const Duration(microseconds: 5)),
+                  ))
+            .microsecondsSinceEpoch,
+  ),
+  'element': ([g]) => _n(
+    4,
+    () =>
+        g == null ? Rand.element([1, 2, 3, 4, 5]) : g.element([1, 2, 3, 4, 5]),
+  ),
+  'elementSet': ([g]) => _n(
+    4,
+    () =>
+        g == null ? Rand.element({'a', 'b', 'c'}) : g.element({'a', 'b', 'c'}),
+  ),
+  'mapEntry': ([g]) =>
+      _n(2, () => (g == null ? Rand.mapEntry(_map) : g.mapEntry(_map)).key),
+  'mapKey': ([g]) =>
+      _n(2, () => g == null ? Rand.mapKey(_map) : g.mapKey(_map)),
+  'mapValue': ([g]) =>
+      _n(2, () => g == null ? Rand.mapValue(_map) : g.mapValue(_map)),
+  'enumValue': ([g]) => _n(
+    3,
+    () => (g == null ? Rand.enumValue(_E.values) : g.enumValue(_E.values)).name,
+  ),
+  'shuffled': ([g]) => g == null
+      ? Rand.shuffled(List.generate(10, (i) => i))
+      : g.shuffled(List.generate(10, (i) => i)),
+  'subSet': ([g]) =>
+      (g == null
+              ? Rand.subSet(Set.of(List.generate(10, (i) => i)), 4)
+              : g.subSet(Set.of(List.generate(10, (i) => i)), 4))
+          .toList(),
+  'sample': ([g]) => g == null
+      ? Rand.sample(from: ['a', 'b', 'c'], count: 10)
+      : g.sample(from: ['a', 'b', 'c'], count: 10),
+  'sampleWeighted': ([g]) => g == null
+      ? Rand.sample(from: ['a', 'b', 'c'], count: 10, weights: [1, 10, 100])
+      : g.sample(from: ['a', 'b', 'c'], count: 10, weights: [1, 10, 100]),
+  'alias': ([g]) => _n(2, g == null ? Rand.alias : g.alias),
+  'firstName': ([g]) => _n(2, g == null ? Rand.firstName : g.firstName),
+  'lastName': ([g]) => _n(2, g == null ? Rand.lastName : g.lastName),
+  'city': ([g]) => _n(2, g == null ? Rand.city : g.city),
+  'fullName': ([g]) => _n(4, g == null ? Rand.fullName : g.fullName),
+  'word': ([g]) => _n(3, g == null ? Rand.word : g.word),
+  'words': ([g]) => g == null ? Rand.words(count: 4) : g.words(count: 4),
+  'wordsDefault': ([g]) => g == null ? Rand.words() : g.words(),
+  'sentence': ([g]) => g == null ? Rand.sentence() : g.sentence(),
+  'sentences': ([g]) => g == null ? Rand.sentence(2) : g.sentence(2),
+  'paragraph': ([g]) => g == null ? Rand.paragraph(2) : g.paragraph(2),
+  'paragraphDefault': ([g]) => g == null ? Rand.paragraph() : g.paragraph(),
+  'article': ([g]) => g == null ? Rand.article(1) : g.article(1),
+  'articleDefault': ([g]) => g == null ? Rand.article() : g.article(),
+  'slug': ([g]) => g == null ? Rand.slug() : g.slug(),
+  'color': ([g]) => _n(3, () => (g == null ? Rand.color() : g.color()).name),
+  'colorDark': ([g]) => (g == null ? Rand.colorDark() : g.colorDark()).name,
+  'colorLight': ([g]) => (g == null ? Rand.colorLight() : g.colorLight()).name,
+  'email': ([g]) => _n(8, g == null ? Rand.email : g.email),
+  'ipv4': ([g]) => g == null ? Rand.ipv4() : g.ipv4(),
+  'ipv6': ([g]) => g == null ? Rand.ipv6() : g.ipv6(),
+  'mac': ([g]) => g == null ? Rand.mac() : g.mac(),
+  'hex': ([g]) => g == null ? Rand.hex(length: 16) : g.hex(length: 16),
+  'uuidV4': ([g]) => _n(2, g == null ? Rand.uuidV4 : g.uuidV4),
+  'uuidV7': ([g]) => g == null ? Rand.uuidV7(time: _t) : g.uuidV7(time: _t),
+  'ulid': ([g]) => g == null ? Rand.ulid(time: _t) : g.ulid(time: _t),
 };
 
 const Map<String, Object?> _golden = {
@@ -123,6 +185,7 @@ const Map<String, Object?> _golden = {
   'element': [3, 4, 5, 1],
   'elementSet': ['b', 'a', 'a', 'b'],
   'mapEntry': ['b', 'a'],
+  'mapKey': ['b', 'a'],
   'mapValue': [2, 1],
   'enumValue': ['d', 'c', 'a'],
   'shuffled': [2, 0, 1, 5, 8, 3, 9, 4, 6, 7],
@@ -141,10 +204,13 @@ const Map<String, Object?> _golden = {
   ],
   'word': ['dictumst', 'potenti', 'vivamus'],
   'words': 'dictumst potenti elit semper',
+  'wordsDefault': 'potenti imperdiet placerat molestie lacus dapibus',
   'sentence': 'Congue nisi vitae suscipit tellus mauris a diam maecenas sed.',
   'sentences': 'Congue nisi vitae suscipit tellus mauris a diam maecenas sed. Feugiat vivamus at augue eget arcu.',
   'paragraph': 'Congue nisi vitae suscipit tellus mauris a diam maecenas sed. Enim facilisis gravida neque convallis a cras semper auctor neque.',
+  'paragraphDefault': 'Enim facilisis gravida neque convallis a cras semper auctor neque. Cras semper auctor neque vitae. Sit amet venenatis urna cursus eget nunc scelerisque. Massa tincidunt dui ut ornare lectus sit amet est. Egestas dui id ornare arcu. Curabitur vitae nunc sed velit.',
   'article': 'Enim facilisis gravida neque convallis a cras semper auctor neque. Cras semper auctor neque vitae. Sit amet venenatis urna cursus eget nunc scelerisque. Massa tincidunt dui ut ornare lectus sit amet est. Egestas dui id ornare arcu. Curabitur vitae nunc sed velit.',
+  'articleDefault': 'Cras semper auctor neque vitae. Sit amet venenatis urna cursus eget nunc scelerisque. Massa tincidunt dui ut ornare lectus sit amet est. Egestas dui id ornare arcu. Curabitur vitae nunc sed velit.\n\nTellus molestie nunc non blandit massa enim nec dui. Laoreet id donec ultrices tincidunt arcu non sodales neque. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Facilisi nullam vehicula ipsum a arcu cursus. Egestas erat imperdiet sed euismod nisi porta lorem mollis aliquam. Laoreet sit amet cursus sit amet dictum sit.\n\nFacilisi etiam dignissim diam quis enim. Scelerisque viverra mauris in aliquam. Dictumst quisque sagittis purus sit amet volutpat consequat mauris nunc. Laoreet id donec ultrices tincidunt. Tempus imperdiet nulla malesuada pellentesque. Dignissim diam quis enim lobortis scelerisque. Pulvinar etiam non quam lacus. Erat velit scelerisque in dictum non consectetur a erat nam. In pellentesque massa placerat duis ultricies lacus sed turpis. Enim nec dui nunc mattis enim ut tellus.\n\nCursus vitae congue mauris rhoncus aenean vel. At varius vel pharetra vel. In pellentesque massa placerat duis ultricies lacus sed turpis. Odio tempor orci dapibus ultrices. Nibh cras pulvinar mattis nunc sed blandit libero volutpat. Nunc sed id semper risus in. Metus vulputate eu scelerisque felis imperdiet.\n\nUltricies mi eget mauris pharetra et ultrices neque ornare aenean. Vel elit scelerisque mauris pellentesque. Aliquam faucibus purus in massa tempor nec feugiat nisl pretium. Velit euismod in pellentesque massa. Sit amet nisl suscipit adipiscing. Gravida cum sociis natoque penatibus et magnis dis parturient. Orci porta non pulvinar neque laoreet suspendisse interdum consectetur. Nunc sed velit dignissim sodales ut.',
   'slug': 'dictumst-potenti-elit',
   'color': ['yellowGreen', 'mediumPurple', 'darkGray'],
   'colorDark': 'saddleBrown',
@@ -191,6 +257,22 @@ void main() {
     final actual = {
       for (final MapEntry(:key, :value) in _draws.entries)
         key: Rand.withSeed(42, value),
+    };
+    check(actual).deepEquals(_golden);
+  });
+
+  test('RandGen(Random(42)) reproduces the golden values', () {
+    final actual = {
+      for (final MapEntry(:key, :value) in _draws.entries)
+        key: value(RandGen(Random(42))),
+    };
+    check(actual).deepEquals(_golden);
+  });
+
+  test('RandGen.seeded(42) reproduces the golden values', () {
+    final actual = {
+      for (final MapEntry(:key, :value) in _draws.entries)
+        key: value(RandGen.seeded(42)),
     };
     check(actual).deepEquals(_golden);
   });
