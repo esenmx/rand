@@ -60,11 +60,12 @@ dart pub add rand
 ```dart
 Rand.useRng(Random(42));      // any Random instance
 Rand.seed(42);                // useRng(Random(42)), and Rand.currentSeed == 42
-Rand.useRng(Random.secure()); // cryptographically secure for non-crypto methods
+Rand.useRng(Random.secure()); // global swap to a CSPRNG; clears currentSeed
 
 final user = Rand.withSeed(7, () => (Rand.fullName(), Rand.email()));
 final gen = RandGen(Random(1)); // independent stream, same non-crypto API
 gen.fullName();
+RandGen(Random.secure()).sample(from: items, count: 3); // one secure draw, global untouched
 ```
 
 `useRng` and `seed` mutate the global non-cryptographic RNG. `withSeed` scopes
@@ -93,10 +94,10 @@ ran before it (`--name`, `--test-randomize-ordering-seed`).
 ## Numbers
 
 ```dart
-Rand.integer();                    // 0 to 2^31-1, inclusive both ends
-Rand.integer(min: 50, max: 100);
-Rand.float();                      // 0.0 to double.maxFinite, half-open
-Rand.float(min: 0, max: 1);        // [0.0, 1.0)
+Rand.integer();                    // [0, 2^31)
+Rand.integer(min: 50, max: 100);   // 50..99
+Rand.float();                      // [0.0, 1.0), like nextDouble
+Rand.float(min: 10, max: 20);      // [10.0, 20.0)
 Rand.boolean();                    // 50% true
 Rand.boolean(90);                  // 90% true
 Rand.latitude();                   // -90..90, 5 decimal places
@@ -104,9 +105,11 @@ Rand.longitude(3);                 // -180..180, 3 decimal places
 Rand.charCode();                   // base62 code point (int)
 ```
 
-`integer(max: list.length)` is **inclusive** — it can return `list.length`
-(out of bounds for indexing). Use `max: list.length - 1`, or just call
-`Rand.element(list)`.
+Every range is `[min, max)` half-open, like `Random.nextInt` and
+`nextDouble`: `integer(max: list.length)` is always a valid index of a
+non-empty list (or just call `Rand.element(list)`). An empty range
+(`min >= max`) throws `ArgumentError`, like `nextInt(0)`.
+`float`'s default `max` is 1, so `float(min: 5)` throws — pass a `max`.
 
 ---
 
@@ -121,7 +124,7 @@ Rand.mac();                         // '3a:5f:9c:8e:2d:71'
 Rand.mac(separator: '-');           // '3a-5f-9c-8e-2d-71'
 Rand.hex(length: 40);               // git-SHA-shaped opaque hex
 Rand.semver();                      // '3.7.42'
-Rand.otp();                         // '047215'
+Rand.digits();                      // '047215'
 Rand.slug();                        // 'lorem-ipsum-dolor'
 ```
 
@@ -130,7 +133,7 @@ TLDs — safe to ship in fixtures without collision risk. `ipv4` is not
 filtered for reserved ranges; compose your own filter if you need only
 routable addresses. `ipv6` is returned in full form (no `::` collapse)
 so fixture length stays stable. `hex` is general-purpose lowercase hex
-— git SHAs, ETags, opaque content hashes. `semver`, `otp`, `slug` use
+— git SHAs, ETags, opaque content hashes. `semver`, `digits`, `slug` use
 the non-secure RNG and are reproducible under `Rand.seed`.
 
 ---
@@ -139,16 +142,17 @@ the non-secure RNG and are reproducible under `Rand.seed`.
 
 ```dart
 Rand.uuidV4();                    // '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-Rand.uuidV7();                    // 48-bit ms timestamp (now), then random bits
 Rand.uuidV7(time: DateTime.utc(2026, 10, 3, 12, 34, 56, 789)); // '01a101c2-a895-7…'
-Rand.ulid();                      // 26-char Crockford base32, '01M40W5A4N…'
+Rand.uuidV7(time: DateTime.now()); // live clock
+Rand.ulid(time: DateTime.utc(2026, 10, 3, 12, 34, 56, 789));   // '01M40W5A4N…', 26 chars
 ```
 
 All three draw from the non-cryptographic RNG, so they reproduce under
-`seed`, `withSeed` and `RandGen` — stable IDs for snapshot tests. `time`
-defaults to `DateTime.now()`; v7 and ULID sort by time across milliseconds
-but are not monotonic within one; a `time` before 1970 or past year 10889
-throws. Production IDs → [`package:uuid`](https://pub.dev/packages/uuid).
+`seed`, `withSeed` and `RandGen`. `uuidV7` and `ulid` take a required `time`:
+a fixed instant keeps the whole ID stable for snapshot tests, `DateTime.now()`
+gives a live clock. v7 and ULID sort by time across milliseconds but are not
+monotonic within one; a `time` before 1970 or past year 10889 throws.
+Production IDs → [`package:uuid`](https://pub.dev/packages/uuid).
 
 ---
 
@@ -217,6 +221,10 @@ Rand.article(5);                   // 5 paragraphs separated by '\n\n'
 repeats in one call (corpora: 167 unique words, 856 sentences). For repeats, call
 `word()` / `sentence()` N times yourself, or use `paragraph(N)`.
 
+Counts accept 0 and return an empty result (`words`, `sentence`, `paragraph`,
+`article`, `bytes`, `subSet`, `sample`). Single-token generators — `nonce`,
+`hex`, `digits`, `base64`, `slug` — need a length of at least 1.
+
 ---
 
 ## Time
@@ -228,9 +236,9 @@ Rand.duration(max: const Duration(days: 30));          // 0 to 30 days
 Rand.duration(min: const Duration(days: 1), max: const Duration(days: 30));
 ```
 
-`dateTime` and `duration` are `[min, max)` half-open, return `min` when
-`min == max`, and throw `ArgumentError` on a reversed range — including
-`dateTime(start)` with `start` after 2038-01-01 and no `end`.
+`dateTime` and `duration` are `[min, max)` half-open and throw
+`ArgumentError` on an empty or reversed range — including `dateTime(start)`
+with `start` at or after 2038-01-01 and no `end`.
 
 ---
 
@@ -281,8 +289,10 @@ final loot = Rand.sample(
 final dice = Rand.sample(from: [1, 2, 3, 4, 5, 6], count: 10);
 ```
 
-`weights.length` must be `>= from.length`. For a *secure* sample call
-`Rand.useRng(Random.secure())` first.
+`weights.length` must equal `from.length`. An empty `from` throws
+`StateError` unless `count` is 0. For a *secure* sample, draw from your own
+generator — `RandGen(Random.secure()).sample(...)` — so the global RNG and
+`Rand.currentSeed` stay untouched.
 
 ---
 
@@ -312,8 +322,8 @@ to pick a foreground.
 ```dart
 Rand.boolean();             // 50% true
 Rand.boolean(99.9);         // 99.9% true
-Rand.nullable('value');     // 50% null, useful in fixtures
-Rand.nullable('value', 90); // 90% null
+Rand.nullable('value');                 // 50% null, useful in fixtures
+Rand.nullable('value', nullChance: 90); // 90% null
 ```
 
 ---
@@ -322,10 +332,11 @@ Rand.nullable('value', 90); // 90% null
 
 |❌|✅|
 |---|---|
-|`Rand.integer(max: list.length)` — inclusive, can return `list.length`|`Rand.element(list)` or `Rand.integer(max: list.length - 1)`|
+|`Rand.integer(min: 1, max: 6)` for a die roll — `max` is exclusive, never 6|`Rand.integer(min: 1, max: 7)`|
+|`Rand.float(min: 5)` — default `max` is 1, so it throws|Pass both bounds: `Rand.float(min: 5, max: 10)`|
+|`Rand.integer(max: list.length)` on a list that may be empty — `[0, 0)` is empty and throws|Guard with `list.isNotEmpty`, or call `Rand.element(list)`|
 |`Rand.seed(42); Rand.password()` — seed never reaches CSPRNG|Build deterministic tokens from your own `Random(42)`|
 |`Rand.subSet([1, 2, 2], 2)` — compile error: `subSet` takes a `Set<T>`|Pass a set: `Rand.subSet({1, 2}, 2)`, or dedupe with `.toSet()`|
-|`Rand.nullable(x, 80)` thinking "80% present"|Arg is `nullChance` — 80% returns **null**. Flip to `Rand.nullable(x, 20)` for 80% present|
 |Shipping `Rand.nonce` / `Rand.password` as production secrets|Use `package:cryptography` or a platform keystore|
 |`setUpAll(() => Rand.seed(42))`|Use `setUp` — each test starts from the same state whatever ran before it (`--name`, `--test-randomize-ordering-seed`)|
 |`list..shuffle()` to "get a random order" without keeping the original|`Rand.shuffled(list)` — non-mutating copy|

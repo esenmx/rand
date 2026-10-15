@@ -60,7 +60,7 @@ void main() {
             DateTime.utc(2020).toLocal(),
           ),
         ).throws<ArgumentError>().has((e) => '${e.message}', 'message')
-        ..contains('start must be <= end')
+        ..contains('start must be < end')
         ..contains('2025-01-01 00:00:00.000Z')
         ..contains('2020-01-01 00:00:00.000Z')
         ..not((it) => it.contains('2038'));
@@ -78,22 +78,26 @@ void main() {
         ..contains('pass start');
     });
 
-    test('duration and dateTime return min when min == max', () {
-      const d = Duration(seconds: 3);
-      check(Rand.duration(min: d, max: d)).equals(d);
-      final t = DateTime.utc(2020);
-      check(Rand.dateTime(t, t)).equals(t);
-    });
-
-    test('equal-bound duration and dateTime consume no draw', () {
+    test('duration and dateTime with equal bounds throw before drawing', () {
       const d = Duration(seconds: 3);
       final t = DateTime.utc(2020);
-      for (final call in [
-        () => Rand.duration(min: d, max: d),
-        () => Rand.dateTime(t, t),
+      for (final (call, message) in [
+        (() => Rand.duration(min: d, max: d), 'min ($d) must be < max ($d)'),
+        (() => Rand.dateTime(t, t), 'start must be < end'),
+        (
+          () => Rand.dateTime(DateTime.utc(2038)),
+          'start must be < 2038-01-01 UTC when end is omitted',
+        ),
+        (
+          () => Rand.dateTime(null, DateTime.utc(1970)),
+          'end must be > 1970-01-01 UTC when start is omitted',
+        ),
       ]) {
         Rand.seed(5);
-        call();
+        check(call)
+            .throws<ArgumentError>()
+            .has((e) => '${e.message}', 'message')
+            .contains(message);
         final next = Rand.integer();
         Rand.seed(5);
         check(next).equals(Rand.integer());

@@ -1,6 +1,6 @@
 part of '../rand.dart';
 
-const int _maxInt = (1 << 31) - 1;
+const int _intDefaultMax = 1 << 31;
 const int _maxIntSpan = 0xFFFFFFFF;
 const String _lowercase = 'abcdefghijklmnopqrstuvwxyz';
 const String _uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

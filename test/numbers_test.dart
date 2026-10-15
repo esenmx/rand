@@ -28,18 +28,38 @@ void main() {
 
   group('Numbers', () {
     test('integer returns value in range', () {
-      check(Rand.integer(min: 5, max: 5)).equals(5);
       check(Rand.integer()).isA<int>();
       check(Rand.integer(max: 1)).isA<int>();
       check(Rand.integer(min: 1, max: 2)).isA<int>();
       check(Rand.integer(min: -1, max: 1)).isA<int>();
     });
 
+    test('integer max is exclusive, like nextInt', () {
+      for (var i = 0; i < 1000; i++) {
+        check(Rand.integer(max: 2)).isLessThan(2);
+        check(Rand.integer(min: 4, max: 5)).equals(4);
+        check(Rand.integer(min: -3, max: -1))
+          ..isGreaterOrEqual(-3)
+          ..isLessThan(-1);
+      }
+    });
+
+    test('integer with min == max throws before drawing', () {
+      Rand.seed(5);
+      check(() => Rand.integer(min: 5, max: 5))
+          .throws<ArgumentError>()
+          .has((e) => '${e.message}', 'message')
+          .contains('min (5) must be < max (5)');
+      final next = Rand.integer();
+      Rand.seed(5);
+      check(next).equals(Rand.integer());
+    });
+
     test('integer is uniform over its range', () {
       Rand.seed(42);
       final histogram = List.filled(10, 0);
       for (var i = 0; i < 100000; i++) {
-        histogram[Rand.integer(max: 9)]++;
+        histogram[Rand.integer(max: 10)]++;
       }
       for (final count in histogram) {
         check(count).isGreaterOrEqual(9000);
@@ -51,19 +71,19 @@ void main() {
       check(() => Rand.integer(min: 2, max: 1)).throws<ArgumentError>();
     });
 
-    test('integer accepts spans up to 2^32 - 1', () {
+    test('integer accepts spans up to 2^32', () {
       for (var i = 0; i < 1000; i++) {
-        check(Rand.integer(max: 0xFFFFFFFF))
+        check(Rand.integer(max: 0x100000000))
           ..isGreaterOrEqual(0)
-          ..isLessOrEqual(0xFFFFFFFF);
-        check(Rand.integer(min: -0x7FFFFFFF, max: 0x80000000))
-          ..isGreaterOrEqual(-0x7FFFFFFF)
-          ..isLessOrEqual(0x80000000);
+          ..isLessThan(0x100000000);
+        check(Rand.integer(min: -0x80000001, max: 0x7FFFFFFF))
+          ..isGreaterOrEqual(-0x80000001)
+          ..isLessThan(0x7FFFFFFF);
       }
     });
 
-    test('integer rejects spans past 2^32 - 1 naming max', () {
-      check(() => Rand.integer(max: 0x100000000))
+    test('integer rejects spans past 2^32 naming max', () {
+      check(() => Rand.integer(max: 0x100000001))
           .throws<ArgumentError>()
           .has((e) => e.name, 'name')
           .equals('max');
@@ -94,6 +114,24 @@ void main() {
       check(f2.isNaN).isFalse();
     });
 
+    test('bare float() draws from [0, 1), like nextDouble', () {
+      for (var i = 0; i < 1000; i++) {
+        check(Rand.float())
+          ..isGreaterOrEqual(0)
+          ..isLessThan(1);
+        check(Rand.float(min: 0.25))
+          ..isGreaterOrEqual(0.25)
+          ..isLessThan(1);
+      }
+    });
+
+    test('float(min) above the default max of 1 throws', () {
+      check(() => Rand.float(min: 5))
+          .throws<ArgumentError>()
+          .has((e) => '${e.message}', 'message')
+          .contains('max (1)');
+    });
+
     test('float throws on invalid range', () {
       check(() => Rand.float(min: 20, max: 10)).throws<ArgumentError>();
     });
@@ -106,11 +144,13 @@ void main() {
       check(() => Rand.float(max: double.nan)).throws<ArgumentError>();
     });
 
-    test('float returns min when min == max', () {
-      check(Rand.float(min: 1, max: 1)).equals(1);
-      for (var i = 0; i < 100; i++) {
-        check(Rand.float(min: 123.456, max: 123.456)).equals(123.456);
-      }
+    test('float with min == max throws', () {
+      check(() => Rand.float(min: 2, max: 2))
+          .throws<ArgumentError>()
+          .has((e) => '${e.message}', 'message')
+          .contains('min (2) must be < max (2)');
+      check(() => Rand.float(min: 123.456, max: 123.456))
+          .throws<ArgumentError>();
     });
 
     test('float stays below max on adjacent doubles', () {
@@ -129,9 +169,10 @@ void main() {
       }
     });
 
-    test('equal-bound float consumes no draw', () {
+    test('equal-bound float throws before drawing', () {
       Rand.seed(5);
-      Rand.float(min: 123.456, max: 123.456);
+      check(() => Rand.float(min: 123.456, max: 123.456))
+          .throws<ArgumentError>();
       final next = Rand.integer();
       Rand.seed(5);
       check(next).equals(Rand.integer());
@@ -140,12 +181,10 @@ void main() {
     test('float with 64-bit int bounds > 2^53 honours [lo, hi)', () {
       final minCollapsed = int.parse('9007199254740995');
       final maxCollapsed = int.parse('9007199254740996');
-      Rand.seed(5);
-      final collapsed = Rand.float(min: minCollapsed, max: maxCollapsed);
-      final next = Rand.integer();
-      Rand.seed(5);
-      check(collapsed).equals(minCollapsed.toDouble());
-      check(next).equals(Rand.integer());
+      check(
+        because: 'both bounds round to the same double: [lo, hi) is empty',
+        () => Rand.float(min: minCollapsed, max: maxCollapsed),
+      ).throws<ArgumentError>();
 
       final minSpan = int.parse('9007199254740993');
       final maxSpan = int.parse('9007199254740994');
@@ -253,10 +292,18 @@ void main() {
       }
     });
 
-    test('otp returns digit string of requested length', () {
+    test('semver with zero maxima consumes no draw', () {
+      Rand.seed(5);
+      check(Rand.semver(maxMajor: 0, maxMinor: 0, maxPatch: 0)).equals('0.0.0');
+      final next = Rand.integer();
+      Rand.seed(5);
+      check(next).equals(Rand.integer());
+    });
+
+    test('digits returns a digit string of the requested length', () {
       const digits = '0123456789';
       for (final len in [1, 6, 12]) {
-        final code = Rand.otp(length: len);
+        final code = Rand.digits(length: len);
         check(code).length.equals(len);
         for (var i = 0; i < code.length; i++) {
           check(digits.contains(code[i])).isTrue();
@@ -264,20 +311,20 @@ void main() {
       }
     });
 
-    test('otp throws on non-positive length naming length', () {
+    test('digits throws on non-positive length naming length', () {
       for (final len in [0, -3]) {
-        check(() => Rand.otp(length: len))
+        check(() => Rand.digits(length: len))
             .throws<ArgumentError>()
             .has((e) => e.name, 'name')
             .equals('length');
       }
     });
 
-    test('otp is reproducible under seed', () {
+    test('digits is reproducible under seed', () {
       Rand.seed(42);
-      final a = List.generate(20, (_) => Rand.otp());
+      final a = List.generate(20, (_) => Rand.digits());
       Rand.seed(42);
-      final b = List.generate(20, (_) => Rand.otp());
+      final b = List.generate(20, (_) => Rand.digits());
       check(a).deepEquals(b);
     });
 

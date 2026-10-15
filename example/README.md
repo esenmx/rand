@@ -27,7 +27,7 @@ dart run recipes.dart
 - Numbers, booleans, floats, lat/lng, `geoPoint`.
 - Identity and city corpora.
 - Lorem text — word / sentence / paragraph granularity.
-- Networking — `email`, `ipv4`, `ipv6`, `mac`, `hex`, `slug`, `semver`, `otp`.
+- Networking — `email`, `ipv4`, `ipv6`, `mac`, `hex`, `slug`, `semver`, `digits`.
 - Cryptographic helpers — `nonce`, `password`, `bytes`, `base64`.
 - `DateTime` and `Duration` ranges.
 - CSS color picking with `isDark` filtering.

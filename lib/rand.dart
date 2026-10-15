@@ -71,10 +71,10 @@ final class Rand {
   /// ```dart
   /// Rand.useRng(Random(42));
   /// Rand.integer(max: 100);          // deterministic
-  ///
-  /// Rand.useRng(Random.secure());
-  /// Rand.sample(from: items, count: 3); // CSPRNG-backed
   /// ```
+  ///
+  /// For a one-off draw from another RNG, use a [RandGen] instead of swapping
+  /// the global: `RandGen(Random.secure()).sample(from: items, count: 3)`.
   ///
   /// In tests, call this in `setUp`, not `setUpAll`, so each test starts
   /// from the same state whatever ran before it (`--name`,
@@ -158,54 +158,55 @@ final class Rand {
   /// Throws [ArgumentError] when [trueChance] is outside `[0, 100]` or NaN.
   static bool boolean([double trueChance = 50]) => _i.boolean(trueChance);
 
-  /// Returns [value] with `(100 - nullChance)%` probability, else `null`.
+  /// Returns `null` with [nullChance] probability (0-100), else [value].
   ///
   /// ```dart
-  /// Rand.nullable('value');       // 50% null
-  /// Rand.nullable('value', 90);   // 90% null
+  /// Rand.nullable('value');                  // 50% null
+  /// Rand.nullable('value', nullChance: 90);  // 90% null
   /// ```
   ///
   /// Throws [ArgumentError] when [nullChance] is outside `[0, 100]` or NaN.
   ///
   /// See also: [boolean].
-  static T? nullable<T>(T value, [double nullChance = 50]) =>
-      _i.nullable(value, nullChance);
+  static T? nullable<T>(T value, {double nullChance = 50}) =>
+      _i.nullable(value, nullChance: nullChance);
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Numbers
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  /// Random integer in `[min, max]` — inclusive on both ends.
+  /// Random integer in `[min, max)` — half-open upper bound, like
+  /// [Random.nextInt].
   ///
   /// ```dart
-  /// Rand.integer();                  // 0..2^31-1
-  /// Rand.integer(max: 100);          // 0..100 inclusive
-  /// Rand.integer(min: -10, max: 10);
+  /// Rand.integer();                  // [0, 2^31)
+  /// Rand.integer(max: 100);          // 0..99
+  /// Rand.integer(min: -10, max: 10); // -10..9
+  /// Rand.integer(max: list.length);  // a valid index of a non-empty list
   /// ```
   ///
-  /// Maximum range (`max - min`) is `2^32 - 1`.
+  /// Maximum range (`max - min`) is `2^32`.
   ///
-  /// Throws [ArgumentError] when `min > max` or `max - min > 2^32 - 1`.
-  ///
-  /// For a list index use `max: list.length - 1`, or call [element].
+  /// Throws [ArgumentError] when `min >= max` (an empty range, like
+  /// `Random.nextInt(0)`) or `max - min > 2^32`.
   ///
   /// See also: [float], [element].
-  static int integer({int min = 0, int max = _maxInt}) =>
+  static int integer({int min = 0, int max = _intDefaultMax}) =>
       _i.integer(min: min, max: max);
 
-  /// Random double in `[min, max)` — half-open upper bound.
+  /// Random double in `[min, max)` — half-open upper bound. Defaults to
+  /// `[0, 1)`, like [Random.nextDouble].
   ///
   /// ```dart
-  /// Rand.float();                  // 0.0..double.maxFinite
-  /// Rand.float(min: 0, max: 1);    // [0.0, 1.0)
+  /// Rand.float();                    // [0.0, 1.0)
+  /// Rand.float(min: 10, max: 20);    // [10.0, 20.0)
   /// ```
   ///
-  /// Returns [min] when `min == max`.
-  ///
-  /// Throws [ArgumentError] when `min > max` or either bound is not finite.
+  /// Throws [ArgumentError] when `min >= max` as doubles (an empty range; a
+  /// [min] of 1 or more needs a [max]) or either bound is not finite.
   ///
   /// See also: [integer].
-  static double float({num min = 0, num max = double.maxFinite}) =>
+  static double float({num min = 0, num max = 1}) =>
       _i.float(min: min, max: max);
 
   /// Random latitude in `[-90, 90]` with [precision] decimal places.
@@ -281,18 +282,19 @@ final class Rand {
     );
   }
 
-  /// Random zero-padded decimal OTP code.
+  /// Random string of [length] decimal digits, leading zeros kept.
   ///
-  /// Each digit drawn uniformly from `[0-9]`. Reproducible under
-  /// [Rand.seed] — useful for test fixtures, not for real one-time codes.
+  /// Each digit drawn uniformly from `[0-9]` by the non-cryptographic RNG,
+  /// so reproducible under [Rand.seed] — fixture codes, postal codes, PINs
+  /// in tests. For a real one-time code use a CSPRNG.
   ///
   /// ```dart
-  /// Rand.otp();              // '047215'
-  /// Rand.otp(length: 4);      // '8203'
+  /// Rand.digits();             // '047215'
+  /// Rand.digits(length: 4);    // '8203'
   /// ```
   ///
   /// Throws [ArgumentError] when [length] is less than 1.
-  static String otp({int length = 6}) => _i.otp(length: length);
+  static String digits({int length = 6}) => _i.digits(length: length);
 
   /// Cryptographically secure random base62 character code (int).
   ///
@@ -336,7 +338,7 @@ final class Rand {
   /// Rand.nonce(length: 32);  // 32-char token
   /// ```
   ///
-  /// Throws [ArgumentError] when [length] is negative.
+  /// Throws [ArgumentError] when [length] is less than 1.
   ///
   /// See also: [password], [bytes], [base62].
   static String nonce({int length = 16}) => _s.nonce(length: length);
@@ -408,10 +410,9 @@ final class Rand {
   /// );
   /// ```
   ///
-  /// [max] is required — no implicit upper bound. Returns [min] when
-  /// `min == max`.
+  /// [max] is required — no implicit upper bound.
   ///
-  /// Throws [ArgumentError] when `min > max`.
+  /// Throws [ArgumentError] when `min >= max` (an empty range).
   ///
   /// See also: [dateTime].
   static Duration duration({
@@ -424,17 +425,17 @@ final class Rand {
   /// Random UTC [DateTime] in `[start, end)` — half-open upper bound.
   ///
   /// Defaults to `[1970-01-01, 2038-01-01)` UTC if [start] / [end] are
-  /// omitted. Returns `start.toUtc()` when [start] and [end] are at the same
-  /// instant.
+  /// omitted.
   ///
   /// ```dart
   /// Rand.dateTime();
   /// Rand.dateTime(DateTime.utc(2020), DateTime.utc(2025));
   /// ```
   ///
-  /// Throws [ArgumentError] when the effective start is after the effective
-  /// end — including a [start] after 2038-01-01 with no [end] (pass [end])
-  /// and an [end] before 1970-01-01 with no [start] (pass [start]).
+  /// Throws [ArgumentError] when the effective start is not before the
+  /// effective end (an empty or reversed range) — including a [start] at or
+  /// after 2038-01-01 with no [end] (pass [end]) and an [end] at or before
+  /// 1970-01-01 with no [start] (pass [start]).
   ///
   /// See also: [duration].
   static DateTime dateTime([DateTime? start, DateTime? end]) =>
@@ -606,8 +607,8 @@ final class Rand {
   /// Rand.sentence(2);  // 'Lorem ipsum dolor sit amet. Nunc sed velit dignissim.'
   /// ```
   ///
-  /// Throws [ArgumentError] when [count] is less than 1, [RangeError] when it
-  /// exceeds the 856-sentence corpus.
+  /// `sentence(0)` returns `''`. Throws [ArgumentError] when [count] is
+  /// negative, [RangeError] when it exceeds the 856-sentence corpus.
   ///
   /// See also: [paragraph] — repeats allowed, joined by `" "`.
   static String sentence([int? count]) => _i.sentence(count);
@@ -760,40 +761,46 @@ final class Rand {
   static String uuidV4() => _i.uuidV4();
 
   /// Random UUID version 7 (RFC 9562): a 48-bit Unix-millisecond timestamp
-  /// from [time] (default `DateTime.now()`) followed by random bits.
+  /// from [time] followed by random bits.
   ///
   /// {@macro rand.seedable_ids}
+  /// {@template rand.time_ids}
+  /// [time] is required: a fixed instant keeps the whole ID stable for
+  /// snapshots; pass `DateTime.now()` for a live clock.
+  /// {@endtemplate}
   ///
   /// IDs sort by time across milliseconds but are not monotonic within one.
   ///
   /// ```dart
-  /// Rand.uuidV7();
   /// Rand.uuidV7(time: DateTime.utc(2026, 10, 3, 12, 34, 56, 789));
   /// // '01a101c2-a895-7…' — time prefix, then random bits
+  /// Rand.uuidV7(time: DateTime.now());
   /// ```
   ///
   /// Throws [ArgumentError] when [time] is before 1970 or past the 48-bit
   /// millisecond range (year 10889).
   ///
   /// See also: [uuidV4], [ulid].
-  static String uuidV7({DateTime? time}) => _i.uuidV7(time: time);
+  static String uuidV7({required DateTime time}) => _i.uuidV7(time: time);
 
   /// Random ULID: 10 Crockford base32 characters of 48-bit Unix-millisecond
-  /// timestamp from [time] (default `DateTime.now()`), then 16 random ones.
+  /// timestamp from [time], then 16 random ones.
   ///
   /// {@macro rand.seedable_ids}
+  /// {@macro rand.time_ids}
   ///
   /// IDs sort by time across milliseconds but are not monotonic within one.
   ///
   /// ```dart
-  /// Rand.ulid();  // '01M40W5A4N…' — 26 chars
+  /// Rand.ulid(time: DateTime.utc(2026, 10, 3, 12, 34, 56, 789));
+  /// // '01M40W5A4N…' — 26 chars
   /// ```
   ///
   /// Throws [ArgumentError] when [time] is before 1970 or past the 48-bit
   /// millisecond range (year 10889).
   ///
   /// See also: [uuidV4], [uuidV7].
-  static String ulid({DateTime? time}) => _i.ulid(time: time);
+  static String ulid({required DateTime time}) => _i.ulid(time: time);
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Sampling
@@ -804,8 +811,8 @@ final class Rand {
   /// Optionally weighted via [weights].
   ///
   /// If [weights] is `null` all items have equal probability. Otherwise
-  /// `weights[i]` is the relative weight for `from[i]`; `weights.length`
-  /// must be `>= from.length`, and weights beyond `from.length` are ignored.
+  /// `weights[i]` is the relative weight for `from[i]`, and `weights.length`
+  /// must equal `from.length`.
   ///
   /// ```dart
   /// // Equal probability
@@ -819,15 +826,16 @@ final class Rand {
   /// );
   /// ```
   ///
-  /// Returns an empty list when [from] is empty or [count] is 0.
+  /// Returns an empty list when [count] is 0.
   ///
   /// Throws [ArgumentError] when [count] is negative, when
-  /// `weights.length < from.length`, when a used weight is negative, or when
-  /// the used weights sum to 0 or more than `2^32`.
+  /// `weights.length != from.length`, when a weight is negative, or when the
+  /// weights sum to 0 or more than `2^32`. Throws [StateError] when [from] is
+  /// empty and [count] is positive.
   ///
   /// For sampling **without** replacement, use [subSet]. For a
-  /// cryptographically secure sample, call
-  /// `Rand.useRng(Random.secure())` first.
+  /// cryptographically secure sample, draw from a secure generator without
+  /// touching the global: `RandGen(Random.secure()).sample(...)`.
   ///
   /// See also: [subSet], [element].
   static List<T> sample<T>({

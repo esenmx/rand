@@ -23,7 +23,7 @@ mixin _Ids {
   }
 
   /// See [Rand.uuidV7].
-  String uuidV7({DateTime? time}) {
+  String uuidV7({required DateTime time}) {
     var ms = _unixMs48(time);
     final b = _randomBytes(16);
     for (var i = 5; i >= 0; i--) {
@@ -36,7 +36,7 @@ mixin _Ids {
   }
 
   /// See [Rand.ulid].
-  String ulid({DateTime? time}) {
+  String ulid({required DateTime time}) {
     var ms = _unixMs48(time);
     final codes = Uint16List(26);
     for (var i = 9; i >= 0; i--) {
@@ -50,8 +50,8 @@ mixin _Ids {
   }
 }
 
-int _unixMs48(DateTime? time) {
-  final ms = (time ?? DateTime.now()).millisecondsSinceEpoch;
+int _unixMs48(DateTime time) {
+  final ms = time.millisecondsSinceEpoch;
   if (ms < 0 || ms > _maxUnixMs48) {
     throw ArgumentError.value(time, 'time', 'must be within 1970..10889');
   }

@@ -28,7 +28,7 @@ void main() {
             .throws<ArgumentError>()
             .has((e) => e.name, 'name')
             .equals('trueChance');
-        check(() => Rand.nullable(1, chance))
+        check(() => Rand.nullable(1, nullChance: chance))
             .throws<ArgumentError>()
             .has((e) => e.name, 'name')
             .equals('nullChance');
@@ -41,6 +41,15 @@ void main() {
         if (Rand.boolean(0.1)) trueCount++;
       }
       check(trueCount).isLessThan(50);
+    });
+
+    test('nullable(nullChance: 90) returns null about 90% of the time', () {
+      var nullCount = 0;
+      for (var i = 0; i < 1000; i++) {
+        if (Rand.nullable('value', nullChance: 90) == null) nullCount++;
+      }
+      check(nullCount).isGreaterThan(850);
+      check(nullCount).isLessThan(950);
     });
 
     test('nullable returns value or null based on probability', () {

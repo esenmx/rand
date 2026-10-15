@@ -23,14 +23,14 @@ mixin _Networking on _Numbers, _Collections, _Identity {
         'must not be empty or contain "@"',
       );
     }
-    final user = '${firstName().toLowerCase()}${integer(min: 1, max: 99)}';
+    final user = '${firstName().toLowerCase()}${_closed(1, 99)}';
     return '$user@${domain ?? element(_domains)}';
   }
 
   /// See [Rand.ipv4].
   String ipv4() {
-    return '${integer(max: 255)}.${integer(max: 255)}.'
-        '${integer(max: 255)}.${integer(max: 255)}';
+    return '${_closed(0, 255)}.${_closed(0, 255)}.'
+        '${_closed(0, 255)}.${_closed(0, 255)}';
   }
 
   /// See [Rand.ipv6].

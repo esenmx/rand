@@ -10,30 +10,36 @@ mixin _Numbers {
   Random get rng;
 
   /// See [Rand.integer].
-  int integer({int min = 0, int max = _maxInt}) {
-    if (min > max) throw ArgumentError('min ($min) must be <= max ($max)');
-    if (max == min) return max;
+  int integer({int min = 0, int max = _intDefaultMax}) {
+    if (min >= max) throw ArgumentError('min ($min) must be < max ($max)');
     final span = max - min;
-    if (span < 0 || span > _maxIntSpan) {
+    if (span < 0 || span > _maxIntSpan + 1) {
       throw ArgumentError(
-        'max - min must be <= 4294967295, got min: $min, max: $max',
+        'max - min must be <= 4294967296, got min: $min, max: $max',
         'max',
       );
     }
-    return rng.nextInt(span + 1) + min;
+    return rng.nextInt(span) + min;
+  }
+
+  // Inclusive draw behind the package's own bounded values (semver parts,
+  // email suffixes, octets, default text lengths); kept apart from the public
+  // half-open [integer] so their seeded output stays put.
+  int _closed(int min, int max) {
+    if (max == min) return max;
+    return rng.nextInt(max - min + 1) + min;
   }
 
   /// See [Rand.float].
-  double float({num min = 0, num max = double.maxFinite}) {
+  double float({num min = 0, num max = 1}) {
     if (!min.isFinite || !max.isFinite) {
       throw ArgumentError(
         'min and max must be finite, got min: $min, max: $max',
       );
     }
-    if (min > max) throw ArgumentError('min ($min) must be <= max ($max)');
     final lo = min.toDouble();
     final hi = max.toDouble();
-    if (lo == hi) return lo;
+    if (lo >= hi) throw ArgumentError('min ($min) must be < max ($max)');
     final v = _lerp(lo, hi, rng.nextDouble());
     return v < hi ? v : lo;
   }
@@ -67,14 +73,14 @@ mixin _Numbers {
     _checkSemverMax(maxMajor, 'maxMajor');
     _checkSemverMax(maxMinor, 'maxMinor');
     _checkSemverMax(maxPatch, 'maxPatch');
-    final major = integer(max: maxMajor);
-    final minor = integer(max: maxMinor);
-    final patch = integer(max: maxPatch);
+    final major = _closed(0, maxMajor);
+    final minor = _closed(0, maxMinor);
+    final patch = _closed(0, maxPatch);
     return '$major.$minor.$patch';
   }
 
-  /// See [Rand.otp].
-  String otp({int length = 6}) {
+  /// See [Rand.digits].
+  String digits({int length = 6}) {
     if (length < 1) {
       throw ArgumentError('length must be >= 1, got $length', 'length');
     }

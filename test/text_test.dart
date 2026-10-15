@@ -39,13 +39,12 @@ void main() {
       }
     });
 
-    test('sentence rejects count below 1 naming count', () {
-      for (final n in [0, -1]) {
-        check(() => Rand.sentence(n))
-            .throws<ArgumentError>()
-            .has((e) => e.name, 'name')
-            .equals('count');
-      }
+    test('sentence(0) is empty; a negative count throws naming count', () {
+      check(Rand.sentence(0)).equals('');
+      check(() => Rand.sentence(-1))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('count');
     });
 
     test('sentence throws when count exceeds corpus', () {

@@ -1,6 +1,6 @@
 ---
 name: rand-test-data
-description: Generate random Dart test data via `package:rand` — names, emails, IPv4/IPv6/MAC, hex, slugs, OTP, semver, lorem, colors, weighted sampling, geo points, UUID v4/v7 and ULID test IDs, crypto tokens; isolated streams (`RandGen`), scoped seeds (`withSeed`), seed reporting. Use for test fixtures, mocked API responses, demo seeds, any fake/seeded data. Skip for production secrets (`cryptography`), locale-aware names (`faker`).
+description: Generate random Dart test data via `package:rand` — names, emails, IPv4/IPv6/MAC, hex, slugs, digit codes, semver, lorem, colors, weighted sampling, geo points, UUID v4/v7 and ULID test IDs, crypto tokens; isolated streams (`RandGen`), scoped seeds (`withSeed`), seed reporting. Use for test fixtures, mocked API responses, demo seeds, any fake/seeded data. Skip for production secrets (`cryptography`), locale-aware names (`faker`).
 ---
 
 # rand-test-data
@@ -17,7 +17,7 @@ description: Generate random Dart test data via `package:rand` — names, emails
 Consequences:
 
 - `Rand.seed(42); Rand.password()` is fresh CSPRNG every call. For deterministic password-shaped data, build from your own `Random(42)`.
-- For a "secure" non-crypto draw, switch the global once: `Rand.useRng(Random.secure())`.
+- For a "secure" non-crypto draw, use your own generator: `RandGen(Random.secure()).sample(...)` — swapping the global with `useRng` also clears `currentSeed` for every later call.
 - Don't ship rand-generated tokens as production secrets — package contract is "test data"; defaults can shift in major versions. Reach for `package:cryptography` or a platform keystore.
 
 ## Picking the right call
@@ -31,13 +31,13 @@ Consequences:
 |Weighted draws|`Rand.sample(..., weights: [...])`|
 |Whole list, reordered|`Rand.shuffled(list)` — non-mutating copy|
 |Map key / value / entry|`Rand.mapKey` / `mapValue` / `mapEntry`|
-|Maybe-null fixture field|`Rand.nullable(value, chance)`|
+|Maybe-null fixture field|`Rand.nullable(value, nullChance: 20)`|
 |Independent stream injected into code under test|`RandGen(Random(1))` — same non-crypto API as `Rand`, no crypto methods|
 |Seed one call tree without touching the global|`Rand.withSeed(7, () => …)` — zone-scoped, follows `await`, nests|
 |Random seed per run, replayable on failure|`Rand.seed(); printOnFailure('Rand seed: ${Rand.currentSeed}')` in `setUp`|
-|Seedable test IDs|`Rand.uuidV4()` / `Rand.uuidV7(time: t)` / `Rand.ulid(time: t)` — reproducible under `seed`/`withSeed`|
+|Seedable test IDs|`Rand.uuidV4()` / `Rand.uuidV7(time: t)` / `Rand.ulid(time: t)` — reproducible under `seed`/`withSeed`; `time` is required (a fixed instant for snapshots, `DateTime.now()` for a live clock)|
 
-`subSet` is `Set<T>` only — dedupe explicitly with `.toSet()`. `weights.length >= from.length` for `sample`.
+`subSet` is `Set<T>` only — dedupe explicitly with `.toSet()`. `sample` needs `weights.length == from.length`, and an empty `from` throws unless `count` is 0.
 
 ## Common tasks
 
@@ -52,14 +52,14 @@ Recipe shapes that show up in fixture / mock requests. `rand` is intentionally f
 |*"Reproducible fixture I can rerun"*|`setUp(() => Rand.seed(42));` — non-crypto reproduces; `password`/`nonce`/`bytes`/`base64` stay live CSPRNG|
 |*"Opaque session/auth token for tests"*|`Rand.base64(byteLength: 32)` — crypto-secure source|
 |*"Git-style SHA"*|`Rand.hex(length: 40)`|
-|*"Mostly-present nullable field"*|`Rand.nullable(value, 20)` — 20% null (arg is `nullChance`, **not** `presenceChance`)|
+|*"Mostly-present nullable field"*|`Rand.nullable(value, nullChance: 20)` — 20% null|
 |*"Pick a random enum"*|`Rand.enumValue(MyEnum.values)`|
 |*"Shuffle a list non-destructively"*|`Rand.shuffled(list)` — returns a copy; `list..shuffle()` mutates|
 
 ## Bounds
 
-- `Rand.integer({min, max})` — **inclusive both ends**.
-- `Rand.float`, `Rand.duration`, `Rand.dateTime` — `[min, max)` half-open. `Rand.dateTime` always returns a UTC representation.
+- `Rand.integer`, `Rand.float`, `Rand.duration`, `Rand.dateTime` — all `[min, max)` half-open, like `nextInt` / `nextDouble`; an empty range (`min >= max`) throws `ArgumentError`. `Rand.float()` defaults to `[0, 1)`. `Rand.dateTime` always returns a UTC representation.
+- Counts accept 0 (empty result); `nonce`, `hex`, `digits`, `base64`, `slug` need a length of at least 1.
 
 ## Networking primitives
 
@@ -71,7 +71,7 @@ Rand.ipv6();                        // full form, no `::` collapse
 Rand.mac(separator: ':');           // default colon; '-' also common
 Rand.hex(length: 8);                // generic lowercase hex — git SHAs (length: 40), ETags
 Rand.semver();                      // 'major.minor.patch', no pre-release suffix
-Rand.otp(length: 6);                // zero-padded decimal digits
+Rand.digits(length: 6);             // decimal digits, leading zeros kept
 Rand.slug(wordCount: 3);            // unique lorem words, '-' separator
 ```
 
@@ -95,10 +95,11 @@ Rand.geoPoint(precision: 2);                  // (lat: 42.36, lng: -71.06)
 ```dart
 final list = [1, 2, 3];
 
-// ❌ inclusive max — can return list.length (out of bounds)
-final idx = Rand.integer(max: list.length);
+// ❌ max is exclusive — a die roll never returns 6
+final roll = Rand.integer(min: 1, max: 6);
 // ✅
-final item = Rand.element(list);  // or: Rand.integer(max: list.length - 1)
+final die = Rand.integer(min: 1, max: 7);
+final item = Rand.element(list);  // or: list[Rand.integer(max: list.length)]
 
 // ❌ seed has no effect on password — CSPRNG every call
 Rand.seed(42);
