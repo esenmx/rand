@@ -13,9 +13,9 @@ double _chiSquareBase62(String s) {
   for (final c in s.codeUnits) {
     counts[c] = (counts[c] ?? 0) + 1;
   }
-  final expected = s.length / base62.length;
+  final expected = s.length / Rand.base62Alphabet.length;
   var chi = 0.0;
-  for (final c in base62.codeUnits) {
+  for (final c in Rand.base62Alphabet.codeUnits) {
     final d = (counts[c] ?? 0) - expected;
     chi += d * d / expected;
   }
@@ -44,9 +44,9 @@ void main() {
 
     test('seed does not affect bytes', () {
       Rand.seed(42);
-      final a = Rand.bytes(16);
+      final a = Rand.bytes(length: 16);
       Rand.seed(42);
-      final b = Rand.bytes(16);
+      final b = Rand.bytes(length: 16);
       check(a).not((it) => it.deepEquals(b));
     });
 
@@ -66,21 +66,21 @@ void main() {
   });
 
   group('Cryptographic', () {
-    test('secureCharCode returns base62 character', () {
+    test('secureCharCode returns Rand.base62Alphabet character', () {
       for (var i = 0; i < 1000; i++) {
         final cs = Rand.secureCharCode();
-        check(base62.contains(String.fromCharCode(cs))).isTrue();
+        check(Rand.base62Alphabet.contains(String.fromCharCode(cs))).isTrue();
       }
     });
 
     test('bytes returns correct length', () {
-      check(Rand.bytes(0)).length.equals(0);
-      check(Rand.bytes(10)).length.equals(10);
-      check(Rand.bytes(100)).length.equals(100);
+      check(Rand.bytes(length: 0)).length.equals(0);
+      check(Rand.bytes(length: 10)).length.equals(10);
+      check(Rand.bytes(length: 100)).length.equals(100);
     });
 
     test('bytes and nonce reject a negative length', () {
-      check(() => Rand.bytes(-1))
+      check(() => Rand.bytes(length: -1))
           .throws<ArgumentError>()
           .has((e) => '${e.message}', 'message')
           .contains('length must be');
@@ -91,7 +91,7 @@ void main() {
     });
 
     test('bytes(0) is empty; nonce rejects length 0 naming length', () {
-      check(Rand.bytes(0)).isEmpty();
+      check(Rand.bytes(length: 0)).isEmpty();
       check(() => Rand.nonce(length: 0))
           .throws<ArgumentError>()
           .has((e) => e.name, 'name')
@@ -99,7 +99,7 @@ void main() {
     });
 
     test('bytes covers all 256 values in every byte lane', () {
-      final b = Rand.bytes(65536);
+      final b = Rand.bytes(length: 65536);
       for (var lane = 0; lane < 4; lane++) {
         check({for (var i = lane; i < b.length; i += 4) b[i]}).length
             .equals(256);
@@ -108,7 +108,7 @@ void main() {
 
     test('adjacent bytes of one CSPRNG word are uncorrelated', () {
       // 16384 words, expected 1/256 ≈ 0.39 % equal; P(>= 1 %) < 3e-25.
-      final b = Rand.bytes(65536);
+      final b = Rand.bytes(length: 65536);
       final words = b.length ~/ 4;
       for (var lane = 0; lane < 3; lane++) {
         var equal = 0;
@@ -127,11 +127,11 @@ void main() {
       }
     });
 
-    test('nonce returns base62 characters', () {
+    test('nonce returns Rand.base62Alphabet characters', () {
       for (var i = 0; i < 50; i++) {
         final n = Rand.nonce(length: 32);
         for (var j = 0; j < n.length; j++) {
-          check(base62.contains(n[j])).isTrue();
+          check(Rand.base62Alphabet.contains(n[j])).isTrue();
         }
       }
     });
@@ -229,7 +229,7 @@ void main() {
       check(a).not((it) => it.equals(b));
     });
 
-    test('nonce characters are uniform over base62', () {
+    test('nonce characters are uniform over Rand.base62Alphabet', () {
       final s = List.generate(4000, (_) => Rand.nonce()).join();
       final digits = s.codeUnits.where((c) => c < 58).length;
       final chi = _chiSquareBase62(s);

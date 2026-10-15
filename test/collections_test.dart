@@ -83,39 +83,39 @@ void main() {
         [-1, 1],
         [0, 0],
       ]) {
-        check(() => Rand.sample(from: ['a', 'b'], count: 0, weights: weights))
+        check(() => Rand.sample(['a', 'b'], count: 0, weights: weights))
             .throws<ArgumentError>()
             .has((e) => e.name, 'name')
             .equals('weights');
       }
     });
 
-    test('subSet returns unique elements', () {
-      check(Rand.subSet(<int>{}, 0)).isEmpty();
+    test('subset returns unique elements', () {
+      check(Rand.subset(<int>{}, count: 0)).isEmpty();
 
       final pool = List.generate(100, (i) => i).toSet();
-      check(Rand.subSet(pool, 100)).length.equals(100);
-      check(Rand.subSet(pool, 50)).length.equals(50);
+      check(Rand.subset(pool, count: 100)).length.equals(100);
+      check(Rand.subset(pool, count: 50)).length.equals(50);
     });
 
-    test('subSet throws when count exceeds set size', () {
-      check(() => Rand.subSet({1, 2}, 3)).throws<RangeError>();
+    test('subset throws when count exceeds set size', () {
+      check(() => Rand.subset({1, 2}, count: 3)).throws<RangeError>();
     });
 
-    test('subSet rejects a negative count', () {
-      check(() => Rand.subSet({1, 2, 3}, -1))
+    test('subset rejects a negative count', () {
+      check(() => Rand.subset({1, 2, 3}, count: -1))
           .throws<ArgumentError>()
           .has((e) => '${e.message}', 'message')
           .contains('count must be >= 0');
     });
 
-    test('subSet is uniform: each of 10 lands in a 3-subset ~30%', () {
+    test('subset is uniform: each of 10 lands in a 3-subset ~30%', () {
       Rand.seed(8);
       final pool = Set.of(List.generate(10, (i) => i));
       final hits = List.filled(10, 0);
       const n = 100000;
       for (var i = 0; i < n; i++) {
-        for (final x in Rand.subSet(pool, 3)) {
+        for (final x in Rand.subset(pool, count: 3)) {
           hits[x]++;
         }
       }

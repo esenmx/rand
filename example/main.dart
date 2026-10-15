@@ -18,7 +18,7 @@ void main() {
   print('  Integer [50, 100):   ${Rand.integer(min: 50, max: 100)}');
   print('  Float [0, 1):        ${Rand.float().toStringAsFixed(4)}');
   print('  Boolean (50%):       ${Rand.boolean()}');
-  print('  Boolean (90% true):  ${Rand.boolean(90)}');
+  print('  Boolean (90% true):  ${Rand.boolean(trueChance: 90)}');
 
   _section('Geo');
   print('  Latitude:   ${Rand.latitude()}');
@@ -39,7 +39,7 @@ void main() {
   print('  Sentence:  ${Rand.sentence()}');
   print('');
   print('  Paragraph (3 sentences):');
-  print('  ${_indent(Rand.paragraph(3))}');
+  print('  ${_indent(Rand.paragraph(count: 3))}');
 
   _section('Networking');
   print('  Email:    ${Rand.email()}');
@@ -56,14 +56,14 @@ void main() {
   print('  Nonce (32):    ${Rand.nonce(length: 32)}');
   print('  Password:      ${Rand.password()}');
   print('  Password (no symbols): ${Rand.password(symbols: false)}');
-  print('  Bytes (8):     ${Rand.bytes(8)}');
+  print('  Bytes (8):     ${Rand.bytes(length: 8)}');
   print('  Base64 (32):   ${Rand.base64(byteLength: 32)}');
 
   _section('Time');
   print('  DateTime:             ${Rand.dateTime()}');
   print(
     '  DateTime (2020-2025): '
-    '${Rand.dateTime(DateTime.utc(2020), DateTime.utc(2025))}',
+    '${Rand.dateTime(min: DateTime.utc(2020), max: DateTime.utc(2025))}',
   );
   final duration = Rand.duration(
     min: const Duration(days: 1),
@@ -83,7 +83,7 @@ void main() {
   final fruits = {'apple', 'orange', 'lemon', 'grape', 'kiwi'};
   final scores = {'Alice': 95, 'Bob': 87, 'Charlie': 92};
   print('  Element:    ${Rand.element(fruits)} from $fruits');
-  print('  SubSet(3):  ${Rand.subSet(fruits, 3)}');
+  print('  Subset(3):  ${Rand.subset(fruits, count: 3)}');
   print('  Shuffled:   ${Rand.shuffled(fruits.toList())}');
   print('  Map Key:    ${Rand.mapKey(scores)} from ${scores.keys}');
   print('  Map Value:  ${Rand.mapValue(scores)} from ${scores.values}');
@@ -91,7 +91,7 @@ void main() {
 
   _section('Sampling');
   final positions = Rand.sample(
-    from: ['GK', 'DEF', 'MID', 'FWD'],
+    ['GK', 'DEF', 'MID', 'FWD'],
     count: 11,
     weights: [10, 40, 40, 10],
   );
@@ -99,7 +99,7 @@ void main() {
   print('  ${positions.join(', ')}');
   print('');
   final rarityDemo = Rand.sample(
-    from: ['Legendary', 'Rare', 'Common'],
+    ['Legendary', 'Rare', 'Common'],
     count: 20,
     weights: [1, 10, 100],
   );

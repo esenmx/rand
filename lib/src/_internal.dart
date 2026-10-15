@@ -7,10 +7,7 @@ const String _uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const String _digits = '0123456789';
 const String _symbols = '!@#\$%^&*()-_=+[]{}\\|;:\'",<.>/?`~';
 
-/// Base62 alphabet — digits, then uppercase, then lowercase ASCII.
-///
-/// Used by [Rand.charCode], [Rand.secureCharCode], and [Rand.nonce].
-const String base62 = _digits + _uppercase + _lowercase;
+const String _base62 = _digits + _uppercase + _lowercase;
 
 final int _epochMin = DateTime.utc(1970).microsecondsSinceEpoch;
 final int _epochMax = DateTime.utc(2038).microsecondsSinceEpoch;
@@ -60,5 +57,5 @@ T _weightedChoice<T>(List<T> items, List<int> weights, int total, Random rng) {
 }
 
 extension on Random {
-  int charCode() => base62.codeUnitAt(nextInt(base62.length));
+  int charCode() => _base62.codeUnitAt(nextInt(_base62.length));
 }

@@ -33,39 +33,39 @@ void main() {
 
     test('sentence(count) returns count unique sentences', () {
       for (final n in [1, 5, 50]) {
-        final parts = Rand.sentence(n).split('. ');
+        final parts = Rand.sentence(count: n).split('. ');
         check(parts.length).equals(n);
         check(parts.toSet().length).equals(n);
       }
     });
 
     test('sentence(0) is empty; a negative count throws naming count', () {
-      check(Rand.sentence(0)).equals('');
-      check(() => Rand.sentence(-1))
+      check(Rand.sentence(count: 0)).equals('');
+      check(() => Rand.sentence(count: -1))
           .throws<ArgumentError>()
           .has((e) => e.name, 'name')
           .equals('count');
     });
 
     test('sentence throws when count exceeds corpus', () {
-      check(() => Rand.sentence(100000)).throws<RangeError>();
+      check(() => Rand.sentence(count: 100000)).throws<RangeError>();
     });
 
     test('corpora hold 167 unique words and 856 sentences', () {
       check(Rand.words(count: 167).split(' ')).length.equals(167);
       check(() => Rand.words(count: 168)).throws<RangeError>();
-      check(Rand.sentence(856).split('. ')).length.equals(856);
-      check(() => Rand.sentence(857)).throws<RangeError>();
+      check(Rand.sentence(count: 856).split('. ')).length.equals(856);
+      check(() => Rand.sentence(count: 857)).throws<RangeError>();
     });
 
     test('paragraph returns multiple sentences', () {
-      final p = Rand.paragraph(5);
+      final p = Rand.paragraph(count: 5);
       check(p).isNotEmpty();
       check(p.split('. ').length).isGreaterOrEqual(5);
     });
 
     test('article returns multiple paragraphs', () {
-      final a = Rand.article(3);
+      final a = Rand.article(count: 3);
       check(a).isNotEmpty();
       check(a.split('\n\n').length).isGreaterOrEqual(3);
     });
@@ -115,8 +115,8 @@ void main() {
     test('words, paragraph and article reject a negative count', () {
       for (final draw in [
         () => Rand.words(count: -1),
-        () => Rand.paragraph(-1),
-        () => Rand.article(-1),
+        () => Rand.paragraph(count: -1),
+        () => Rand.article(count: -1),
       ]) {
         check(draw)
             .throws<ArgumentError>()
@@ -127,8 +127,8 @@ void main() {
 
     test('words, paragraph and article return empty for count 0', () {
       check(Rand.words(count: 0)).equals('');
-      check(Rand.paragraph(0)).equals('');
-      check(Rand.article(0)).equals('');
+      check(Rand.paragraph(count: 0)).equals('');
+      check(Rand.article(count: 0)).equals('');
     });
 
     test('paragraph does not produce double periods', () {
@@ -141,7 +141,7 @@ void main() {
       Rand.seed(9);
       final expected = '${Rand.sentence()} ${Rand.sentence()}';
       Rand.seed(9);
-      check(Rand.paragraph(2)).equals(expected);
+      check(Rand.paragraph(count: 2)).equals(expected);
     });
   });
 }

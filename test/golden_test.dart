@@ -40,10 +40,14 @@ final Map<String, Object? Function([RandGen?])> _draws = {
   'nullable': ([g]) =>
       _n(6, () => g == null ? Rand.nullable(1) : g.nullable(1)),
   'latitude': ([g]) => _n(2, g == null ? Rand.latitude : g.latitude),
-  'latitude0': ([g]) =>
-      _n(4, () => g == null ? Rand.latitude(0) : g.latitude(0)),
-  'longitude': ([g]) =>
-      _n(2, () => g == null ? Rand.longitude(2) : g.longitude(2)),
+  'latitude0': ([g]) => _n(
+    4,
+    () => g == null ? Rand.latitude(precision: 0) : g.latitude(precision: 0),
+  ),
+  'longitude': ([g]) => _n(
+    2,
+    () => g == null ? Rand.longitude(precision: 2) : g.longitude(precision: 2),
+  ),
   'geoPoint': ([g]) {
     final (:lat, :lng) = g == null ? Rand.geoPoint() : g.geoPoint();
     return [lat, lng];
@@ -81,8 +85,11 @@ final Map<String, Object? Function([RandGen?])> _draws = {
     3,
     () =>
         (g == null
-                ? Rand.dateTime(DateTime.utc(2020), DateTime.utc(2025))
-                : g.dateTime(DateTime.utc(2020), DateTime.utc(2025)))
+                ? Rand.dateTime(
+                    min: DateTime.utc(2020),
+                    max: DateTime.utc(2025),
+                  )
+                : g.dateTime(min: DateTime.utc(2020), max: DateTime.utc(2025)))
             .microsecondsSinceEpoch,
   ),
   'datePre1970': ([g]) => _n(
@@ -90,12 +97,12 @@ final Map<String, Object? Function([RandGen?])> _draws = {
     () =>
         (g == null
                 ? Rand.dateTime(
-                    _pre1970,
-                    _pre1970.add(const Duration(microseconds: 5)),
+                    min: _pre1970,
+                    max: _pre1970.add(const Duration(microseconds: 5)),
                   )
                 : g.dateTime(
-                    _pre1970,
-                    _pre1970.add(const Duration(microseconds: 5)),
+                    min: _pre1970,
+                    max: _pre1970.add(const Duration(microseconds: 5)),
                   ))
             .microsecondsSinceEpoch,
   ),
@@ -122,17 +129,17 @@ final Map<String, Object? Function([RandGen?])> _draws = {
   'shuffled': ([g]) => g == null
       ? Rand.shuffled(List.generate(10, (i) => i))
       : g.shuffled(List.generate(10, (i) => i)),
-  'subSet': ([g]) =>
+  'subset': ([g]) =>
       (g == null
-              ? Rand.subSet(Set.of(List.generate(10, (i) => i)), 4)
-              : g.subSet(Set.of(List.generate(10, (i) => i)), 4))
+              ? Rand.subset(Set.of(List.generate(10, (i) => i)), count: 4)
+              : g.subset(Set.of(List.generate(10, (i) => i)), count: 4))
           .toList(),
   'sample': ([g]) => g == null
-      ? Rand.sample(from: ['a', 'b', 'c'], count: 10)
-      : g.sample(from: ['a', 'b', 'c'], count: 10),
+      ? Rand.sample(['a', 'b', 'c'], count: 10)
+      : g.sample(['a', 'b', 'c'], count: 10),
   'sampleWeighted': ([g]) => g == null
-      ? Rand.sample(from: ['a', 'b', 'c'], count: 10, weights: [1, 10, 100])
-      : g.sample(from: ['a', 'b', 'c'], count: 10, weights: [1, 10, 100]),
+      ? Rand.sample(['a', 'b', 'c'], count: 10, weights: [1, 10, 100])
+      : g.sample(['a', 'b', 'c'], count: 10, weights: [1, 10, 100]),
   'alias': ([g]) => _n(2, g == null ? Rand.alias : g.alias),
   'firstName': ([g]) => _n(2, g == null ? Rand.firstName : g.firstName),
   'lastName': ([g]) => _n(2, g == null ? Rand.lastName : g.lastName),
@@ -142,10 +149,12 @@ final Map<String, Object? Function([RandGen?])> _draws = {
   'words': ([g]) => g == null ? Rand.words(count: 4) : g.words(count: 4),
   'wordsDefault': ([g]) => g == null ? Rand.words() : g.words(),
   'sentence': ([g]) => g == null ? Rand.sentence() : g.sentence(),
-  'sentences': ([g]) => g == null ? Rand.sentence(2) : g.sentence(2),
-  'paragraph': ([g]) => g == null ? Rand.paragraph(2) : g.paragraph(2),
+  'sentences': ([g]) =>
+      g == null ? Rand.sentence(count: 2) : g.sentence(count: 2),
+  'paragraph': ([g]) =>
+      g == null ? Rand.paragraph(count: 2) : g.paragraph(count: 2),
   'paragraphDefault': ([g]) => g == null ? Rand.paragraph() : g.paragraph(),
-  'article': ([g]) => g == null ? Rand.article(1) : g.article(1),
+  'article': ([g]) => g == null ? Rand.article(count: 1) : g.article(count: 1),
   'articleDefault': ([g]) => g == null ? Rand.article() : g.article(),
   'slug': ([g]) => g == null ? Rand.slug() : g.slug(),
   'color': ([g]) => _n(3, () => (g == null ? Rand.color() : g.color()).name),
@@ -186,7 +195,7 @@ const Map<String, Object?> _golden = {
   'mapValue': [2, 1],
   'enumValue': ['d', 'c', 'a'],
   'shuffled': [2, 0, 1, 5, 8, 3, 9, 4, 6, 7],
-  'subSet': [7, 6, 4, 9],
+  'subset': [7, 6, 4, 9],
   'sample': ['b', 'a', 'a', 'b', 'a', 'c', 'b', 'b', 'b', 'b'],
   'sampleWeighted': ['c', 'c', 'c', 'b', 'c', 'c', 'c', 'c', 'c', 'c'],
   'alias': ['Surge', 'Electra'],

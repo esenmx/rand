@@ -74,7 +74,7 @@ final class Rand {
   /// ```
   ///
   /// For a one-off draw from another RNG, use a [RandGen] instead of swapping
-  /// the global: `RandGen(Random.secure()).sample(from: items, count: 3)`.
+  /// the global: `RandGen(Random.secure()).sample(items, count: 3)`.
   ///
   /// In tests, call this in `setUp`, not `setUpAll`, so each test starts
   /// from the same state whatever ran before it (`--name`,
@@ -150,13 +150,14 @@ final class Rand {
   /// Returns `true` with [trueChance] probability (0-100).
   ///
   /// ```dart
-  /// Rand.boolean();      // 50% true
-  /// Rand.boolean(90);    // 90% true
-  /// Rand.boolean(99.9);  // 99.9% true
+  /// Rand.boolean();                   // 50% true
+  /// Rand.boolean(trueChance: 90);     // 90% true
+  /// Rand.boolean(trueChance: 99.9);   // 99.9% true
   /// ```
   ///
   /// Throws [ArgumentError] when [trueChance] is outside `[0, 100]` or NaN.
-  static bool boolean([double trueChance = 50]) => _i.boolean(trueChance);
+  static bool boolean({double trueChance = 50}) =>
+      _i.boolean(trueChance: trueChance);
 
   /// Returns `null` with [nullChance] probability (0-100), else [value].
   ///
@@ -212,26 +213,28 @@ final class Rand {
   /// Random latitude in `[-90, 90]` with [precision] decimal places.
   ///
   /// ```dart
-  /// Rand.latitude();   // 42.36011
-  /// Rand.latitude(2);  // 42.36
+  /// Rand.latitude();               // 42.36011
+  /// Rand.latitude(precision: 2);  // 42.36
   /// ```
   ///
   /// Throws [RangeError] unless `0 <= precision <= 15`.
   ///
   /// See also: [longitude].
-  static double latitude([int precision = 5]) => _i.latitude(precision);
+  static double latitude({int precision = 5}) =>
+      _i.latitude(precision: precision);
 
   /// Random longitude in `[-180, 180]` with [precision] decimal places.
   ///
   /// ```dart
-  /// Rand.longitude();   // -71.05891
-  /// Rand.longitude(2);  // -71.06
+  /// Rand.longitude();               // -71.05891
+  /// Rand.longitude(precision: 2);  // -71.06
   /// ```
   ///
   /// Throws [RangeError] unless `0 <= precision <= 15`.
   ///
   /// See also: [latitude].
-  static double longitude([int precision = 5]) => _i.longitude(precision);
+  static double longitude({int precision = 5}) =>
+      _i.longitude(precision: precision);
 
   /// Random `(lat, lng)` record — composes [latitude] and [longitude].
   ///
@@ -249,12 +252,17 @@ final class Rand {
   static ({double lat, double lng}) geoPoint({int precision = 5}) =>
       _i.geoPoint(precision: precision);
 
+  /// Base62 alphabet — digits, then uppercase, then lowercase ASCII.
+  ///
+  /// The characters drawn by [charCode], [secureCharCode] and [nonce].
+  static const String base62Alphabet = _base62;
+
   /// Random base62 character code (int).
   ///
   /// Returns a code point from `[0-9A-Za-z]`. Use [String.fromCharCode]
   /// to render: `String.fromCharCode(Rand.charCode())`.
   ///
-  /// See also: [secureCharCode], [base62].
+  /// See also: [secureCharCode], [base62Alphabet].
   static int charCode() => _i.charCode();
 
   /// Random semantic-version string `"major.minor.patch"`.
@@ -314,7 +322,7 @@ final class Rand {
   /// {@macro rand.always_secure}
   ///
   /// ```dart
-  /// Rand.bytes(32);  // Uint8List(32)
+  /// Rand.bytes(length: 32);  // Uint8List(32)
   /// ```
   ///
   /// For reproducible (non-secure) byte streams, generate them from your
@@ -323,7 +331,7 @@ final class Rand {
   /// Throws [ArgumentError] when [length] is negative.
   ///
   /// See also: [nonce], [password].
-  static Uint8List bytes(int length) => _s.bytes(length);
+  static Uint8List bytes({required int length}) => _s.bytes(length: length);
 
   /// Cryptographically secure random base62 string.
   ///
@@ -340,7 +348,7 @@ final class Rand {
   ///
   /// Throws [ArgumentError] when [length] is less than 1.
   ///
-  /// See also: [password], [bytes], [base62].
+  /// See also: [password], [bytes], [base62Alphabet].
   static String nonce({int length = 16}) => _s.nonce(length: length);
 
   /// Cryptographically secure random password with configurable character sets.
@@ -422,24 +430,24 @@ final class Rand {
     return _i.duration(max: max, min: min);
   }
 
-  /// Random UTC [DateTime] in `[start, end)` — half-open upper bound.
+  /// Random UTC [DateTime] in `[min, max)` — half-open upper bound.
   ///
-  /// Defaults to `[1970-01-01, 2038-01-01)` UTC if [start] / [end] are
+  /// Defaults to `[1970-01-01, 2038-01-01)` UTC if [min] / [max] are
   /// omitted.
   ///
   /// ```dart
   /// Rand.dateTime();
-  /// Rand.dateTime(DateTime.utc(2020), DateTime.utc(2025));
+  /// Rand.dateTime(min: DateTime.utc(2020), max: DateTime.utc(2025));
   /// ```
   ///
-  /// Throws [ArgumentError] when the effective start is not before the
-  /// effective end (an empty or reversed range) — including a [start] at or
-  /// after 2038-01-01 with no [end] (pass [end]) and an [end] at or before
-  /// 1970-01-01 with no [start] (pass [start]).
+  /// Throws [ArgumentError] when the effective min is not before the
+  /// effective max (an empty or reversed range) — including a [min] at or
+  /// after 2038-01-01 with no [max] (pass [max]) and a [max] at or before
+  /// 1970-01-01 with no [min] (pass [min]).
   ///
   /// See also: [duration].
-  static DateTime dateTime([DateTime? start, DateTime? end]) =>
-      _i.dateTime(start, end);
+  static DateTime dateTime({DateTime? min, DateTime? max}) =>
+      _i.dateTime(min: min, max: max);
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Collections
@@ -459,7 +467,7 @@ final class Rand {
   ///
   /// Throws [StateError] when [from] is empty.
   ///
-  /// See also: [subSet], [sample].
+  /// See also: [subset], [sample].
   static T element<T>(Iterable<T> from) => _i.element(from);
 
   /// Random [MapEntry] from [from].
@@ -505,14 +513,14 @@ final class Rand {
   /// ```
   ///
   /// For sampling with replacement, see [sample]. For unique-subset
-  /// draws, see [subSet].
+  /// draws, see [subset].
   static List<T> shuffled<T>(List<T> from) => _i.shuffled(from);
 
   /// Random subset of [count] unique elements from [from].
   ///
   /// ```dart
-  /// Rand.subSet({1, 2, 3, 4, 5}, 3);  // {2, 5, 1}
-  /// Rand.subSet([1, 2, 2, 3].toSet(), 2); // dedupe explicitly
+  /// Rand.subset({1, 2, 3, 4, 5}, count: 3);         // {2, 5, 1}
+  /// Rand.subset([1, 2, 2, 3].toSet(), count: 2);    // dedupe explicitly
   /// ```
   ///
   /// Throws [ArgumentError] when [count] is negative, [RangeError] when
@@ -521,7 +529,8 @@ final class Rand {
   /// For sampling **with** replacement, use [sample].
   ///
   /// See also: [sample], [element].
-  static Set<T> subSet<T>(Set<T> from, int count) => _i.subSet(from, count);
+  static Set<T> subset<T>(Set<T> from, {required int count}) =>
+      _i.subset(from, count: count);
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // Identity & Geo
@@ -585,7 +594,7 @@ final class Rand {
 
   /// Random unique lorem words joined by [separator].
   ///
-  /// Default [count] is 3..10. Words are drawn via [subSet] — never
+  /// Default [count] is 3..10. Words are drawn via [subset] — never
   /// repeats within one call.
   ///
   /// ```dart
@@ -600,32 +609,32 @@ final class Rand {
 
   /// Random pre-built lorem sentence, or [count] unique ones joined by `" "`.
   ///
-  /// Sentences are drawn via [subSet] — never repeats within one call.
+  /// Sentences are drawn via [subset] — never repeats within one call.
   ///
   /// ```dart
-  /// Rand.sentence();   // 'Lorem ipsum dolor sit amet.'
-  /// Rand.sentence(2);  // 'Lorem ipsum dolor sit amet. Nunc sed velit dignissim.'
+  /// Rand.sentence();          // 'Lorem ipsum dolor sit amet.'
+  /// Rand.sentence(count: 2);  // 'Lorem ipsum dolor sit amet. Nunc sed velit dignissim.'
   /// ```
   ///
-  /// `sentence(0)` returns `''`. Throws [ArgumentError] when [count] is
+  /// `sentence(count: 0)` returns `''`. Throws [ArgumentError] when [count] is
   /// negative, [RangeError] when it exceeds the 856-sentence corpus.
   ///
   /// See also: [paragraph] — repeats allowed, joined by `" "`.
-  static String sentence([int? count]) => _i.sentence(count);
+  static String sentence({int? count}) => _i.sentence(count: count);
 
   /// Random paragraph of [count] sentences (default 5..10), joined by `" "`.
   ///
   /// Throws [ArgumentError] when [count] is negative.
-  static String paragraph([int? count]) => _i.paragraph(count);
+  static String paragraph({int? count}) => _i.paragraph(count: count);
 
   /// Random article of [count] paragraphs (default 3..7), joined by `"\n\n"`.
   ///
   /// Throws [ArgumentError] when [count] is negative.
-  static String article([int? count]) => _i.article(count);
+  static String article({int? count}) => _i.article(count: count);
 
   /// Random URL slug — [wordCount] unique lorem words joined by [separator].
   ///
-  /// Words never repeat within one slug (drawn via [subSet]).
+  /// Words never repeat within one slug (drawn via [subset]).
   ///
   /// ```dart
   /// Rand.slug();                     // 'lorem-ipsum-dolor'
@@ -816,11 +825,11 @@ final class Rand {
   ///
   /// ```dart
   /// // Equal probability
-  /// Rand.sample(from: [1, 2, 3, 4, 5, 6], count: 10);
+  /// Rand.sample([1, 2, 3, 4, 5, 6], count: 10);
   ///
   /// // Loot box: 1% legendary, 10% rare, ~89% common
   /// Rand.sample(
-  ///   from: ['Legendary', 'Rare', 'Common'],
+  ///   ['Legendary', 'Rare', 'Common'],
   ///   count: 100,
   ///   weights: [1, 10, 100],
   /// );
@@ -833,16 +842,16 @@ final class Rand {
   /// weights sum to 0 or more than `2^32`. Throws [StateError] when [from] is
   /// empty and [count] is positive.
   ///
-  /// For sampling **without** replacement, use [subSet]. For a
+  /// For sampling **without** replacement, use [subset]. For a
   /// cryptographically secure sample, draw from a secure generator without
   /// touching the global: `RandGen(Random.secure()).sample(...)`.
   ///
-  /// See also: [subSet], [element].
-  static List<T> sample<T>({
-    required List<T> from,
+  /// See also: [subset], [element].
+  static List<T> sample<T>(
+    List<T> from, {
     required int count,
     List<int>? weights,
   }) {
-    return _i.sample(from: from, count: count, weights: weights);
+    return _i.sample(from, count: count, weights: weights);
   }
 }

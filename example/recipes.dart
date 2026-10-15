@@ -69,7 +69,7 @@ _User _buildUser() {
       'https://i.pravatar.cc/${Rand.integer(min: 64, max: 257)}',
       nullChance: 20,
     ),
-    joinedAt: Rand.dateTime(DateTime.utc(2020), _anchor),
+    joinedAt: Rand.dateTime(min: DateTime.utc(2020), max: _anchor),
   );
 }
 
@@ -150,7 +150,10 @@ _Page<T> _buildPage<T>({
   return (
     sender: sender,
     body: Rand.sentence(),
-    at: Rand.dateTime(_anchor.subtract(const Duration(hours: 1)), _anchor),
+    at: Rand.dateTime(
+      min: _anchor.subtract(const Duration(hours: 1)),
+      max: _anchor,
+    ),
   );
 }
 
@@ -158,10 +161,7 @@ List<({String sender, String body, DateTime at})> _buildChatHistory({
   required int messageCount,
 }) {
   // `sample` with equal weights → realistic sender alternation.
-  final senders = Rand.sample(
-    from: const ['user', 'assistant'],
-    count: messageCount,
-  );
+  final senders = Rand.sample(const ['user', 'assistant'], count: messageCount);
   return [for (final s in senders) _chatMessage(s)]
     ..sort((a, b) => a.at.compareTo(b.at));
 }
