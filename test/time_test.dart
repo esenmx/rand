@@ -44,38 +44,40 @@ void main() {
       ).throws<ArgumentError>();
     });
 
-    test('dateTime throws when start > end', () {
-      check(() => Rand.dateTime(DateTime.utc(2025), DateTime.utc(2020)))
-          .throws<ArgumentError>();
+    test('dateTime throws when min > max', () {
+      check(
+        () => Rand.dateTime(min: DateTime.utc(2025), max: DateTime.utc(2020)),
+      ).throws<ArgumentError>();
     });
 
-    test('dateTime(start) after the default end throws', () {
-      check(() => Rand.dateTime(DateTime.utc(2050))).throws<ArgumentError>();
+    test('dateTime(min:) after the default max throws', () {
+      check(() => Rand.dateTime(min: DateTime.utc(2050)))
+          .throws<ArgumentError>();
     });
 
     test('reversed dateTime errors say which bound to pass in UTC', () {
       check(
           () => Rand.dateTime(
-            DateTime.utc(2025).toLocal(),
-            DateTime.utc(2020).toLocal(),
+            min: DateTime.utc(2025).toLocal(),
+            max: DateTime.utc(2020).toLocal(),
           ),
         ).throws<ArgumentError>().has((e) => '${e.message}', 'message')
-        ..contains('start must be < end')
+        ..contains('min must be < max')
         ..contains('2025-01-01 00:00:00.000Z')
         ..contains('2020-01-01 00:00:00.000Z')
         ..not((it) => it.contains('2038'));
-      check(() => Rand.dateTime(DateTime.utc(2050).toLocal()))
+      check(() => Rand.dateTime(min: DateTime.utc(2050).toLocal()))
           .throws<ArgumentError>()
           .has((e) => '${e.message}', 'message')
         ..contains('2038-01-01 UTC')
         ..contains('2050-01-01 00:00:00.000Z')
-        ..contains('pass end');
-      check(() => Rand.dateTime(null, DateTime.utc(1969).toLocal()))
+        ..contains('pass max');
+      check(() => Rand.dateTime(max: DateTime.utc(1969).toLocal()))
           .throws<ArgumentError>()
           .has((e) => '${e.message}', 'message')
         ..contains('1970-01-01 UTC')
         ..contains('1969-01-01 00:00:00.000Z')
-        ..contains('pass start');
+        ..contains('pass min');
     });
 
     test('duration and dateTime with equal bounds throw before drawing', () {
@@ -83,14 +85,14 @@ void main() {
       final t = DateTime.utc(2020);
       for (final (call, message) in [
         (() => Rand.duration(min: d, max: d), 'min ($d) must be < max ($d)'),
-        (() => Rand.dateTime(t, t), 'start must be < end'),
+        (() => Rand.dateTime(min: t, max: t), 'min must be < max'),
         (
-          () => Rand.dateTime(DateTime.utc(2038)),
-          'start must be < 2038-01-01 UTC when end is omitted',
+          () => Rand.dateTime(min: DateTime.utc(2038)),
+          'min must be < 2038-01-01 UTC when max is omitted',
         ),
         (
-          () => Rand.dateTime(null, DateTime.utc(1970)),
-          'end must be > 1970-01-01 UTC when start is omitted',
+          () => Rand.dateTime(max: DateTime.utc(1970)),
+          'max must be > 1970-01-01 UTC when min is omitted',
         ),
       ]) {
         Rand.seed(5);
@@ -104,11 +106,11 @@ void main() {
       }
     });
 
-    test('a 1µs dateTime range always returns start', () {
+    test('a 1µs dateTime range always returns min', () {
       final start = DateTime.utc(2020);
       final end = start.add(const Duration(microseconds: 1));
       for (var i = 0; i < 1000; i++) {
-        check(Rand.dateTime(start, end)).equals(start);
+        check(Rand.dateTime(min: start, max: end)).equals(start);
       }
     });
 
@@ -132,12 +134,12 @@ void main() {
       check(seen).not((it) => it.contains(-5));
     });
 
-    test('pre-1970 dateTime range honours half-open [start, end)', () {
+    test('pre-1970 dateTime range honours half-open [min, max)', () {
       final start = DateTime.utc(1969, 12, 31, 23, 59, 59, 999, 990);
       final end = start.add(const Duration(microseconds: 5));
       final seen = {
         for (var i = 0; i < 2000; i++)
-          Rand.dateTime(start, end).microsecondsSinceEpoch,
+          Rand.dateTime(min: start, max: end).microsecondsSinceEpoch,
       };
       printOnFailure('observed ${seen.toList()..sort()}');
       check(seen).contains(start.microsecondsSinceEpoch);

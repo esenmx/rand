@@ -26,8 +26,8 @@ Consequences:
 |---|---|
 |One element|`Rand.element(iterable)`|
 |One enum member|`Rand.enumValue(MyEnum.values)`|
-|N unique elements|`Rand.subSet(set, N)` — requires `Set<T>`|
-|N elements, repeats okay|`Rand.sample(from: list, count: N)`|
+|N unique elements|`Rand.subset(set, count: N)` — requires `Set<T>`|
+|N elements, repeats okay|`Rand.sample(list, count: N)`|
 |Weighted draws|`Rand.sample(..., weights: [...])`|
 |Whole list, reordered|`Rand.shuffled(list)` — non-mutating copy|
 |Map key / value / entry|`Rand.mapKey` / `mapValue` / `mapEntry`|
@@ -37,7 +37,7 @@ Consequences:
 |Random seed per run, replayable on failure|`Rand.seed(); printOnFailure('Rand seed: ${Rand.currentSeed}')` in `setUp`|
 |Seedable test IDs|`Rand.uuidV4()` / `Rand.uuidV7(time: t)` / `Rand.ulid(time: t)` — reproducible under `seed`/`withSeed`; `time` is required (a fixed instant for snapshots, `DateTime.now()` for a live clock)|
 
-`subSet` is `Set<T>` only — dedupe explicitly with `.toSet()`. `sample` needs `weights.length == from.length`, and an empty `from` throws unless `count` is 0.
+`subset` is `Set<T>` only — dedupe explicitly with `.toSet()`. `sample` needs `weights.length == from.length`, and an empty `from` throws unless `count` is 0.
 
 ## Common tasks
 
@@ -47,8 +47,8 @@ Recipe shapes that show up in fixture / mock requests. `rand` is intentionally f
 |---|---|
 |*"10 fake users"*|`List.generate(10, (_) => (id: Rand.hex(length: 24), name: Rand.fullName(), email: Rand.email()))`|
 |*"Paginated response, 5 items"*|`(page: 1, totalPages: 7, items: List.generate(5, (_) => buildItem()))`|
-|*"Loot box: 1% legendary, 10% rare, 90% common"*|`Rand.sample(from: ['L','R','C'], count: 100, weights: [1, 10, 100])`|
-|*"Timestamps for the past hour, sorted"*|`[for (var i = 0; i < 20; i++) Rand.dateTime(DateTime.now().subtract(const Duration(hours: 1)), DateTime.now())]..sort((a, b) => a.compareTo(b))`|
+|*"Loot box: 1% legendary, 10% rare, 90% common"*|`Rand.sample(['L','R','C'], count: 100, weights: [1, 10, 100])`|
+|*"Timestamps for the past hour, sorted"*|`[for (var i = 0; i < 20; i++) Rand.dateTime(min: DateTime.now().subtract(const Duration(hours: 1)), max: DateTime.now())]..sort((a, b) => a.compareTo(b))`|
 |*"Reproducible fixture I can rerun"*|`setUp(() => Rand.seed(42));` — non-crypto reproduces; `password`/`nonce`/`bytes`/`base64` stay live CSPRNG|
 |*"Opaque session/auth token for tests"*|`Rand.base64(byteLength: 32)` — crypto-secure source|
 |*"Git-style SHA"*|`Rand.hex(length: 40)`|
@@ -106,10 +106,10 @@ Rand.seed(42);
 Rand.password();
 // ✅ build deterministic tokens from your own Random
 
-// ❌ subSet on a list with duplicates — compile error (requires Set):
-// Rand.subSet([1, 2, 2], 2);
+// ❌ subset on a list with duplicates — compile error (requires Set):
+// Rand.subset([1, 2, 2], count: 2);
 // ✅
-Rand.subSet({1, 2}, 2);
+Rand.subset({1, 2}, count: 2);
 
 // ❌ nonce / password as production secret
 final jwtKey = Rand.nonce(length: 32);

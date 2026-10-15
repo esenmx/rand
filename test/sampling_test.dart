@@ -7,7 +7,7 @@ void main() {
 
   group('Sampling', () {
     test('sample without weights uses equal probability', () {
-      final result = Rand.sample(from: [1, 2, 3], count: 100);
+      final result = Rand.sample([1, 2, 3], count: 100);
       check(result).length.equals(100);
       check(result.every((e) => [1, 2, 3].contains(e))).isTrue();
     });
@@ -15,7 +15,7 @@ void main() {
     test('sample with weights respects ratios', () {
       Rand.seed(42);
       final result = Rand.sample(
-        from: ['a', 'b', 'c'],
+        ['a', 'b', 'c'],
         count: 100000,
         weights: [1, 10, 100],
       );
@@ -32,7 +32,7 @@ void main() {
     });
 
     test('sample from an empty list throws StateError when count > 0', () {
-      check(() => Rand.sample(from: <int>[], count: 10))
+      check(() => Rand.sample(<int>[], count: 10))
           .throws<StateError>()
           .has((e) => e.message, 'message')
           .contains('Rand.sample');
@@ -43,14 +43,14 @@ void main() {
         [1],
         <int>[],
       ]) {
-        final empty = Rand.sample(from: from, count: 0);
+        final empty = Rand.sample(from, count: 0);
         check(empty).isEmpty();
         check(() => empty.add(1)).returnsNormally();
       }
     });
 
     test('sample throws on mismatched weights length naming weights', () {
-      check(() => Rand.sample(from: [1, 2], count: 1, weights: [1]))
+      check(() => Rand.sample([1, 2], count: 1, weights: [1]))
           .throws<ArgumentError>()
           .has((e) => e.name, 'name')
           .equals('weights');
@@ -62,7 +62,7 @@ void main() {
         [-1, 1],
         [0, 0],
       ]) {
-        check(() => Rand.sample(from: ['a', 'b'], count: 0, weights: weights))
+        check(() => Rand.sample(['a', 'b'], count: 0, weights: weights))
             .throws<ArgumentError>()
             .has((e) => e.name, 'name')
             .equals('weights');
@@ -70,31 +70,31 @@ void main() {
     });
 
     test('sample rejects weights longer than from naming weights', () {
-      check(() => Rand.sample(from: [1], count: 200, weights: [1, 1000]))
+      check(() => Rand.sample([1], count: 200, weights: [1, 1000]))
           .throws<ArgumentError>()
           .has((e) => e.name, 'name')
           .equals('weights');
     });
 
     test('sample checks weights before the empty-pool check', () {
-      check(() => Rand.sample(from: <int>[], count: 3, weights: [-1]))
+      check(() => Rand.sample(<int>[], count: 3, weights: [-1]))
           .throws<ArgumentError>()
           .has((e) => e.name, 'name')
           .equals('weights');
     });
 
     test('sample rejects all-zero weights naming weights', () {
-      check(() => Rand.sample(from: ['a', 'b'], count: 1, weights: [0, 0]))
+      check(() => Rand.sample(['a', 'b'], count: 1, weights: [0, 0]))
           .throws<ArgumentError>()
           .has((e) => '${e.message}', 'message')
           .contains('weights');
     });
 
     test('sample rejects negative weights naming weights', () {
-      check(
-        () =>
-            Rand.sample(from: ['a', 'b', 'c'], count: 10, weights: [3, -5, 10]),
-      ).throws<ArgumentError>().has((e) => e.name, 'name').equals('weights');
+      check(() => Rand.sample(['a', 'b', 'c'], count: 10, weights: [3, -5, 10]))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('weights');
     });
 
     test('sample rejects a negative count naming count', () {
@@ -102,7 +102,7 @@ void main() {
         [1],
         <int>[],
       ]) {
-        check(() => Rand.sample(from: from, count: -1))
+        check(() => Rand.sample(from, count: -1))
             .throws<ArgumentError>()
             .has((e) => '${e.message}', 'message')
             .contains('count must be >= 0');
@@ -110,22 +110,23 @@ void main() {
     });
 
     test('sample rejects weights summing past 2^32 naming weights', () {
-      check(
-        () => Rand.sample(from: ['a', 'b'], count: 1, weights: [4294967296, 1]),
-      ).throws<ArgumentError>().has((e) => e.name, 'name').equals('weights');
+      check(() => Rand.sample(['a', 'b'], count: 1, weights: [4294967296, 1]))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('weights');
     });
 
     test('sample accepts weights summing to exactly 2^32', () {
-      check(Rand.sample(from: ['a', 'b'], count: 5, weights: [4294967295, 1]))
-          .length
+      check(Rand.sample(['a', 'b'], count: 5, weights: [4294967295, 1])).length
           .equals(5);
     });
 
     test('sample rejects weights whose 64-bit sum would wrap', () {
       final m = int.parse('9223372036854775807');
-      check(
-        () => Rand.sample(from: ['a', 'b', 'c'], count: 1, weights: [3, m, m]),
-      ).throws<ArgumentError>().has((e) => e.name, 'name').equals('weights');
+      check(() => Rand.sample(['a', 'b', 'c'], count: 1, weights: [3, m, m]))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('weights');
     });
   });
 }

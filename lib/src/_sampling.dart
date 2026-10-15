@@ -4,11 +4,7 @@ mixin _Sampling {
   Random get rng;
 
   /// See [Rand.sample].
-  List<T> sample<T>({
-    required List<T> from,
-    required int count,
-    List<int>? weights,
-  }) {
+  List<T> sample<T>(List<T> from, {required int count, List<int>? weights}) {
     _checkNonNegative(count, 'count');
     if (weights != null && weights.length != from.length) {
       throw ArgumentError(

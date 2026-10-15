@@ -45,7 +45,7 @@ mixin _Numbers {
   }
 
   /// See [Rand.latitude].
-  double latitude([int precision = 5]) {
+  double latitude({int precision = 5}) {
     RangeError.checkValueInInterval(precision, 0, 15, 'precision');
     final value = float(min: -90, max: 90);
     final mod = pow(10.0, precision);
@@ -53,7 +53,7 @@ mixin _Numbers {
   }
 
   /// See [Rand.longitude].
-  double longitude([int precision = 5]) {
+  double longitude({int precision = 5}) {
     RangeError.checkValueInInterval(precision, 0, 15, 'precision');
     final value = float(min: -180, max: 180);
     final mod = pow(10.0, precision);
@@ -62,7 +62,10 @@ mixin _Numbers {
 
   /// See [Rand.geoPoint].
   ({double lat, double lng}) geoPoint({int precision = 5}) {
-    return (lat: latitude(precision), lng: longitude(precision));
+    return (
+      lat: latitude(precision: precision),
+      lng: longitude(precision: precision),
+    );
   }
 
   /// See [Rand.charCode].

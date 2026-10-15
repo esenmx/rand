@@ -38,8 +38,8 @@ mixin _Collections {
     return from.values.elementAt(rng.nextInt(from.length));
   }
 
-  /// See [Rand.subSet].
-  Set<T> subSet<T>(Set<T> from, int count) {
+  /// See [Rand.subset].
+  Set<T> subset<T>(Set<T> from, {required int count}) {
     _checkNonNegative(count, 'count');
     if (count > from.length) {
       throw RangeError('count ($count) exceeds set size (${from.length})');

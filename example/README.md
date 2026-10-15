@@ -31,7 +31,7 @@ dart run recipes.dart
 - Cryptographic helpers — `nonce`, `password`, `bytes`, `base64`.
 - `DateTime` and `Duration` ranges.
 - CSS color picking with `isDark` filtering.
-- Collection sampling — `element`, `subSet`, `shuffled`, `mapKey/Value/Entry`, `enumValue`.
+- Collection sampling — `element`, `subset`, `shuffled`, `mapKey/Value/Entry`, `enumValue`.
 - Weighted sampling — football-team formation, loot-box rarity.
 - IDs & seeding — `uuidV4`, `uuidV7`, `ulid`, `RandGen`, `withSeed`.
 - `nullable` probability.

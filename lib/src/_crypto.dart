@@ -5,7 +5,7 @@ mixin _Crypto {
 
   int secureCharCode() => secureRng.charCode();
 
-  Uint8List bytes(int length) {
+  Uint8List bytes({required int length}) {
     _checkNonNegative(length, 'length');
     final list = Uint8List(length);
     for (var i = 0; i < length; i += 4) {
@@ -82,6 +82,6 @@ mixin _Crypto {
         'byteLength',
       );
     }
-    return base64Encode(bytes(byteLength));
+    return base64Encode(bytes(length: byteLength));
   }
 }

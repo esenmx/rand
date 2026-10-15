@@ -14,9 +14,9 @@ double _chiSquareBase62(String s) {
   for (final c in s.codeUnits) {
     counts[c] = (counts[c] ?? 0) + 1;
   }
-  final expected = s.length / base62.length;
+  final expected = s.length / Rand.base62Alphabet.length;
   var chi = 0.0;
-  for (final c in base62.codeUnits) {
+  for (final c in Rand.base62Alphabet.codeUnits) {
     final d = (counts[c] ?? 0) - expected;
     chi += d * d / expected;
   }
@@ -201,8 +201,8 @@ void main() {
       'latitude and longitude are finite and in range for precision 0..15',
       () {
         for (var p = 0; p <= 15; p++) {
-          final lat = Rand.latitude(p);
-          final lng = Rand.longitude(p);
+          final lat = Rand.latitude(precision: p);
+          final lng = Rand.longitude(precision: p);
           check(lat.isFinite).isTrue();
           check(lat.abs()).isLessOrEqual(90);
           check(lng.isFinite).isTrue();
@@ -213,8 +213,8 @@ void main() {
 
     test('latitude, longitude and geoPoint reject precision outside 0..15', () {
       for (final p in [16, 64, -1]) {
-        check(() => Rand.latitude(p)).throws<RangeError>();
-        check(() => Rand.longitude(p)).throws<RangeError>();
+        check(() => Rand.latitude(precision: p)).throws<RangeError>();
+        check(() => Rand.longitude(precision: p)).throws<RangeError>();
         check(() => Rand.geoPoint(precision: p)).throws<RangeError>();
       }
     });
@@ -245,10 +245,10 @@ void main() {
       }
     });
 
-    test('charCode returns base62 character', () {
+    test('charCode returns Rand.base62Alphabet character', () {
       for (var i = 0; i < 1000; i++) {
         final c = Rand.charCode();
-        check(base62.contains(String.fromCharCode(c))).isTrue();
+        check(Rand.base62Alphabet.contains(String.fromCharCode(c))).isTrue();
       }
     });
 
@@ -328,7 +328,7 @@ void main() {
       check(a).deepEquals(b);
     });
 
-    test('seeded charCode is uniform over base62', () {
+    test('seeded charCode is uniform over Rand.base62Alphabet', () {
       Rand.seed(3);
       final s = String.fromCharCodes(
         List.generate(64000, (_) => Rand.charCode()),

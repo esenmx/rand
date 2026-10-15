@@ -16,20 +16,20 @@ mixin _Time {
   }
 
   /// See [Rand.dateTime].
-  DateTime dateTime([DateTime? start, DateTime? end]) {
-    final from = start?.microsecondsSinceEpoch ?? _epochMin;
-    final to = end?.microsecondsSinceEpoch ?? _epochMax;
+  DateTime dateTime({DateTime? min, DateTime? max}) {
+    final from = min?.microsecondsSinceEpoch ?? _epochMin;
+    final to = max?.microsecondsSinceEpoch ?? _epochMax;
     if (from >= to) {
-      throw ArgumentError(switch ((start, end)) {
+      throw ArgumentError(switch ((min, max)) {
         (_, null) =>
-          'start must be < 2038-01-01 UTC when end is omitted, '
-              'got ${start?.toUtc()}; pass end',
+          'min must be < 2038-01-01 UTC when max is omitted, '
+              'got ${min?.toUtc()}; pass max',
         (null, _) =>
-          'end must be > 1970-01-01 UTC when start is omitted, '
-              'got ${end?.toUtc()}; pass start',
+          'max must be > 1970-01-01 UTC when min is omitted, '
+              'got ${max?.toUtc()}; pass min',
         _ =>
-          'start must be < end, '
-              'got start: ${start?.toUtc()}, end: ${end?.toUtc()}',
+          'min must be < max, '
+              'got min: ${min?.toUtc()}, max: ${max?.toUtc()}',
       });
     }
     return DateTime.fromMicrosecondsSinceEpoch(

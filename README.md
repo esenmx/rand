@@ -18,7 +18,7 @@ Rand.ipv4();           // → '143.61.48.184'
 Rand.password();       // → 12 chars, CSPRNG — not seeded
 Rand.color();          // → CssColors.darkKhaki
 Rand.dateTime();       // → 1972-02-25 21:42:51.597617Z
-Rand.sample(from: ['rare', 'common'], count: 10, weights: [1, 100]);
+Rand.sample(['rare', 'common'], count: 10, weights: [1, 100]);
 ```
 
 ---
@@ -65,7 +65,7 @@ Rand.useRng(Random.secure()); // global swap to a CSPRNG; clears currentSeed
 final user = Rand.withSeed(7, () => (Rand.fullName(), Rand.email()));
 final gen = RandGen(Random(1)); // independent stream, same non-crypto API
 gen.fullName();
-RandGen(Random.secure()).sample(from: items, count: 3); // one secure draw, global untouched
+RandGen(Random.secure()).sample(items, count: 3); // one secure draw, global untouched
 ```
 
 `useRng` and `seed` mutate the global non-cryptographic RNG. `withSeed` scopes
@@ -99,9 +99,9 @@ Rand.integer(min: 50, max: 100);   // 50..99
 Rand.float();                      // [0.0, 1.0), like nextDouble
 Rand.float(min: 10, max: 20);      // [10.0, 20.0)
 Rand.boolean();                    // 50% true
-Rand.boolean(90);                  // 90% true
+Rand.boolean(trueChance: 90);      // 90% true
 Rand.latitude();                   // -90..90, 5 decimal places
-Rand.longitude(3);                 // -180..180, 3 decimal places
+Rand.longitude(precision: 3);      // -180..180, 3 decimal places
 Rand.charCode();                   // base62 code point (int)
 ```
 
@@ -159,13 +159,14 @@ Production IDs → [`package:uuid`](https://pub.dev/packages/uuid).
 ## Cryptographic — secure vs non-secure
 
 ```dart
-Rand.bytes(32);              // Uint8List, always Random.secure()
+Rand.bytes(length: 32);      // Uint8List, always Random.secure()
 Rand.nonce();                // 16-char base62, always Random.secure()
 Rand.nonce(length: 32);
 Rand.password();             // 12-char mixed-charset, always Random.secure()
 Rand.password(length: 20, symbols: false);
 Rand.base64();               // 16 bytes encoded, always Random.secure()
 Rand.secureCharCode();       // base62 code point, always Random.secure()
+Rand.base62Alphabet;         // '0-9A-Za-z', the characters the three above draw
 ```
 
 Three rules:
@@ -212,17 +213,18 @@ Rand.word();                       // 'lorem'
 Rand.words(count: 5);              // 'amet consectetur adipiscing elit sed'
 Rand.words(count: 3, separator: '-');
 Rand.sentence();                   // 'Lorem ipsum dolor sit amet.'
-Rand.sentence(3);                  // 3 unique sentences joined by ' '
-Rand.paragraph(3);                 // 3 sentences joined by ' '
-Rand.article(5);                   // 5 paragraphs separated by '\n\n'
+Rand.sentence(count: 3);           // 3 unique sentences joined by ' '
+Rand.paragraph(count: 3);          // 3 sentences joined by ' '
+Rand.article(count: 5);            // 5 paragraphs separated by '\n\n'
 ```
 
-`words(count: N)` and `sentence(N)` use `subSet` — the same word/sentence never
-repeats in one call (corpora: 167 unique words, 856 sentences). For repeats, call
-`word()` / `sentence()` N times yourself, or use `paragraph(N)`.
+`words(count: N)` and `sentence(count: N)` use `subset` — the same word/sentence
+never repeats in one call (corpora: 167 unique words, 856 sentences). For
+repeats, call `word()` / `sentence()` N times yourself, or use
+`paragraph(count: N)`.
 
 Counts accept 0 and return an empty result (`words`, `sentence`, `paragraph`,
-`article`, `bytes`, `subSet`, `sample`). Single-token generators — `nonce`,
+`article`, `bytes`, `subset`, `sample`). Single-token generators — `nonce`,
 `hex`, `digits`, `base64`, `slug` — need a length of at least 1.
 
 ---
@@ -231,14 +233,14 @@ Counts accept 0 and return an empty result (`words`, `sentence`, `paragraph`,
 
 ```dart
 Rand.dateTime();                                       // [1970-01-01, 2038-01-01) UTC
-Rand.dateTime(DateTime.utc(2020), DateTime.utc(2025)); // custom range, half-open
+Rand.dateTime(min: DateTime.utc(2020), max: DateTime.utc(2025)); // half-open
 Rand.duration(max: const Duration(days: 30));          // 0 to 30 days
 Rand.duration(min: const Duration(days: 1), max: const Duration(days: 30));
 ```
 
 `dateTime` and `duration` are `[min, max)` half-open and throw
-`ArgumentError` on an empty or reversed range — including `dateTime(start)`
-with `start` at or after 2038-01-01 and no `end`.
+`ArgumentError` on an empty or reversed range — including `dateTime(min: t)`
+with `t` at or after 2038-01-01 and no `max`.
 
 ---
 
@@ -251,7 +253,7 @@ final scores = {'Alice': 95, 'Bob': 87};
 
 Rand.element(fruits);              // 'orange'
 Rand.enumValue(Status.values);     // Status.suspended — typed enum draw
-Rand.subSet({1, 2, 3, 4, 5}, 3);   // {2, 5, 1} — unique elements
+Rand.subset({1, 2, 3, 4, 5}, count: 3); // {2, 5, 1} — unique elements
 Rand.shuffled(fruits);             // ['kiwi', 'grape', 'apple', ...] — copy
 Rand.mapKey(scores);               // 'Bob'
 Rand.mapValue(scores);             // 95
@@ -264,13 +266,13 @@ Pick the right call:
 |---|---|
 |One element|`element(iterable)`|
 |One enum member|`enumValue(MyEnum.values)`|
-|N unique elements|`subSet(set, N)`|
-|N elements, repeats okay|`sample(from: list, count: N)`|
+|N unique elements|`subset(set, count: N)`|
+|N elements, repeats okay|`sample(list, count: N)`|
 |N elements with weighted frequency|`sample(..., weights: [...])`|
 |Whole list, reordered|`shuffled(list)`|
 |One key / value / entry of a Map|`mapKey` / `mapValue` / `mapEntry`|
 
-`subSet` requires `Set<T>` — dedupe explicitly with `.toSet()` if your
+`subset` requires `Set<T>` — dedupe explicitly with `.toSet()` if your
 source has duplicates.
 
 ---
@@ -280,13 +282,13 @@ source has duplicates.
 ```dart
 // Loot box: legendary 1%, rare 10%, common ~90%
 final loot = Rand.sample(
-  from: ['Legendary', 'Rare', 'Common'],
+  ['Legendary', 'Rare', 'Common'],
   count: 100,
   weights: [1, 10, 100],
 );
 
 // Equal probability — drop weights
-final dice = Rand.sample(from: [1, 2, 3, 4, 5, 6], count: 10);
+final dice = Rand.sample([1, 2, 3, 4, 5, 6], count: 10);
 ```
 
 `weights.length` must equal `from.length`. An empty `from` throws
@@ -321,7 +323,7 @@ to pick a foreground.
 
 ```dart
 Rand.boolean();             // 50% true
-Rand.boolean(99.9);         // 99.9% true
+Rand.boolean(trueChance: 99.9);         // 99.9% true
 Rand.nullable('value');                 // 50% null, useful in fixtures
 Rand.nullable('value', nullChance: 90); // 90% null
 ```
@@ -336,7 +338,7 @@ Rand.nullable('value', nullChance: 90); // 90% null
 |`Rand.float(min: 5)` — default `max` is 1, so it throws|Pass both bounds: `Rand.float(min: 5, max: 10)`|
 |`Rand.integer(max: list.length)` on a list that may be empty — `[0, 0)` is empty and throws|Guard with `list.isNotEmpty`, or call `Rand.element(list)`|
 |`Rand.seed(42); Rand.password()` — seed never reaches CSPRNG|Build deterministic tokens from your own `Random(42)`|
-|`Rand.subSet([1, 2, 2], 2)` — compile error: `subSet` takes a `Set<T>`|Pass a set: `Rand.subSet({1, 2}, 2)`, or dedupe with `.toSet()`|
+|`Rand.subset([1, 2, 2], count: 2)` — compile error: `subset` takes a `Set<T>`|Pass a set: `Rand.subset({1, 2}, count: 2)`, or dedupe with `.toSet()`|
 |Shipping `Rand.nonce` / `Rand.password` as production secrets|Use `package:cryptography` or a platform keystore|
 |`setUpAll(() => Rand.seed(42))`|Use `setUp` — each test starts from the same state whatever ran before it (`--name`, `--test-randomize-ordering-seed`)|
 |`list..shuffle()` to "get a random order" without keeping the original|`Rand.shuffled(list)` — non-mutating copy|
