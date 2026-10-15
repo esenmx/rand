@@ -1,6 +1,6 @@
 # Changelog
 
-## 5.0.0
+## 5.0.0 - 2026-10-15
 
 ### Breaking
 
@@ -35,7 +35,7 @@
 - `Rand.slug` validates `wordCount` upfront (naming `'wordCount'`) before drawing from the RNG.
 - `Rand.email` throws `ArgumentError` naming `'domain'` when `domain` is empty or contains `'@'`.
 - `Rand.sample` validates `weights` even when `count == 0` (when `from` is non-empty).
-- `Rand.otp`, `Rand.sentence`, `Rand.slug`, `Rand.hex`, `Rand.password`, `Rand.base64`, and `Rand.sample` populate `ArgumentError.name` on invalid arguments.
+- `Rand.digits`, `Rand.sentence`, `Rand.slug`, `Rand.hex`, `Rand.password`, `Rand.base64`, and `Rand.sample` populate `ArgumentError.name` on invalid arguments.
 - `Rand.dateTime` reversed-range error messages format timestamps in UTC (`toUtc()`).
 - The `sample` and `useRng` docs recommend `RandGen(Random.secure())` for a one-off secure draw instead of swapping the global RNG, which also clears `currentSeed`.
 
