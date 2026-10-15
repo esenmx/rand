@@ -16,6 +16,8 @@ final RegExp _declaration = RegExp(
   'Future<void> main)',
 );
 
+final RegExp _variable = RegExp('^(final |const |var |late )');
+
 final class _Snippet(
   final String file,
   final int fenceLine,
@@ -30,13 +32,16 @@ final class _Rendered(
 );
 
 _Rendered _render(_Snippet snippet, List<String> imports) {
+  final hasDeclarations = snippet.lines.any(_declaration.hasMatch);
   final declarations = <int>[];
   final statements = <int>[];
   var inDeclaration = false;
   for (final (i, line) in snippet.lines.indexed) {
     final atColumnZero = line.isNotEmpty && !line.startsWith(RegExp(r'\s'));
     if (atColumnZero && !line.startsWith('}')) {
-      inDeclaration = _declaration.hasMatch(line);
+      inDeclaration =
+          _declaration.hasMatch(line) ||
+          (hasDeclarations && _variable.hasMatch(line));
     }
     (inDeclaration ? declarations : statements).add(i);
   }
