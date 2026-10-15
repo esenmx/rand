@@ -31,9 +31,22 @@ void main() {
       check(b / c).isLessOrEqual(0.20);
     });
 
-    test('sample handles empty inputs', () {
-      check(Rand.sample(from: <int>[], count: 10)).isEmpty();
-      check(Rand.sample(from: [1], count: 0)).isEmpty();
+    test('sample from an empty list throws StateError when count > 0', () {
+      check(() => Rand.sample(from: <int>[], count: 10))
+          .throws<StateError>()
+          .has((e) => e.message, 'message')
+          .contains('Rand.sample');
+    });
+
+    test('sample with count 0 returns an empty growable list', () {
+      for (final from in [
+        [1],
+        <int>[],
+      ]) {
+        final empty = Rand.sample(from: from, count: 0);
+        check(empty).isEmpty();
+        check(() => empty.add(1)).returnsNormally();
+      }
     });
 
     test('sample throws on mismatched weights length naming weights', () {
@@ -56,14 +69,18 @@ void main() {
       }
     });
 
-    test('sample ignores weights beyond from.length', () {
-      final result = Rand.sample(from: [1], count: 200, weights: [1, 1000]);
-      check(result.every((e) => e == 1)).isTrue();
+    test('sample rejects weights longer than from naming weights', () {
+      check(() => Rand.sample(from: [1], count: 200, weights: [1, 1000]))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('weights');
     });
 
-    test('sample returns a growable list when from is empty', () {
-      final empty = Rand.sample(from: <int>[], count: 3);
-      check(() => empty.add(1)).returnsNormally();
+    test('sample checks weights before the empty-pool check', () {
+      check(() => Rand.sample(from: <int>[], count: 3, weights: [-1]))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('weights');
     });
 
     test('sample rejects all-zero weights naming weights', () {

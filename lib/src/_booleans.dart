@@ -10,7 +10,7 @@ mixin _Booleans {
   }
 
   /// See [Rand.nullable].
-  T? nullable<T>(T value, [double nullChance = 50]) {
+  T? nullable<T>(T value, {double nullChance = 50}) {
     _checkChance(nullChance, 'nullChance');
     return boolean(nullChance) ? null : value;
   }

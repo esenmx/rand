@@ -14,9 +14,9 @@ void main() {
   print('\x1B[0m');
 
   _section('Numbers');
-  print('  Integer (0-100):     ${Rand.integer(max: 100)}');
-  print('  Integer (50-100):    ${Rand.integer(min: 50, max: 100)}');
-  print('  Float (0-1):         ${Rand.float(max: 1).toStringAsFixed(4)}');
+  print('  Integer [0, 100):    ${Rand.integer(max: 100)}');
+  print('  Integer [50, 100):   ${Rand.integer(min: 50, max: 100)}');
+  print('  Float [0, 1):        ${Rand.float().toStringAsFixed(4)}');
   print('  Boolean (50%):       ${Rand.boolean()}');
   print('  Boolean (90% true):  ${Rand.boolean(90)}');
 
@@ -50,7 +50,7 @@ void main() {
   print('  Hex (40): ${Rand.hex(length: 40)}');
   print('  Slug:     ${Rand.slug()}');
   print('  Semver:   ${Rand.semver()}');
-  print('  OTP:      ${Rand.otp()}');
+  print('  Digits:   ${Rand.digits()}');
 
   _section('Cryptographic');
   print('  Nonce (32):    ${Rand.nonce(length: 32)}');
@@ -112,14 +112,17 @@ void main() {
 
   _section('IDs & seeding');
   print('  UUID v4:            ${Rand.uuidV4()}');
-  print('  UUID v7:            ${Rand.uuidV7()}');
-  print('  ULID:               ${Rand.ulid()}');
+  print('  UUID v7:            ${Rand.uuidV7(time: DateTime.now())}');
+  print('  ULID:               ${Rand.ulid(time: DateTime.now())}');
   print('  RandGen(Random(1)): ${RandGen(Random(1)).fullName()}');
   print('  withSeed(7, email): ${Rand.withSeed(7, Rand.email)}');
 
   _section('Nullable');
   print('  nullable("value", 50%): ${Rand.nullable("value") ?? "null"}');
-  print('  nullable("value", 90%): ${Rand.nullable("value", 90) ?? "null"}');
+  print(
+    '  nullable("value", 90%): '
+    '${Rand.nullable("value", nullChance: 90) ?? "null"}',
+  );
 
   print('\n\x1B[36m═════════════════════════════════════════════════\x1B[0m\n');
 }

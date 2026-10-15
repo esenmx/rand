@@ -40,7 +40,7 @@ void main() {
 
   group('uuidV7', () {
     test('2 000 draws are well-formed and distinct', () {
-      final ids = List.generate(2000, (_) => Rand.uuidV7());
+      final ids = List.generate(2000, (_) => Rand.uuidV7(time: _t));
       for (final id in ids) {
         check(id).matchesPattern(_v7);
       }
@@ -53,9 +53,9 @@ void main() {
       check(_uuidMs(id)).equals(1791030896789);
     });
 
-    test('defaults time to now', () {
+    test('encodes an explicit DateTime.now()', () {
       final before = DateTime.now().millisecondsSinceEpoch;
-      final ms = _uuidMs(Rand.uuidV7());
+      final ms = _uuidMs(Rand.uuidV7(time: DateTime.now()));
       final after = DateTime.now().millisecondsSinceEpoch;
       check(ms)
         ..isGreaterOrEqual(before)
@@ -86,7 +86,7 @@ void main() {
     });
 
     test('2 000 draws are well-formed and distinct', () {
-      final ids = List.generate(2000, (_) => Rand.ulid());
+      final ids = List.generate(2000, (_) => Rand.ulid(time: _t));
       for (final id in ids) {
         check(id).matchesPattern(_ulid);
       }
@@ -101,9 +101,9 @@ void main() {
       check(Rand.ulid(time: max)).startsWith('7ZZZZZZZZZ');
     });
 
-    test('defaults time to now', () {
+    test('encodes an explicit DateTime.now()', () {
       final before = DateTime.now().millisecondsSinceEpoch;
-      final ms = _ulidMs(Rand.ulid());
+      final ms = _ulidMs(Rand.ulid(time: DateTime.now()));
       final after = DateTime.now().millisecondsSinceEpoch;
       check(ms)
         ..isGreaterOrEqual(before)
@@ -125,20 +125,33 @@ void main() {
 
   group('reproducibility', () {
     test('withSeed and RandGen replay the same IDs for a fixed time', () {
-      List<String> draw(String Function() uuidV4, String Function() ulid) => [
-        uuidV4(),
-        ulid(),
-      ];
+      List<String> draw(
+        String Function() uuidV4,
+        String Function() uuidV7,
+        String Function() ulid,
+      ) => [uuidV4(), uuidV7(), ulid()];
       final a = Rand.withSeed(
         1,
-        () => draw(Rand.uuidV4, () => Rand.ulid(time: _t)),
+        () => draw(
+          Rand.uuidV4,
+          () => Rand.uuidV7(time: _t),
+          () => Rand.ulid(time: _t),
+        ),
       );
       final b = Rand.withSeed(
         1,
-        () => draw(Rand.uuidV4, () => Rand.ulid(time: _t)),
+        () => draw(
+          Rand.uuidV4,
+          () => Rand.uuidV7(time: _t),
+          () => Rand.ulid(time: _t),
+        ),
       );
       final gen = RandGen(Random(1));
-      final c = draw(gen.uuidV4, () => gen.ulid(time: _t));
+      final c = draw(
+        gen.uuidV4,
+        () => gen.uuidV7(time: _t),
+        () => gen.ulid(time: _t),
+      );
       check(a).deepEquals(b);
       check(a).deepEquals(c);
     });

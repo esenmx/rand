@@ -10,30 +10,28 @@ mixin _Text on _Collections, _Numbers {
   /// See [Rand.words].
   String words({int? count, String separator = ' '}) {
     if (count != null) _checkNonNegative(count, 'count');
-    final n = count ?? integer(min: 3, max: 10);
+    final n = count ?? _closed(3, 10);
     return subSet(_wordSet, n).join(separator);
   }
 
   /// See [Rand.sentence].
   String sentence([int? count]) {
     if (count == null) return element(_sentences);
-    if (count < 1) {
-      throw ArgumentError('count must be >= 1, got $count', 'count');
-    }
+    _checkNonNegative(count, 'count');
     return subSet(_sentenceSet, count).join(' ');
   }
 
   /// See [Rand.paragraph].
   String paragraph([int? count]) {
     if (count != null) _checkNonNegative(count, 'count');
-    final n = count ?? integer(min: 5, max: 10);
+    final n = count ?? _closed(5, 10);
     return List.generate(n, (_) => sentence()).join(' ');
   }
 
   /// See [Rand.article].
   String article([int? count]) {
     if (count != null) _checkNonNegative(count, 'count');
-    final n = count ?? integer(min: 3, max: 7);
+    final n = count ?? _closed(3, 7);
     return List.generate(n, (_) => paragraph()).join('\n\n');
   }
 

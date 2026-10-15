@@ -19,7 +19,9 @@ mixin _Crypto {
   }
 
   String nonce({int length = 16}) {
-    _checkNonNegative(length, 'length');
+    if (length < 1) {
+      throw ArgumentError('length must be >= 1, got $length', 'length');
+    }
     final codes = Uint16List(length);
     for (var i = 0; i < length; i++) {
       codes[i] = secureRng.charCode();

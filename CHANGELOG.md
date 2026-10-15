@@ -1,10 +1,20 @@
 # Changelog
 
-## Unreleased
+## 5.0.0
 
 ### Breaking
 
 - `CssColors.isDark` is now a direct getter on `CssColors` (removes the `CssColorsX` extension).
+- `Rand.integer` is half-open, `[min, max)`, like `Random.nextInt` and the other range methods (was inclusive on both ends). The default range is unchanged (`[0, 2^31)`) and the maximum span is now `2^32`.
+- `Rand.float()` defaults to `[0, 1)`, like `Random.nextDouble` (was `[0, double.maxFinite)`). A `min` above 1 without a `max` now throws `ArgumentError`.
+- `Rand.integer`, `Rand.float`, `Rand.duration` and `Rand.dateTime` throw `ArgumentError` on an empty range (`min >= max`, or `start` not before `end`), like `Random.nextInt(0)`, instead of returning `min` without a draw. `float` compares its bounds as doubles, so two distinct `int` bounds that round to the same `double` (above 2^53) also throw. `dateTime(start)` needs `start` before 2038-01-01, and `dateTime(null, end)` needs `end` after 1970-01-01. Reverses a 4.3.0 decision.
+- `Rand.otp` is renamed `Rand.digits` (same output). The old name suggested a one-time-code primitive, but the digits come from the seedable RNG.
+- `Rand.nullable` takes its chance as a named parameter: `Rand.nullable(value, nullChance: 90)`. The positional form read like `boolean`'s `trueChance` with the opposite meaning.
+- `Rand.uuidV7` and `Rand.ulid` require `time`. Defaulting to `DateTime.now()` made a seeded ID change on every run; pass a fixed instant for snapshot-stable IDs or `DateTime.now()` for a live clock.
+- `Rand.sample` requires `weights.length == from.length` (extra weights were ignored, hiding a weights list that drifted out of line with `from`), and throws `StateError` for an empty `from` with a positive `count` (returned `[]`, unlike `element`). Weights are validated before the empty-pool check. Reverses two 4.3.0 decisions.
+- `Rand.nonce` rejects a `length` below 1, like `hex`, `base64` and `digits` (`nonce(length: 0)` returned an empty token). Reverses a 4.3.0 decision.
+- `Rand.sentence(0)` returns `''` (threw), like `words`, `paragraph` and `article`: counts accept 0, single-token generators need at least 1.
+- Seeded output changes for `integer` calls with an explicit `max` (each draw is now `nextInt(max - min)`) and for `float()` / `float(min: …)` without a `max`. Other seeded output is unchanged, including methods that draw bounded integers internally (`semver`, `email`, `ipv4`, and the default lengths of `words`, `paragraph`, `article`) and bare `integer()`.
 
 ### Added
 
@@ -18,7 +28,7 @@
 - `Rand.sample` validates `weights` even when `count == 0` (when `from` is non-empty).
 - `Rand.otp`, `Rand.sentence`, `Rand.slug`, `Rand.hex`, `Rand.password`, `Rand.base64`, and `Rand.sample` populate `ArgumentError.name` on invalid arguments.
 - `Rand.dateTime` reversed-range error messages format timestamps in UTC (`toUtc()`).
-- `Rand.float` no longer consumes a draw when two distinct `int` bounds round to the same `double` (above 2^53), so later draws from a seeded stream that makes such calls shift. Returned values are unchanged.
+- The `sample` and `useRng` docs recommend `RandGen(Random.secure())` for a one-off secure draw instead of swapping the global RNG, which also clears `currentSeed`.
 
 ### Fixed
 

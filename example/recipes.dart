@@ -65,10 +65,9 @@ _User _buildUser() {
     id: Rand.hex(length: 24),
     name: Rand.fullName(),
     email: Rand.email(),
-    // `nullable(x, 20)` → 20% null. Arg is `nullChance`, not `presenceChance`.
     avatar: Rand.nullable(
-      'https://i.pravatar.cc/${Rand.integer(min: 64, max: 256)}',
-      20,
+      'https://i.pravatar.cc/${Rand.integer(min: 64, max: 257)}',
+      nullChance: 20,
     ),
     joinedAt: Rand.dateTime(DateTime.utc(2020), _anchor),
   );
@@ -83,9 +82,9 @@ typedef _Address = ({
 
 _Address _buildAddress() {
   return (
-    street: '${Rand.integer(min: 1, max: 9999)} ${Rand.word()} St',
+    street: '${Rand.integer(min: 1, max: 10000)} ${Rand.word()} St',
     city: Rand.city(),
-    postalCode: Rand.otp(length: 5),
+    postalCode: Rand.digits(length: 5),
     country: Rand.element(const ['US', 'GB', 'DE', 'JP', 'BR']),
   );
 }
@@ -110,7 +109,7 @@ _Order _buildOrder({required int itemCount}) {
   final items = List.generate(itemCount, (_) {
     return _LineItem(
       sku: Rand.hex(length: 10).toUpperCase(),
-      qty: Rand.integer(min: 1, max: 5),
+      qty: Rand.integer(min: 1, max: 6),
       price: double.parse(Rand.float(min: 5, max: 200).toStringAsFixed(2)),
     );
   });

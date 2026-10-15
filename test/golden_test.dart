@@ -35,9 +35,7 @@ final Map<String, Object? Function([RandGen?])> _draws = {
         ? Rand.integer(min: -10, max: 10)
         : g.integer(min: -10, max: 10),
   ),
-  'float': ([g]) =>
-      _n(3, () => g == null ? Rand.float(max: 1) : g.float(max: 1)),
-  'floatDefault': ([g]) => _n(2, g == null ? Rand.float : g.float),
+  'float': ([g]) => _n(3, g == null ? Rand.float : g.float),
   'boolean': ([g]) => _n(8, g == null ? Rand.boolean : g.boolean),
   'nullable': ([g]) =>
       _n(6, () => g == null ? Rand.nullable(1) : g.nullable(1)),
@@ -52,7 +50,7 @@ final Map<String, Object? Function([RandGen?])> _draws = {
   },
   'charCode': ([g]) => _n(8, g == null ? Rand.charCode : g.charCode),
   'semver': ([g]) => _n(2, g == null ? Rand.semver : g.semver),
-  'otp': ([g]) => _n(2, g == null ? Rand.otp : g.otp),
+  'digits': ([g]) => _n(2, g == null ? Rand.digits : g.digits),
   'duration': ([g]) => _n(
     3,
     () =>
@@ -165,9 +163,8 @@ final Map<String, Object? Function([RandGen?])> _draws = {
 
 const Map<String, Object?> _golden = {
   'integer': [748325939, 523363758, 376088004],
-  'integerRange': [3, 5, 2, -6, -4],
+  'integerRange': [-3, 8, -6, -5, 7],
   'float': [0.15092545597797424, 0.6041479725361217, 0.6616810157870647],
-  'floatDefault': [2.713176560875689e+307, 1.0860726626691728e+308],
   'boolean': [true, false, false, true, false, true, true, true],
   'nullable': [null, 1, 1, null, 1, null],
   'latitude': [-62.83342, 18.74664],
@@ -176,7 +173,7 @@ const Map<String, Object?> _golden = {
   'geoPoint': [-62.83342, 37.49327],
   'charCode': [70, 119, 89, 120, 112, 89, 80, 102],
   'semver': ['7.8.4', '5.7.4'],
-  'otp': ['784574', '550890'],
+  'digits': ['784574', '550890'],
   'duration': [391198781894, 1565951544813, 1715077192920],
   'durationNegative': [-10, -7, -7, -9, -7, -10, -8, -10],
   'dateTime': [323873471530795, 1296451283951202, 1419912408018527],

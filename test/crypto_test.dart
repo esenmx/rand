@@ -90,9 +90,12 @@ void main() {
           .contains('length must be');
     });
 
-    test('bytes(0) and nonce(length: 0) are empty', () {
+    test('bytes(0) is empty; nonce rejects length 0 naming length', () {
       check(Rand.bytes(0)).isEmpty();
-      check(Rand.nonce(length: 0)).equals('');
+      check(() => Rand.nonce(length: 0))
+          .throws<ArgumentError>()
+          .has((e) => e.name, 'name')
+          .equals('length');
     });
 
     test('bytes covers all 256 values in every byte lane', () {
@@ -119,7 +122,7 @@ void main() {
 
     test('nonce returns correct length', () {
       for (var i = 0; i < 100; i++) {
-        final len = Rand.integer(max: 100);
+        final len = Rand.integer(min: 1, max: 101);
         check(Rand.nonce(length: len)).length.equals(len);
       }
     });
