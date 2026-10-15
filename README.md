@@ -166,7 +166,7 @@ Rand.password();             // 12-char mixed-charset, always Random.secure()
 Rand.password(length: 20, symbols: false);
 Rand.base64();               // 16 bytes encoded, always Random.secure()
 Rand.secureCharCode();       // base62 code point, always Random.secure()
-Rand.base62Alphabet;         // '0-9A-Za-z', the characters the three above draw
+Rand.base62Alphabet;         // the 62 characters nonce, secureCharCode and charCode draw from
 ```
 
 Three rules:
