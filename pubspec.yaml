@@ -1,5 +1,5 @@
 name: rand
-description: "Seedable test-data generator: names, emails, IPs, UUID v4/v7, ULID, hex, slugs, digit codes, semver, lorem, CSS colors, geo, weighted samples, CSPRNG tokens. Pure Dart. Agent skill."
+description: "Seedable test-data generator: names, emails, IPs, UUIDv4/v7, ULID, hex, slugs, digits, semver, lorem, CSS colors, geo, weighted samples, CSPRNG tokens. Pure Dart. Agent skill."
 version: 5.0.0
 repository: https://github.com/esenmx/rand
 issue_tracker: https://github.com/esenmx/rand/issues
