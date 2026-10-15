@@ -58,6 +58,8 @@ dart pub add rand
 ## Configuring the RNG
 
 ```dart
+import 'dart:math';
+
 Rand.useRng(Random(42));      // any Random instance
 Rand.seed(42);                // useRng(Random(42)), and Rand.currentSeed == 42
 Rand.useRng(Random.secure()); // global swap to a CSPRNG; clears currentSeed
@@ -65,7 +67,7 @@ Rand.useRng(Random.secure()); // global swap to a CSPRNG; clears currentSeed
 final user = Rand.withSeed(7, () => (Rand.fullName(), Rand.email()));
 final gen = RandGen(Random(1)); // independent stream, same non-crypto API
 gen.fullName();
-RandGen(Random.secure()).sample(items, count: 3); // one secure draw, global untouched
+RandGen(Random.secure()).sample(['a', 'b', 'c', 'd'], count: 3); // one secure draw, global untouched
 ```
 
 `useRng` and `seed` mutate the global non-cryptographic RNG. `withSeed` scopes
@@ -80,6 +82,8 @@ ignore all of these.
 Seed reporting — a random seed per run that you can replay on failure:
 
 ```dart
+import 'package:test/test.dart';
+
 setUp(() {
   Rand.seed();                                  // random seed in [0, 2^32)
   printOnFailure('Rand seed: ${Rand.currentSeed}'); // replay with Rand.seed(n)
