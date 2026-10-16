@@ -1,7 +1,7 @@
 # rand example
 
-A CLI demo of every `Rand.*` method in the
-[rand](https://pub.dev/packages/rand) package, with formatted ANSI output.
+A CLI tour of the `Rand.*` API in the [rand](https://pub.dev/packages/rand)
+package, with formatted ANSI output.
 
 ## Run
 
@@ -22,21 +22,25 @@ dart run recipes.dart
 
 ## What it shows
 
-`main.dart` — every primitive in `Rand.*`:
+`main.dart` — the `Rand.*` generators, section by section:
 
 - Numbers, booleans, floats, lat/lng, `geoPoint`.
 - Identity and city corpora.
 - Lorem text — word / sentence / paragraph granularity.
-- Networking — `email`, `ipv4`, `ipv6`, `mac`, `hex`, `slug`, `semver`, `digits`.
+- Networking — `email`, `ipv4`, `ipv6`, `mac`, `hex`, `slug`, `semver`,
+  `digits`.
 - Cryptographic helpers — `nonce`, `password`, `bytes`, `base64`.
 - `DateTime` and `Duration` ranges.
-- CSS color picking with `isDark` filtering.
-- Collection sampling — `element`, `subset`, `shuffled`, `mapKey/Value/Entry`, `enumValue`.
+- CSS color picking, including dark/light-only picks (`colorDark`,
+  `colorLight`).
+- Collection sampling — `element`, `subset`, `shuffled`, `mapKey`, `mapValue`,
+  `enumValue`.
 - Weighted sampling — football-team formation, loot-box rarity.
 - IDs & seeding — `uuidV4`, `uuidV7`, `ulid`, `RandGen`, `withSeed`.
 - `nullable` probability.
 
-`recipes.dart` — composing structured fixtures (`User`, `Address`, `Order`, paginated responses, chronological chat history) on top of `Rand.*` primitives.
+`recipes.dart` — composing structured fixtures (`User`, `Address`, `Order`,
+paginated responses, chronological chat history) on top of `Rand.*` primitives.
 
 ## See also
 

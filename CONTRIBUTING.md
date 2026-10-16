@@ -6,6 +6,7 @@
    - `dart analyze --fatal-infos --fatal-warnings`
    - `dart test`
    - `dart pub publish --dry-run`
-3. Add a line under `## Unreleased` in `CHANGELOG.md` for every user-visible change.
+3. Add a line under `## Unreleased` in `CHANGELOG.md` for every user-visible
+   change.
 
 Releases are published manually by the maintainer.
