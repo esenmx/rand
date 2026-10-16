@@ -827,11 +827,11 @@ final class Rand {
   /// // Equal probability
   /// Rand.sample([1, 2, 3, 4, 5, 6], count: 10);
   ///
-  /// // Loot box: 1% legendary, 10% rare, ~89% common
+  /// // Loot box: 1% legendary, 10% rare, 89% common
   /// Rand.sample(
   ///   ['Legendary', 'Rare', 'Common'],
   ///   count: 100,
-  ///   weights: [1, 10, 100],
+  ///   weights: [1, 10, 89],
   /// );
   /// ```
   ///
