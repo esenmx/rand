@@ -46,7 +46,7 @@ mixin _Networking on _Numbers, _Collections, _Identity {
       codes[j++] = _hexChars.codeUnitAt(rng.nextInt(16));
       codes[j++] = _hexChars.codeUnitAt(rng.nextInt(16));
     }
-    return String.fromCharCodes(codes);
+    return .fromCharCodes(codes);
   }
 
   /// See [Rand.mac].
@@ -63,7 +63,7 @@ mixin _Networking on _Numbers, _Collections, _Identity {
       codes[j++] = _hexChars.codeUnitAt(rng.nextInt(16));
       codes[j++] = _hexChars.codeUnitAt(rng.nextInt(16));
     }
-    return String.fromCharCodes(codes);
+    return .fromCharCodes(codes);
   }
 
   /// See [Rand.hex].
@@ -75,6 +75,6 @@ mixin _Networking on _Numbers, _Collections, _Identity {
     for (var i = 0; i < length; i++) {
       codes[i] = _hexChars.codeUnitAt(rng.nextInt(16));
     }
-    return String.fromCharCodes(codes);
+    return .fromCharCodes(codes);
   }
 }

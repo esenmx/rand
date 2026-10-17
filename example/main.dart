@@ -63,7 +63,7 @@ void main() {
   print('  DateTime:             ${Rand.dateTime()}');
   print(
     '  DateTime (2020-2025): '
-    '${Rand.dateTime(min: DateTime.utc(2020), max: DateTime.utc(2025))}',
+    '${Rand.dateTime(min: .utc(2020), max: .utc(2025))}',
   );
   final duration = Rand.duration(
     min: const Duration(days: 1),
@@ -112,8 +112,8 @@ void main() {
 
   _section('IDs & seeding');
   print('  UUID v4:            ${Rand.uuidV4()}');
-  print('  UUID v7:            ${Rand.uuidV7(time: DateTime.now())}');
-  print('  ULID:               ${Rand.ulid(time: DateTime.now())}');
+  print('  UUID v7:            ${Rand.uuidV7(time: .now())}');
+  print('  ULID:               ${Rand.ulid(time: .now())}');
   print('  RandGen(Random(1)): ${RandGen(Random(1)).fullName()}');
   print('  withSeed(7, email): ${Rand.withSeed(7, Rand.email)}');
 

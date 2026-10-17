@@ -148,9 +148,9 @@ void main() {
 
     test('shuffled is reproducible under seed', () {
       Rand.seed(42);
-      final a = Rand.shuffled(List.generate(20, (i) => i));
+      final a = Rand.shuffled(.generate(20, (i) => i));
       Rand.seed(42);
-      final b = Rand.shuffled(List.generate(20, (i) => i));
+      final b = Rand.shuffled(.generate(20, (i) => i));
       check(a).deepEquals(b);
     });
 

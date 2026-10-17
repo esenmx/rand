@@ -4,14 +4,14 @@
 
 ### Fixed
 
-- `Rand.sample` documentation: the example weights are now `[1, 10, 89]`, so
-  the quoted 1%, 10% and 89% odds are exact.
+- `Rand.sample` documentation: the example weights are now `[1, 10, 89]`, so the
+  quoted 1%, 10% and 89% odds are exact.
 
 ### Changed
 
 - The README opens with what the package does, why to use it and a short
-  example. Every Dart sample in the README and the agent skill is analyzed
-  with the package's lints and fits pub.dev without scrolling sideways.
+  example. Every Dart sample in the README and the agent skill is analyzed with
+  the package's lints and fits pub.dev without scrolling sideways.
 
 ## 5.0.0 - 2026-10-15
 
