@@ -46,7 +46,7 @@ mixin _Ids {
     for (var i = 10; i < 26; i++) {
       codes[i] = _crockford.codeUnitAt(rng.nextInt(32));
     }
-    return String.fromCharCodes(codes);
+    return .fromCharCodes(codes);
   }
 }
 
@@ -66,5 +66,5 @@ String _formatUuid(Uint8List b) {
     codes[j++] = _hexChars.codeUnitAt(b[i] ~/ 16);
     codes[j++] = _hexChars.codeUnitAt(b[i] % 16);
   }
-  return String.fromCharCodes(codes);
+  return .fromCharCodes(codes);
 }

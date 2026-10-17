@@ -45,34 +45,32 @@ void main() {
     });
 
     test('dateTime throws when min > max', () {
-      check(
-        () => Rand.dateTime(min: DateTime.utc(2025), max: DateTime.utc(2020)),
-      ).throws<ArgumentError>();
+      check(() => Rand.dateTime(min: .utc(2025), max: .utc(2020)))
+          .throws<ArgumentError>();
     });
 
     test('dateTime(min:) after the default max throws', () {
-      check(() => Rand.dateTime(min: DateTime.utc(2050)))
-          .throws<ArgumentError>();
+      check(() => Rand.dateTime(min: .utc(2050))).throws<ArgumentError>();
     });
 
     test('reversed dateTime errors say which bound to pass in UTC', () {
       check(
           () => Rand.dateTime(
-            min: DateTime.utc(2025).toLocal(),
-            max: DateTime.utc(2020).toLocal(),
+            min: .utc(2025).toLocal(),
+            max: .utc(2020).toLocal(),
           ),
         ).throws<ArgumentError>().has((e) => '${e.message}', 'message')
         ..contains('min must be < max')
         ..contains('2025-01-01 00:00:00.000Z')
         ..contains('2020-01-01 00:00:00.000Z')
         ..not((it) => it.contains('2038'));
-      check(() => Rand.dateTime(min: DateTime.utc(2050).toLocal()))
+      check(() => Rand.dateTime(min: .utc(2050).toLocal()))
           .throws<ArgumentError>()
           .has((e) => '${e.message}', 'message')
         ..contains('2038-01-01 UTC')
         ..contains('2050-01-01 00:00:00.000Z')
         ..contains('pass max');
-      check(() => Rand.dateTime(max: DateTime.utc(1969).toLocal()))
+      check(() => Rand.dateTime(max: .utc(1969).toLocal()))
           .throws<ArgumentError>()
           .has((e) => '${e.message}', 'message')
         ..contains('1970-01-01 UTC')
@@ -87,11 +85,11 @@ void main() {
         (() => Rand.duration(min: d, max: d), 'min ($d) must be < max ($d)'),
         (() => Rand.dateTime(min: t, max: t), 'min must be < max'),
         (
-          () => Rand.dateTime(min: DateTime.utc(2038)),
+          () => Rand.dateTime(min: .utc(2038)),
           'min must be < 2038-01-01 UTC when max is omitted',
         ),
         (
-          () => Rand.dateTime(max: DateTime.utc(1970)),
+          () => Rand.dateTime(max: .utc(1970)),
           'max must be > 1970-01-01 UTC when min is omitted',
         ),
       ]) {

@@ -8,7 +8,7 @@ mixin _Time {
   Random get rng;
 
   /// See [Rand.duration].
-  Duration duration({required Duration max, Duration min = Duration.zero}) {
+  Duration duration({required Duration max, Duration min = .zero}) {
     if (min >= max) throw ArgumentError('min ($min) must be < max ($max)');
     return Duration(
       microseconds: _halfOpen(min.inMicroseconds, max.inMicroseconds, rng),
@@ -32,9 +32,6 @@ mixin _Time {
               'got min: ${min?.toUtc()}, max: ${max?.toUtc()}',
       });
     }
-    return DateTime.fromMicrosecondsSinceEpoch(
-      _halfOpen(from, to, rng),
-      isUtc: true,
-    );
+    return .fromMicrosecondsSinceEpoch(_halfOpen(from, to, rng), isUtc: true);
   }
 }

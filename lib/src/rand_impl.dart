@@ -43,7 +43,7 @@ final class _Secure with _Crypto {
   Random? _rng;
 
   @override
-  Random get secureRng => _rng ??= Random.secure();
+  Random get secureRng => _rng ??= .secure();
 }
 
 final class _Scope {

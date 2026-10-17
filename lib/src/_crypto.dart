@@ -26,7 +26,7 @@ mixin _Crypto {
     for (var i = 0; i < length; i++) {
       codes[i] = secureRng.charCode();
     }
-    return String.fromCharCodes(codes);
+    return .fromCharCodes(codes);
   }
 
   String password({
@@ -72,7 +72,7 @@ mixin _Crypto {
       charCodes[j] = temp;
     }
 
-    return String.fromCharCodes(charCodes);
+    return .fromCharCodes(charCodes);
   }
 
   String base64({int byteLength = 16}) {

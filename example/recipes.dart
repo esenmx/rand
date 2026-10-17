@@ -69,7 +69,7 @@ _User _buildUser() {
       'https://i.pravatar.cc/${Rand.integer(min: 64, max: 257)}',
       nullChance: 20,
     ),
-    joinedAt: Rand.dateTime(min: DateTime.utc(2020), max: _anchor),
+    joinedAt: Rand.dateTime(min: .utc(2020), max: _anchor),
   );
 }
 
@@ -110,14 +110,14 @@ _Order _buildOrder({required int itemCount}) {
     return _LineItem(
       sku: Rand.hex(length: 10).toUpperCase(),
       qty: Rand.integer(min: 1, max: 6),
-      price: double.parse(Rand.float(min: 5, max: 200).toStringAsFixed(2)),
+      price: .parse(Rand.float(min: 5, max: 200).toStringAsFixed(2)),
     );
   });
   final total = items.fold<double>(0, (sum, it) => sum + it.price * it.qty);
   return _Order(
     id: 'ord_${Rand.hex(length: 12)}',
     items: items,
-    total: double.parse(total.toStringAsFixed(2)),
+    total: .parse(total.toStringAsFixed(2)),
   );
 }
 
@@ -142,7 +142,7 @@ _Page<T> _buildPage<T>({
     pageSize: pageSize,
     totalPages: totalPages,
     totalItems: totalPages * pageSize,
-    items: List.generate(pageSize, (_) => item()),
+    items: .generate(pageSize, (_) => item()),
   );
 }
 
