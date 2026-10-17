@@ -12,8 +12,7 @@ final _pre1970 = DateTime.utc(1969, 12, 31, 23, 59, 59, 999, 990);
 const _map = {'a': 1, 'b': 2, 'c': 3};
 final _t = DateTime.utc(2026, 10, 3, 12, 34, 56, 789);
 
-List<Object?> _n(int n, Object? Function() draw) =>
-    List.generate(n, (_) => draw());
+List<Object?> _n(int n, Object? Function() draw) => .generate(n, (_) => draw());
 
 Object? _seeded(Object? Function() draw) {
   Rand.seed(42);
@@ -85,11 +84,8 @@ final Map<String, Object? Function([RandGen?])> _draws = {
     3,
     () =>
         (g == null
-                ? Rand.dateTime(
-                    min: DateTime.utc(2020),
-                    max: DateTime.utc(2025),
-                  )
-                : g.dateTime(min: DateTime.utc(2020), max: DateTime.utc(2025)))
+                ? Rand.dateTime(min: .utc(2020), max: .utc(2025))
+                : g.dateTime(min: .utc(2020), max: .utc(2025)))
             .microsecondsSinceEpoch,
   ),
   'datePre1970': ([g]) => _n(
@@ -127,12 +123,12 @@ final Map<String, Object? Function([RandGen?])> _draws = {
     () => (g == null ? Rand.enumValue(_E.values) : g.enumValue(_E.values)).name,
   ),
   'shuffled': ([g]) => g == null
-      ? Rand.shuffled(List.generate(10, (i) => i))
-      : g.shuffled(List.generate(10, (i) => i)),
+      ? Rand.shuffled(.generate(10, (i) => i))
+      : g.shuffled(.generate(10, (i) => i)),
   'subset': ([g]) =>
       (g == null
-              ? Rand.subset(Set.of(List.generate(10, (i) => i)), count: 4)
-              : g.subset(Set.of(List.generate(10, (i) => i)), count: 4))
+              ? Rand.subset(.of(List.generate(10, (i) => i)), count: 4)
+              : g.subset(.of(List.generate(10, (i) => i)), count: 4))
           .toList(),
   'sample': ([g]) => g == null
       ? Rand.sample(['a', 'b', 'c'], count: 10)
@@ -278,7 +274,7 @@ void main() {
   test('RandGen.seeded(42) reproduces the golden values', () {
     final actual = {
       for (final MapEntry(:key, :value) in _draws.entries)
-        key: value(RandGen.seeded(42)),
+        key: value(.seeded(42)),
     };
     check(actual).deepEquals(_golden);
   });

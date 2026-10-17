@@ -15,7 +15,7 @@ final _v7 = RegExp(
 final _ulid = RegExp(r'^[0-7][0-9A-HJKMNP-TV-Z]{25}$');
 
 int _uuidMs(String uuid) =>
-    int.parse(uuid.replaceAll('-', '').substring(0, 12), radix: 16);
+    .parse(uuid.replaceAll('-', '').substring(0, 12), radix: 16);
 
 int _ulidMs(String ulid) {
   var ms = 0;
@@ -55,7 +55,7 @@ void main() {
 
     test('encodes an explicit DateTime.now()', () {
       final before = DateTime.now().millisecondsSinceEpoch;
-      final ms = _uuidMs(Rand.uuidV7(time: DateTime.now()));
+      final ms = _uuidMs(Rand.uuidV7(time: .now()));
       final after = DateTime.now().millisecondsSinceEpoch;
       check(ms)
         ..isGreaterOrEqual(before)
@@ -63,14 +63,10 @@ void main() {
     });
 
     test('throws outside the 48-bit Unix-ms range', () {
-      check(() => Rand.uuidV7(time: DateTime.utc(1969)))
-          .throws<ArgumentError>();
+      check(() => Rand.uuidV7(time: .utc(1969))).throws<ArgumentError>();
       check(
         () => Rand.uuidV7(
-          time: DateTime.fromMillisecondsSinceEpoch(
-            0x1000000000000,
-            isUtc: true,
-          ),
+          time: .fromMillisecondsSinceEpoch(0x1000000000000, isUtc: true),
         ),
       ).throws<ArgumentError>();
     });
@@ -103,7 +99,7 @@ void main() {
 
     test('encodes an explicit DateTime.now()', () {
       final before = DateTime.now().millisecondsSinceEpoch;
-      final ms = _ulidMs(Rand.ulid(time: DateTime.now()));
+      final ms = _ulidMs(Rand.ulid(time: .now()));
       final after = DateTime.now().millisecondsSinceEpoch;
       check(ms)
         ..isGreaterOrEqual(before)
@@ -111,13 +107,10 @@ void main() {
     });
 
     test('throws outside the 48-bit Unix-ms range', () {
-      check(() => Rand.ulid(time: DateTime.utc(1969))).throws<ArgumentError>();
+      check(() => Rand.ulid(time: .utc(1969))).throws<ArgumentError>();
       check(
         () => Rand.ulid(
-          time: DateTime.fromMillisecondsSinceEpoch(
-            0x1000000000000,
-            isUtc: true,
-          ),
+          time: .fromMillisecondsSinceEpoch(0x1000000000000, isUtc: true),
         ),
       ).throws<ArgumentError>();
     });

@@ -88,7 +88,7 @@ void main() {
       final expected = [gen.integer(), gen.integer()];
       final actual = await Rand.withSeed(7, () async {
         final a = Rand.integer();
-        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(.zero);
         return [a, Rand.integer()];
       });
       check(actual).deepEquals(expected);

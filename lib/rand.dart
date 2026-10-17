@@ -423,10 +423,7 @@ final class Rand {
   /// Throws [ArgumentError] when `min >= max` (an empty range).
   ///
   /// See also: [dateTime].
-  static Duration duration({
-    required Duration max,
-    Duration min = Duration.zero,
-  }) {
+  static Duration duration({required Duration max, Duration min = .zero}) {
     return _i.duration(max: max, min: min);
   }
 
