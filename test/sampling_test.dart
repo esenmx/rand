@@ -7,9 +7,13 @@ void main() {
 
   group('Sampling', () {
     test('sample without weights uses equal probability', () {
-      final result = Rand.sample([1, 2, 3], count: 100);
-      check(result).length.equals(100);
-      check(result.every((e) => [1, 2, 3].contains(e))).isTrue();
+      final result = Rand.sample([1, 2, 3], count: 30000);
+      check(result).length.equals(30000);
+      for (final value in [1, 2, 3]) {
+        check(result.where((e) => e == value).length)
+          ..isGreaterOrEqual(9700)
+          ..isLessOrEqual(10300);
+      }
     });
 
     test('sample with weights respects ratios', () {

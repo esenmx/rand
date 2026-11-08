@@ -47,10 +47,16 @@ void main() {
         final ip = Rand.ipv4();
         final m = pattern.firstMatch(ip);
         check(m).isNotNull();
-        for (var g = 1; g <= 4; g++) {
-          final octet = int.parse(m!.group(g)!);
-          check(octet).isGreaterOrEqual(0);
-          check(octet).isLessOrEqual(255);
+        if (m?.groups([1, 2, 3, 4]) case [
+          final String a,
+          final String b,
+          final String c,
+          final String d,
+        ]) {
+          for (final octet in [a, b, c, d].map(int.parse)) {
+            check(octet).isGreaterOrEqual(0);
+            check(octet).isLessOrEqual(255);
+          }
         }
       }
     });
