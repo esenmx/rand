@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:checks/checks.dart';
 import 'package:rand/rand.dart';
 import 'package:test/test.dart';
@@ -163,6 +165,46 @@ void main() {
       }
       for (final p in pos) {
         check(p / n).isCloseTo(1 / 6, 0.01);
+      }
+    });
+
+    test('subset keeps the equality of an identity set', () {
+      final equalButDistinct = List.generate(3, (_) => DateTime.utc(2026));
+      final picked = Rand.subset(
+        Set<DateTime>.identity()..addAll(equalButDistinct),
+        count: 3,
+      );
+      check(picked).length.equals(3);
+      check(picked.add(equalButDistinct.first)).isFalse();
+      check(picked.add(.utc(2026))).isTrue();
+    });
+
+    test('subset keeps the equality of a custom-equality set', () {
+      final source = LinkedHashSet<String>(
+        equals: (a, b) => a.toLowerCase() == b.toLowerCase(),
+        hashCode: (s) => s.toLowerCase().hashCode,
+      )..addAll(['a', 'b', 'c']);
+      final picked = Rand.subset(source, count: 3);
+      check(picked).length.equals(3);
+      check(picked.contains('A')).isTrue();
+    });
+
+    test('subset keeps the ordering of a sorted set', () {
+      final source = SplayTreeSet<int>((a, b) => b.compareTo(a))
+        ..addAll([1, 2, 3, 4, 5]);
+      final picked = Rand.subset(source, count: 3).toList();
+      check(picked).deepEquals(source.where(picked.contains));
+    });
+
+    test('subset of an unmodifiable set returns a modifiable set', () {
+      for (final source in [
+        const {1, 2, 3},
+        Set<int>.unmodifiable([1, 2, 3]),
+        UnmodifiableSetView({1, 2, 3}),
+      ]) {
+        final picked = Rand.subset(source, count: 2);
+        check(picked).length.equals(2);
+        check(picked.add(4)).isTrue();
       }
     });
   });

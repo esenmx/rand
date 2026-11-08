@@ -45,7 +45,7 @@ mixin _Collections {
       throw RangeError('count ($count) exceeds set size (${from.length})');
     }
     final list = from.toList();
-    final result = <T>{};
+    final result = from.toSet()..clear();
     for (var i = 0; i < count; i++) {
       final idx = rng.nextInt(list.length - i);
       final picked = list[idx];
