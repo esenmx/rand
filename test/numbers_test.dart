@@ -28,10 +28,63 @@ void main() {
 
   group('Numbers', () {
     test('integer returns value in range', () {
-      check(Rand.integer()).isA<int>();
-      check(Rand.integer(max: 1)).isA<int>();
-      check(Rand.integer(min: 1, max: 2)).isA<int>();
-      check(Rand.integer(min: -1, max: 1)).isA<int>();
+      for (var i = 0; i < 1000; i++) {
+        check(Rand.integer())
+          ..isGreaterOrEqual(0)
+          ..isLessThan(0x80000000);
+        check(Rand.integer(max: 1)).equals(0);
+        check(Rand.integer(min: 1, max: 2)).equals(1);
+        check(Rand.integer(min: -1, max: 1))
+          ..isGreaterOrEqual(-1)
+          ..isLessThan(1);
+      }
+    });
+
+    test(
+      'integer past 2^53 is exact where ints are 64-bit',
+      testOn: '!dart2js',
+      () {
+        final seen = {
+          for (var i = 0; i < 500; i++)
+            Rand.integer(min: 9007199254740992, max: 9007199254740996),
+        };
+        check(seen).unorderedEquals({
+          9007199254740992,
+          .parse('9007199254740993'),
+          9007199254740994,
+          .parse('9007199254740995'),
+        });
+      },
+    );
+
+    test(
+      'integer bounds past ±(2^53 - 1) throw on dart2js',
+      testOn: 'dart2js',
+      () {
+        for (final (min, max, name) in [
+          (9007199254740992, 9007199254740996, 'min'),
+          (0, 9007199254740992, 'max'),
+          (-9007199254740992, 0, 'min'),
+          (9007199254740990, 9007199254740992, 'max'),
+        ]) {
+          check(() => Rand.integer(min: min, max: max))
+              .throws<ArgumentError>()
+              .has((e) => e.name, 'name')
+              .equals(name);
+        }
+      },
+    );
+
+    test('integer at the safe-integer edge is exact on every platform', () {
+      final seen = {
+        for (var i = 0; i < 500; i++)
+          Rand.integer(min: 9007199254740988, max: 9007199254740991),
+      };
+      check(
+        seen,
+      ).unorderedEquals({9007199254740988, 9007199254740989, 9007199254740990});
+      check(Rand.integer(min: -9007199254740991, max: -9007199254740990))
+          .equals(-9007199254740991);
     });
 
     test('integer max is exclusive, like nextInt', () {
@@ -258,9 +311,15 @@ void main() {
         final v = Rand.semver(maxMajor: 3, maxMinor: 4, maxPatch: 5);
         final m = pattern.firstMatch(v);
         check(m).isNotNull();
-        check(int.parse(m!.group(1)!)).isLessOrEqual(3);
-        check(int.parse(m.group(2)!)).isLessOrEqual(4);
-        check(int.parse(m.group(3)!)).isLessOrEqual(5);
+        if (m?.groups([1, 2, 3]) case [
+          final String major,
+          final String minor,
+          final String patch,
+        ]) {
+          check(int.parse(major)).isLessOrEqual(3);
+          check(int.parse(minor)).isLessOrEqual(4);
+          check(int.parse(patch)).isLessOrEqual(5);
+        }
       }
     });
 

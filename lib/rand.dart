@@ -189,7 +189,8 @@ final class Rand {
   /// Maximum range (`max - min`) is `2^32`.
   ///
   /// Throws [ArgumentError] when `min >= max` (an empty range, like
-  /// `Random.nextInt(0)`) or `max - min > 2^32`.
+  /// `Random.nextInt(0)`) or `max - min > 2^32`. Compiled to JavaScript, where
+  /// ints are doubles, it also throws for a bound beyond ±(2^53 - 1).
   ///
   /// See also: [float], [element].
   static int integer({int min = 0, int max = _intDefaultMax}) =>
@@ -420,7 +421,12 @@ final class Rand {
   ///
   /// [max] is required — no implicit upper bound.
   ///
-  /// Throws [ArgumentError] when `min >= max` (an empty range).
+  /// Spans above 2^53 µs (about 285 years) resolve coarser than 1 µs: one
+  /// draw carries 53 random bits.
+  ///
+  /// Throws [ArgumentError] when `min >= max` (an empty range). Compiled to
+  /// JavaScript, where ints are doubles, it also throws for a bound beyond
+  /// ±(2^53 - 1) µs.
   ///
   /// See also: [dateTime].
   static Duration duration({required Duration max, Duration min = .zero}) {
@@ -440,7 +446,12 @@ final class Rand {
   /// Throws [ArgumentError] when the effective min is not before the
   /// effective max (an empty or reversed range) — including a [min] at or
   /// after 2038-01-01 with no [max] (pass [max]) and a [max] at or before
-  /// 1970-01-01 with no [min] (pass [min]).
+  /// 1970-01-01 with no [min] (pass [min]). Compiled to JavaScript, where ints
+  /// are doubles, it also throws for a bound beyond ±(2^53 - 1) µs from the
+  /// epoch: about 1685..2255.
+  ///
+  /// Spans above 2^53 µs (about 285 years) resolve coarser than 1 µs: one
+  /// draw carries 53 random bits.
   ///
   /// See also: [duration].
   static DateTime dateTime({DateTime? min, DateTime? max}) =>
@@ -520,6 +531,9 @@ final class Rand {
   /// Rand.subset([1, 2, 2, 3].toSet(), count: 2);    // dedupe explicitly
   /// ```
   ///
+  /// The result keeps the equality and ordering of [from], as `from.toSet()`
+  /// does: a subset of a `Set.identity()` is an identity set.
+  ///
   /// Throws [ArgumentError] when [count] is negative, [RangeError] when
   /// `count > from.length`.
   ///
@@ -565,6 +579,9 @@ final class Rand {
   /// ```dart
   /// Rand.fullName();  // 'James Michael Wilson'
   /// ```
+  ///
+  /// Throws [StateError] when the RNG keeps repeating names already in the
+  /// result (a constant stub [Random], for example).
   ///
   /// See also: [firstName], [lastName].
   static String fullName() => _i.fullName();
