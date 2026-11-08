@@ -53,7 +53,10 @@ mixin _Ids {
 int _unixMs48(DateTime time) {
   final ms = time.millisecondsSinceEpoch;
   if (ms < 0 || ms > _maxUnixMs48) {
-    throw ArgumentError.value(time, 'time', 'must be within 1970..10889');
+    throw ArgumentError(
+      'time must be within 1970..10889, got ${time.toUtc()}',
+      'time',
+    );
   }
   return ms;
 }
