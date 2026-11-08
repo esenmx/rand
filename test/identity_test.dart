@@ -1,6 +1,24 @@
+import 'dart:math';
+
 import 'package:checks/checks.dart';
 import 'package:rand/rand.dart';
 import 'package:test/test.dart';
+
+final class _TopOfRange implements Random {
+  int _draws = 0;
+
+  @override
+  int nextInt(int max) {
+    if (++_draws > 1000000) throw TestFailure('redraws never stopped');
+    return max - 1;
+  }
+
+  @override
+  double nextDouble() => 0;
+
+  @override
+  bool nextBool() => throw UnsupportedError('nextBool');
+}
 
 void main() {
   setUp(() => Rand.seed(42));
@@ -47,6 +65,13 @@ void main() {
           because: parts.join(' '),
         ).length.equals(parts.length);
       }
+    });
+
+    test('fullName throws when the RNG cannot produce an unused name', () {
+      check(() => RandGen(_TopOfRange()).fullName())
+          .throws<StateError>()
+          .has((e) => e.message, 'message')
+          .contains('Rand.fullName');
     });
   });
 }
