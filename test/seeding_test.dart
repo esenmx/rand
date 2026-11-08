@@ -146,7 +146,11 @@ void main() {
       final b = RandGen(Random(5));
       check(List.generate(20, (_) => a.integer()))
           .deepEquals(List.generate(20, (_) => b.integer()));
-      check(RandGen.seeded().fullName()).isNotEmpty();
+    });
+
+    test('RandGen.seeded requires its seed', () {
+      check(RandGen.seeded is RandGen Function()).isFalse();
+      check(RandGen.seeded is RandGen Function(int?)).isFalse();
     });
   });
 }

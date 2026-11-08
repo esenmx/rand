@@ -32,7 +32,7 @@ final class RandGen
   new(this.rng);
 
   /// Creates a generator drawing from `Random(seed)`.
-  new seeded([int? seed]) : this(Random(seed));
+  new seeded(int seed) : this(Random(seed));
 
   /// The underlying [Random] instance.
   @override
