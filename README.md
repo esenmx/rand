@@ -181,6 +181,11 @@ Every range is `[min, max)` half-open, like `Random.nextInt` and `nextDouble`:
 `integer`, `float`, `dateTime`, `duration`. An empty range (`min >= max`) throws
 `ArgumentError`, like `nextInt(0)`.
 
+Compiled to JavaScript, where ints are doubles, `integer`, `dateTime` and
+`duration` also throw `ArgumentError` for a bound beyond ±(2^53 - 1), in
+microseconds for time (about 1685..2255 for `dateTime`). Native and dart2wasm
+ints are 64-bit and have no such limit.
+
 Counts accept 0 and return an empty result (`words`, `sentence`, `paragraph`,
 `article`, `bytes`, `subset`, `sample`). Single-token generators — `nonce`,
 `hex`, `digits`, `base64`, `slug` — need a length of at least 1.
@@ -313,7 +318,9 @@ Rand.duration(min: const Duration(days: 1), max: const Duration(days: 30));
 
 `dateTime` and `duration` are `[min, max)` half-open and throw `ArgumentError`
 on an empty or reversed range — including `dateTime(min: t)` with `t` at or
-after 2038-01-01 and no `max`. `dateTime` always returns UTC.
+after 2038-01-01 and no `max`. `dateTime` always returns UTC. A span above 2^53
+µs (about 285 years) resolves coarser than 1 µs: one draw carries 53 random
+bits.
 
 ---
 
