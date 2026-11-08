@@ -11,6 +11,8 @@ mixin _Numbers {
 
   /// See [Rand.integer].
   int integer({int min = 0, int max = _intDefaultMax}) {
+    _checkWebSafe(min, 'min');
+    _checkWebSafe(max, 'max');
     if (min >= max) throw ArgumentError('min ($min) must be < max ($max)');
     final span = max - min;
     if (span < 0 || span > _maxIntSpan + 1) {

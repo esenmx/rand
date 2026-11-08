@@ -1,5 +1,7 @@
 part of '../rand.dart';
 
+const bool _jsNumbers = identical(0, 0.0);
+const int _maxSafeInt = 0x1FFFFFFFFFFFFF;
 const int _intDefaultMax = 1 << 31;
 const int _maxIntSpan = 0xFFFFFFFF;
 const String _lowercase = 'abcdefghijklmnopqrstuvwxyz';
@@ -13,6 +15,16 @@ final int _epochMin = DateTime.utc(1970).microsecondsSinceEpoch;
 final int _epochMax = DateTime.utc(2038).microsecondsSinceEpoch;
 
 double _lerp(num a, num b, double t) => a * (1.0 - t) + b * t;
+
+void _checkWebSafe(int value, String name, {String unit = ''}) {
+  if (_jsNumbers && value.abs() > _maxSafeInt) {
+    throw ArgumentError(
+      '$name must be within ±$_maxSafeInt$unit when compiled to JavaScript, '
+      'got $value$unit',
+      name,
+    );
+  }
+}
 
 void _checkNonNegative(int value, String name) {
   if (value < 0) throw ArgumentError('$name must be >= 0, got $value', name);
