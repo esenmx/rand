@@ -108,6 +108,13 @@ void main() {
 
     test('throws outside the 48-bit Unix-ms range', () {
       check(() => Rand.ulid(time: .utc(1969))).throws<ArgumentError>();
+      for (final call in [Rand.ulid, Rand.uuidV7]) {
+        check(() => call(time: .utc(1969).toLocal()))
+            .throws<ArgumentError>()
+            .has((e) => '$e', 'text')
+          ..contains('1969-01-01 00:00:00.000Z')
+          ..not((it) => it.contains('Instance of'));
+      }
       check(
         () => Rand.ulid(
           time: .fromMillisecondsSinceEpoch(0x1000000000000, isUtc: true),
