@@ -25,10 +25,14 @@ mixin _Identity on _Collections, _Booleans {
   String city() => element(_cities);
 }
 
+const int _freshDrawLimit = 100;
+
 String _fresh(List<String> used, String Function() draw) {
-  var name = draw();
-  while (used.contains(name)) {
-    name = draw();
+  for (var i = 0; i < _freshDrawLimit; i++) {
+    final name = draw();
+    if (!used.contains(name)) return name;
   }
-  return name;
+  throw StateError(
+    'Rand.fullName: the RNG produced no unused name in $_freshDrawLimit draws',
+  );
 }
