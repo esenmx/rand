@@ -72,6 +72,9 @@ Paginated, ChatHistory) live in
   `[min, max)` half-open, like `nextInt` / `nextDouble`; an empty range
   (`min >= max`) throws `ArgumentError`. `Rand.float()` defaults to `[0, 1)`.
   `Rand.dateTime` always returns a UTC representation.
+- Compiled to JavaScript, `integer`, `duration` and `dateTime` throw
+  `ArgumentError` for a bound beyond ±(2^53 - 1), in microseconds for time
+  (about 1685..2255 for `dateTime`). Native and dart2wasm have no such limit.
 - Counts accept 0 (empty result); `nonce`, `hex`, `digits`, `base64`, `slug`
   need a length of at least 1.
 

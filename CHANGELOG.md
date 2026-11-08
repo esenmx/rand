@@ -1,5 +1,38 @@
 # Changelog
 
+## Unreleased
+
+### Breaking
+
+- BREAKING: `Rand.duration` and `Rand.dateTime` draw `min + floor(t * span)`
+  instead of interpolating absolute microseconds through doubles, so seeded
+  values with a nonzero `min` can change (the pinned 2020..2025 `dateTime` moved
+  by 1 µs). A `min` of zero, including the default `dateTime` range, keeps its
+  values, and each call still takes one draw, so later draws do not shift.
+- BREAKING: compiled to JavaScript, where ints are doubles, `Rand.integer`,
+  `Rand.duration` and `Rand.dateTime` throw `ArgumentError` for a bound beyond
+  ±(2^53 - 1), in microseconds for time (about 1685..2255 for `dateTime`). They
+  used to round: `integer(min: 2^53, max: 2^53 + 4)` returned `max` in 25 % of
+  draws, and an 8 µs `dateTime` range in year 3000 returned `max` or later in
+  32 %.
+- BREAKING: `RandGen.seeded` requires its seed, as its name says. Replace
+  `RandGen.seeded()` with `RandGen(Random())`.
+
+### Fixed
+
+- `duration` and `dateTime` are uniform over narrow ranges at any distance from
+  zero. A 2 µs range from 2026 split 40/60, a 3 µs range in year 3000 never
+  returned its middle value, and a 1000 µs `duration` range starting at 10^8
+  days returned 2 distinct values. Spans above 2^53 µs still resolve coarser
+  than 1 µs: one draw carries 53 random bits.
+- `subset` keeps the equality and ordering of its source set. Three equal
+  objects in a `Set.identity()` came back as a one-element set. Seeded iteration
+  order changes for a sorted or hash source; set literals keep theirs.
+- `fullName` throws `StateError` when the RNG cannot produce an unused name,
+  instead of looping forever on a stub `Random`.
+- `uuidV7` and `ulid` name the rejected `time` in UTC in their `ArgumentError`,
+  instead of `Instance of 'DateTime'`.
+
 ## 5.0.1 - 2026-10-16
 
 ### Fixed
