@@ -31,7 +31,7 @@ void main() {
       final a = Rand.password();
       Rand.seed(42);
       final b = Rand.password();
-      check(a).not((it) => it.equals(b));
+      check(a).not(.it()..equals(b));
     });
 
     test('seed does not affect nonce', () {
@@ -39,7 +39,7 @@ void main() {
       final a = Rand.nonce();
       Rand.seed(42);
       final b = Rand.nonce();
-      check(a).not((it) => it.equals(b));
+      check(a).not(.it()..equals(b));
     });
 
     test('seed does not affect bytes', () {
@@ -47,13 +47,13 @@ void main() {
       final a = Rand.bytes(length: 16);
       Rand.seed(42);
       final b = Rand.bytes(length: 16);
-      check(a).not((it) => it.deepEquals(b));
+      check(a).not(.it()..deepEquals(b));
     });
 
     test('withSeed does not affect nonce', () {
       final a = Rand.withSeed(42, Rand.nonce);
       final b = Rand.withSeed(42, Rand.nonce);
-      check(a).not((it) => it.equals(b));
+      check(a).not(.it()..equals(b));
     });
 
     test('seed does not affect secureCharCode', () {
@@ -61,7 +61,7 @@ void main() {
       final a = List.generate(50, (_) => Rand.secureCharCode());
       Rand.seed(42);
       final b = List.generate(50, (_) => Rand.secureCharCode());
-      check(a).not((it) => it.deepEquals(b));
+      check(a).not(.it()..deepEquals(b));
     });
   });
 
@@ -69,7 +69,7 @@ void main() {
     test('secureCharCode returns Rand.base62Alphabet character', () {
       for (var i = 0; i < 1000; i++) {
         final cs = Rand.secureCharCode();
-        check(Rand.base62Alphabet.contains(String.fromCharCode(cs))).isTrue();
+        check(Rand.base62Alphabet.contains(String.fromCharCode(cs))).isTrue;
       }
     });
 
@@ -82,19 +82,19 @@ void main() {
     test('bytes and nonce reject a negative length', () {
       check(() => Rand.bytes(length: -1))
           .throws<ArgumentError>()
-          .has((e) => '${e.message}', 'message')
+          .has('message', (e) => '${e.message}')
           .contains('length must be');
       check(() => Rand.nonce(length: -1))
           .throws<ArgumentError>()
-          .has((e) => '${e.message}', 'message')
+          .has('message', (e) => '${e.message}')
           .contains('length must be');
     });
 
     test('bytes(0) is empty; nonce rejects length 0 naming length', () {
-      check(Rand.bytes(length: 0)).isEmpty();
+      check(Rand.bytes(length: 0)).isEmpty;
       check(() => Rand.nonce(length: 0))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('length');
     });
 
@@ -131,7 +131,7 @@ void main() {
       for (var i = 0; i < 50; i++) {
         final n = Rand.nonce(length: 32);
         for (var j = 0; j < n.length; j++) {
-          check(Rand.base62Alphabet.contains(n[j])).isTrue();
+          check(Rand.base62Alphabet.contains(n[j])).isTrue;
         }
       }
     });
@@ -158,7 +158,7 @@ void main() {
     test('password throws on invalid length naming length', () {
       check(() => Rand.password(length: 3))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('length');
     });
 
@@ -181,10 +181,10 @@ void main() {
           if (digitsSet.contains(char)) hasDigit = true;
           if (symbolsSet.contains(char)) hasSymbol = true;
         }
-        check(hasLower).isTrue();
-        check(hasUpper).isTrue();
-        check(hasDigit).isTrue();
-        check(hasSymbol).isTrue();
+        check(hasLower).isTrue;
+        check(hasUpper).isTrue;
+        check(hasDigit).isTrue;
+        check(hasSymbol).isTrue;
       }
     });
 
@@ -217,7 +217,7 @@ void main() {
     test('base64 throws on non-positive byteLength naming byteLength', () {
       check(() => Rand.base64(byteLength: 0))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('byteLength');
     });
 
@@ -226,7 +226,7 @@ void main() {
       final a = Rand.base64();
       Rand.seed(42);
       final b = Rand.base64();
-      check(a).not((it) => it.equals(b));
+      check(a).not(.it()..equals(b));
     });
 
     test('nonce characters are uniform over Rand.base62Alphabet', () {

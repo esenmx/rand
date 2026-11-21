@@ -50,14 +50,14 @@ void main() {
         final dt = Rand.dateTime();
         check(dt.microsecondsSinceEpoch).isGreaterOrEqual(minEpoch);
         check(dt.microsecondsSinceEpoch).isLessThan(maxEpoch);
-        check(dt.isUtc).isTrue();
+        check(dt.isUtc).isTrue;
       }
     });
 
     test('default dateTime stays before 2038-01-01', () {
       final end = DateTime.utc(2038);
       for (var i = 0; i < 10000; i++) {
-        check(Rand.dateTime().isBefore(end)).isTrue();
+        check(Rand.dateTime().isBefore(end)).isTrue;
       }
     });
 
@@ -85,20 +85,20 @@ void main() {
             min: .utc(2025).toLocal(),
             max: .utc(2020).toLocal(),
           ),
-        ).throws<ArgumentError>().has((e) => '${e.message}', 'message')
+        ).throws<ArgumentError>().has('message', (e) => '${e.message}')
         ..contains('min must be < max')
         ..contains('2025-01-01 00:00:00.000Z')
         ..contains('2020-01-01 00:00:00.000Z')
-        ..not((it) => it.contains('2038'));
+        ..not(.it()..contains('2038'));
       check(() => Rand.dateTime(min: .utc(2050).toLocal()))
           .throws<ArgumentError>()
-          .has((e) => '${e.message}', 'message')
+          .has('message', (e) => '${e.message}')
         ..contains('2038-01-01 UTC')
         ..contains('2050-01-01 00:00:00.000Z')
         ..contains('pass max');
       check(() => Rand.dateTime(max: .utc(1969).toLocal()))
           .throws<ArgumentError>()
-          .has((e) => '${e.message}', 'message')
+          .has('message', (e) => '${e.message}')
         ..contains('1970-01-01 UTC')
         ..contains('1969-01-01 00:00:00.000Z')
         ..contains('pass min');
@@ -122,7 +122,7 @@ void main() {
         Rand.seed(5);
         check(call)
             .throws<ArgumentError>()
-            .has((e) => '${e.message}', 'message')
+            .has('message', (e) => '${e.message}')
             .contains(message);
         final next = Rand.integer();
         Rand.seed(5);
@@ -155,7 +155,7 @@ void main() {
       };
       printOnFailure('observed ${seen.toList()..sort()}');
       check(seen).contains(-10);
-      check(seen).not((it) => it.contains(-5));
+      check(seen).not(.it()..contains(-5));
     });
 
     test('pre-1970 dateTime range honours half-open [min, max)', () {
@@ -167,7 +167,7 @@ void main() {
       };
       printOnFailure('observed ${seen.toList()..sort()}');
       check(seen).contains(start.microsecondsSinceEpoch);
-      check(seen).not((it) => it.contains(end.microsecondsSinceEpoch));
+      check(seen).not(.it()..contains(end.microsecondsSinceEpoch));
     });
 
     test('a 2µs dateTime range draws both values equally', () {
@@ -278,26 +278,26 @@ void main() {
             max: start.add(const Duration(microseconds: 8)),
           ),
         ).throws<ArgumentError>()
-        ..has((e) => e.name, 'name').equals('min')
-        ..has((e) => '${e.message}', 'message').contains('JavaScript');
+        ..has('name', (e) => e.name).equals('min')
+        ..has('message', (e) => '${e.message}').contains('JavaScript');
       check(() => Rand.dateTime(min: .utc(1500), max: .utc(2000)))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('min');
       check(() => Rand.dateTime(max: .utc(3000)))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('max');
       check(() => Rand.duration(max: const Duration(days: 200000000)))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('max');
       check(
         () => Rand.duration(
           min: const Duration(days: 200000000),
           max: const Duration(days: 200000001),
         ),
-      ).throws<ArgumentError>().has((e) => e.name, 'name').equals('min');
+      ).throws<ArgumentError>().has('name', (e) => e.name).equals('min');
     });
 
     test('safe bounds at the edge keep half-open draws everywhere', () {

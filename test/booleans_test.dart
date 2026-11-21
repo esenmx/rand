@@ -26,11 +26,11 @@ void main() {
       for (final chance in [double.nan, -1.0, 101.0]) {
         check(() => Rand.boolean(trueChance: chance))
             .throws<ArgumentError>()
-            .has((e) => e.name, 'name')
+            .has('name', (e) => e.name)
             .equals('trueChance');
         check(() => Rand.nullable(1, nullChance: chance))
             .throws<ArgumentError>()
-            .has((e) => e.name, 'name')
+            .has('name', (e) => e.name)
             .equals('nullChance');
       }
     });

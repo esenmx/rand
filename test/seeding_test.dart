@@ -21,7 +21,7 @@ void main() {
       final a = List.generate(100, (_) => Rand.integer(max: 1 << 20));
       Rand.seed(43);
       final b = List.generate(100, (_) => Rand.integer(max: 1 << 20));
-      check(a).not((it) => it.deepEquals(b));
+      check(a).not(.it()..deepEquals(b));
     });
 
     test('useRng(Random(N)) is observably equivalent to seed(N)', () {
@@ -59,7 +59,7 @@ void main() {
 
     test('currentSeed is null after useRng', () {
       Rand.useRng(Random(1));
-      check(Rand.currentSeed).isNull();
+      check(Rand.currentSeed).isNull;
     });
   });
 
@@ -149,8 +149,8 @@ void main() {
     });
 
     test('RandGen.seeded requires its seed', () {
-      check(RandGen.seeded is RandGen Function()).isFalse();
-      check(RandGen.seeded is RandGen Function(int?)).isFalse();
+      check(RandGen.seeded is RandGen Function()).isFalse;
+      check(RandGen.seeded is RandGen Function(int?)).isFalse;
     });
   });
 }

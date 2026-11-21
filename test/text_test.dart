@@ -8,7 +8,7 @@ void main() {
   group('Text', () {
     test('word returns non-empty string', () {
       for (var i = 0; i < 10; i++) {
-        check(Rand.word()).isNotEmpty();
+        check(Rand.word()).isNotEmpty;
       }
     });
 
@@ -27,7 +27,7 @@ void main() {
 
     test('sentence returns non-empty string', () {
       for (var i = 0; i < 10; i++) {
-        check(Rand.sentence()).isNotEmpty();
+        check(Rand.sentence()).isNotEmpty;
       }
     });
 
@@ -43,7 +43,7 @@ void main() {
       check(Rand.sentence(count: 0)).equals('');
       check(() => Rand.sentence(count: -1))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('count');
     });
 
@@ -60,13 +60,13 @@ void main() {
 
     test('paragraph returns multiple sentences', () {
       final p = Rand.paragraph(count: 5);
-      check(p).isNotEmpty();
+      check(p).isNotEmpty;
       check(p.split('. ').length).isGreaterOrEqual(5);
     });
 
     test('article returns multiple paragraphs', () {
       final a = Rand.article(count: 3);
-      check(a).isNotEmpty();
+      check(a).isNotEmpty;
       check(a.split('\n\n').length).isGreaterOrEqual(3);
     });
 
@@ -102,12 +102,12 @@ void main() {
         for (final wc in [0, -1]) {
           check(() => Rand.slug(wordCount: wc))
               .throws<ArgumentError>()
-              .has((e) => e.name, 'name')
+              .has('name', (e) => e.name)
               .equals('wordCount');
         }
         check(() => Rand.slug(wordCount: 168))
             .throws<RangeError>()
-            .has((e) => e.name, 'name')
+            .has('name', (e) => e.name)
             .equals('wordCount');
       },
     );
@@ -120,7 +120,7 @@ void main() {
       ]) {
         check(draw)
             .throws<ArgumentError>()
-            .has((e) => '${e.message}', 'message')
+            .has('message', (e) => '${e.message}')
             .contains('count must be >= 0');
       }
     });
@@ -133,7 +133,7 @@ void main() {
 
     test('paragraph does not produce double periods', () {
       for (var i = 0; i < 200; i++) {
-        check(Rand.paragraph()).not((it) => it.contains('..'));
+        check(Rand.paragraph()).not(.it()..contains('..'));
       }
     });
 

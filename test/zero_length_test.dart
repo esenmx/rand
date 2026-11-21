@@ -6,13 +6,13 @@ void main() {
   setUp(() => Rand.seed(42));
 
   test('counts accept 0 and return an empty result', () {
-    check(Rand.bytes(length: 0)).isEmpty();
+    check(Rand.bytes(length: 0)).isEmpty;
     check(Rand.words(count: 0)).equals('');
     check(Rand.sentence(count: 0)).equals('');
     check(Rand.paragraph(count: 0)).equals('');
     check(Rand.article(count: 0)).equals('');
-    check(Rand.subset({1, 2}, count: 0)).isEmpty();
-    check(Rand.sample([1, 2], count: 0)).isEmpty();
+    check(Rand.subset({1, 2}, count: 0)).isEmpty;
+    check(Rand.sample([1, 2], count: 0)).isEmpty;
   });
 
   test('single-token generators reject a length below 1', () {
@@ -25,7 +25,7 @@ void main() {
     ]) {
       check(call)
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals(name);
     }
   });

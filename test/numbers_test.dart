@@ -69,7 +69,7 @@ void main() {
         ]) {
           check(() => Rand.integer(min: min, max: max))
               .throws<ArgumentError>()
-              .has((e) => e.name, 'name')
+              .has('name', (e) => e.name)
               .equals(name);
         }
       },
@@ -101,7 +101,7 @@ void main() {
       Rand.seed(5);
       check(() => Rand.integer(min: 5, max: 5))
           .throws<ArgumentError>()
-          .has((e) => '${e.message}', 'message')
+          .has('message', (e) => '${e.message}')
           .contains('min (5) must be < max (5)');
       final next = Rand.integer();
       Rand.seed(5);
@@ -138,11 +138,11 @@ void main() {
     test('integer rejects spans past 2^32 naming max', () {
       check(() => Rand.integer(max: 0x100000001))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('max');
       check(() => Rand.integer(min: -1099511627776, max: 1099511627776))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('max');
     });
 
@@ -159,12 +159,12 @@ void main() {
         min: -double.maxFinite / 2,
         max: double.maxFinite / 2,
       );
-      check(f.isInfinite).isFalse();
-      check(f.isNaN).isFalse();
+      check(f.isInfinite).isFalse;
+      check(f.isNaN).isFalse;
 
       final f2 = Rand.float(min: -double.maxFinite);
-      check(f2.isInfinite).isFalse();
-      check(f2.isNaN).isFalse();
+      check(f2.isInfinite).isFalse;
+      check(f2.isNaN).isFalse;
     });
 
     test('bare float() draws from [0, 1), like nextDouble', () {
@@ -181,7 +181,7 @@ void main() {
     test('float(min) above the default max of 1 throws', () {
       check(() => Rand.float(min: 5))
           .throws<ArgumentError>()
-          .has((e) => '${e.message}', 'message')
+          .has('message', (e) => '${e.message}')
           .contains('max (1)');
     });
 
@@ -200,7 +200,7 @@ void main() {
     test('float with min == max throws', () {
       check(() => Rand.float(min: 2, max: 2))
           .throws<ArgumentError>()
-          .has((e) => '${e.message}', 'message')
+          .has('message', (e) => '${e.message}')
           .contains('min (2) must be < max (2)');
       check(() => Rand.float(min: 123.456, max: 123.456))
           .throws<ArgumentError>();
@@ -212,8 +212,7 @@ void main() {
         (1700000000.0, 1700000000.0 + 2.384185791015625e-7),
         (-1.0000000000000002, -1.0),
       ]) {
-        check((lo + hi) / 2)
-            .anyOf([(it) => it.equals(lo), (it) => it.equals(hi)]);
+        check((lo + hi) / 2).anyOf([.it()..equals(lo), .it()..equals(hi)]);
         for (var i = 0; i < 1000; i++) {
           check(Rand.float(min: lo, max: hi))
             ..isGreaterOrEqual(lo)
@@ -256,9 +255,9 @@ void main() {
         for (var p = 0; p <= 15; p++) {
           final lat = Rand.latitude(precision: p);
           final lng = Rand.longitude(precision: p);
-          check(lat.isFinite).isTrue();
+          check(lat.isFinite).isTrue;
           check(lat.abs()).isLessOrEqual(90);
-          check(lng.isFinite).isTrue();
+          check(lng.isFinite).isTrue;
           check(lng.abs()).isLessOrEqual(180);
         }
       },
@@ -301,7 +300,7 @@ void main() {
     test('charCode returns Rand.base62Alphabet character', () {
       for (var i = 0; i < 1000; i++) {
         final c = Rand.charCode();
-        check(Rand.base62Alphabet.contains(String.fromCharCode(c))).isTrue();
+        check(Rand.base62Alphabet.contains(String.fromCharCode(c))).isTrue;
       }
     });
 
@@ -343,7 +342,7 @@ void main() {
         Rand.seed(5);
         check(call)
             .throws<ArgumentError>()
-            .has((e) => e.name, 'name')
+            .has('name', (e) => e.name)
             .equals(param);
         final next = Rand.integer();
         Rand.seed(5);
@@ -365,7 +364,7 @@ void main() {
         final code = Rand.digits(length: len);
         check(code).length.equals(len);
         for (var i = 0; i < code.length; i++) {
-          check(digits.contains(code[i])).isTrue();
+          check(digits.contains(code[i])).isTrue;
         }
       }
     });
@@ -374,7 +373,7 @@ void main() {
       for (final len in [0, -3]) {
         check(() => Rand.digits(length: len))
             .throws<ArgumentError>()
-            .has((e) => e.name, 'name')
+            .has('name', (e) => e.name)
             .equals('length');
       }
     });

@@ -13,21 +13,21 @@ void main() {
     test('element returns item from collection', () {
       final list = [1, 2, 3, 4, 5];
       for (var i = 0; i < 100; i++) {
-        check(list.contains(Rand.element(list))).isTrue();
+        check(list.contains(Rand.element(list))).isTrue;
       }
     });
 
     test('element returns item from non-List Iterable', () {
       final set = {1, 2, 3};
       for (var i = 0; i < 50; i++) {
-        check(set.contains(Rand.element(set))).isTrue();
+        check(set.contains(Rand.element(set))).isTrue;
       }
     });
 
     test('element throws StateError on empty', () {
       check(() => Rand.element(<int>[]))
           .throws<StateError>()
-          .has((e) => e.message, 'message')
+          .has('message', (e) => e.message)
           .contains('Rand.element');
     });
 
@@ -35,7 +35,7 @@ void main() {
       final map = {'a': 1, 'b': 2, 'c': 3};
       for (var i = 0; i < 100; i++) {
         final entry = Rand.mapEntry(map);
-        check(map.containsKey(entry.key)).isTrue();
+        check(map.containsKey(entry.key)).isTrue;
         check(map[entry.key]).equals(entry.value);
       }
     });
@@ -43,28 +43,28 @@ void main() {
     test('mapEntry throws StateError naming Rand.mapEntry on empty', () {
       check(() => Rand.mapEntry(<String, int>{}))
           .throws<StateError>()
-          .has((e) => e.message, 'message')
+          .has('message', (e) => e.message)
           .contains('Rand.mapEntry');
     });
 
     test('mapKey returns key from map', () {
       final map = {'a': 1, 'b': 2, 'c': 3};
       for (var i = 0; i < 100; i++) {
-        check(map.containsKey(Rand.mapKey(map))).isTrue();
+        check(map.containsKey(Rand.mapKey(map))).isTrue;
       }
     });
 
     test('mapKey throws StateError on empty', () {
       check(() => Rand.mapKey(<String, int>{}))
           .throws<StateError>()
-          .has((e) => e.message, 'message')
+          .has('message', (e) => e.message)
           .contains('Rand.mapKey');
     });
 
     test('mapValue returns value from map', () {
       final map = {'a': 1, 'b': 2, 'c': 3};
       for (var i = 0; i < 100; i++) {
-        check(map.containsValue(Rand.mapValue(map))).isTrue();
+        check(map.containsValue(Rand.mapValue(map))).isTrue;
       }
     });
 
@@ -75,7 +75,7 @@ void main() {
     test('mapValue throws StateError naming Rand.mapValue on empty', () {
       check(() => Rand.mapValue(<String, int>{}))
           .throws<StateError>()
-          .has((e) => e.message, 'message')
+          .has('message', (e) => e.message)
           .contains('Rand.mapValue');
     });
 
@@ -87,13 +87,13 @@ void main() {
       ]) {
         check(() => Rand.sample(['a', 'b'], count: 0, weights: weights))
             .throws<ArgumentError>()
-            .has((e) => e.name, 'name')
+            .has('name', (e) => e.name)
             .equals('weights');
       }
     });
 
     test('subset returns unique elements', () {
-      check(Rand.subset(<int>{}, count: 0)).isEmpty();
+      check(Rand.subset(<int>{}, count: 0)).isEmpty;
 
       final pool = List.generate(100, (i) => i).toSet();
       check(Rand.subset(pool, count: 100)).length.equals(100);
@@ -107,7 +107,7 @@ void main() {
     test('subset rejects a negative count', () {
       check(() => Rand.subset({1, 2, 3}, count: -1))
           .throws<ArgumentError>()
-          .has((e) => '${e.message}', 'message')
+          .has('message', (e) => '${e.message}')
           .contains('count must be >= 0');
     });
 
@@ -129,7 +129,7 @@ void main() {
     test('enumValue returns a member of the enum', () {
       for (var i = 0; i < 50; i++) {
         check(_TestEnum.values.contains(Rand.enumValue(_TestEnum.values)))
-            .isTrue();
+            .isTrue;
       }
     });
 
@@ -138,7 +138,7 @@ void main() {
       final out = Rand.shuffled(input);
       check(out).length.equals(input.length);
       check(out.toSet()).deepEquals(input.toSet());
-      check(out).not((it) => it.deepEquals(input));
+      check(out).not(.it()..deepEquals(input));
     });
 
     test('shuffled does not mutate input', () {
@@ -175,8 +175,8 @@ void main() {
         count: 3,
       );
       check(picked).length.equals(3);
-      check(picked.add(equalButDistinct.first)).isFalse();
-      check(picked.add(.utc(2026))).isTrue();
+      check(picked.add(equalButDistinct.first)).isFalse;
+      check(picked.add(.utc(2026))).isTrue;
     });
 
     test('subset keeps the equality of a custom-equality set', () {
@@ -186,7 +186,7 @@ void main() {
       )..addAll(['a', 'b', 'c']);
       final picked = Rand.subset(source, count: 3);
       check(picked).length.equals(3);
-      check(picked.contains('A')).isTrue();
+      check(picked.contains('A')).isTrue;
     });
 
     test('subset keeps the ordering of a sorted set', () {
@@ -204,7 +204,7 @@ void main() {
       ]) {
         final picked = Rand.subset(source, count: 2);
         check(picked).length.equals(2);
-        check(picked.add(4)).isTrue();
+        check(picked.add(4)).isTrue;
       }
     });
   });

@@ -17,12 +17,12 @@ void main() {
       final ipv4Pattern = RegExp(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$');
       for (var i = 0; i < 50; i++) {
         final e = Rand.email();
-        check(e.contains('@')).isTrue();
+        check(e.contains('@')).isTrue;
         final parts = e.split('@');
         check(parts.length).equals(2);
-        check(parts[0]).isNotEmpty();
-        check(parts[1]).isNotEmpty();
-        check(ipv4Pattern.hasMatch(parts[1])).isFalse();
+        check(parts[0]).isNotEmpty;
+        check(parts[1]).isNotEmpty;
+        check(ipv4Pattern.hasMatch(parts[1])).isFalse;
       }
     });
 
@@ -36,7 +36,7 @@ void main() {
       for (final bad in ['', 'a@b.com', '@example.com']) {
         check(() => Rand.email(domain: bad))
             .throws<ArgumentError>()
-            .has((e) => e.name, 'name')
+            .has('name', (e) => e.name)
             .equals('domain');
       }
     });
@@ -64,7 +64,7 @@ void main() {
     test('ipv6 is 8 groups of 4 lowercase hex chars', () {
       final pattern = RegExp(r'^([0-9a-f]{4}:){7}[0-9a-f]{4}$');
       for (var i = 0; i < 100; i++) {
-        check(pattern.hasMatch(Rand.ipv6())).isTrue();
+        check(pattern.hasMatch(Rand.ipv6())).isTrue;
       }
     });
 
@@ -80,8 +80,8 @@ void main() {
       final colon = RegExp(r'^([0-9a-f]{2}:){5}[0-9a-f]{2}$');
       final dash = RegExp(r'^([0-9a-f]{2}-){5}[0-9a-f]{2}$');
       for (var i = 0; i < 50; i++) {
-        check(colon.hasMatch(Rand.mac())).isTrue();
-        check(dash.hasMatch(Rand.mac(separator: '-'))).isTrue();
+        check(colon.hasMatch(Rand.mac())).isTrue;
+        check(dash.hasMatch(Rand.mac(separator: '-'))).isTrue;
       }
     });
 
@@ -91,7 +91,7 @@ void main() {
         final h = Rand.hex(length: len);
         check(h).length.equals(len);
         for (var i = 0; i < h.length; i++) {
-          check(hexPool.contains(h[i])).isTrue();
+          check(hexPool.contains(h[i])).isTrue;
         }
       }
     });
@@ -100,7 +100,7 @@ void main() {
       for (final len in [0, -1]) {
         check(() => Rand.hex(length: len))
             .throws<ArgumentError>()
-            .has((e) => e.name, 'name')
+            .has('name', (e) => e.name)
             .equals('length');
       }
     });
@@ -118,7 +118,7 @@ void main() {
       final domains = {
         for (var i = 0; i < 2000; i++) Rand.email().split('@').last,
       };
-      check(domains.where((d) => !_isRfc2606(d))).isEmpty();
+      check(domains.where((d) => !_isRfc2606(d))).isEmpty;
     });
 
     test('email passes a conservative RFC 5322 dot-atom check', () {

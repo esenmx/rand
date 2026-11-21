@@ -26,33 +26,33 @@ void main() {
   group('Identity', () {
     test('alias returns non-empty string', () {
       for (var i = 0; i < 10; i++) {
-        check(Rand.alias()).isNotEmpty();
+        check(Rand.alias()).isNotEmpty;
       }
     });
 
     test('firstName returns non-empty string', () {
       for (var i = 0; i < 10; i++) {
-        check(Rand.firstName()).isNotEmpty();
+        check(Rand.firstName()).isNotEmpty;
       }
     });
 
     test('lastName returns non-empty string', () {
       for (var i = 0; i < 10; i++) {
-        check(Rand.lastName()).isNotEmpty();
+        check(Rand.lastName()).isNotEmpty;
       }
     });
 
     test('fullName contains at least first and last name', () {
       for (var i = 0; i < 10; i++) {
         final name = Rand.fullName();
-        check(name).isNotEmpty();
+        check(name).isNotEmpty;
         check(name.split(' ').length).isGreaterOrEqual(2);
       }
     });
 
     test('city returns non-empty string', () {
       for (var i = 0; i < 10; i++) {
-        check(Rand.city()).isNotEmpty();
+        check(Rand.city()).isNotEmpty;
       }
     });
 
@@ -70,7 +70,7 @@ void main() {
     test('fullName throws when the RNG cannot produce an unused name', () {
       check(() => RandGen(_TopOfRange()).fullName())
           .throws<StateError>()
-          .has((e) => e.message, 'message')
+          .has('message', (e) => e.message)
           .contains('Rand.fullName');
     });
   });

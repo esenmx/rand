@@ -111,9 +111,9 @@ void main() {
       for (final call in [Rand.ulid, Rand.uuidV7]) {
         check(() => call(time: .utc(1969).toLocal()))
             .throws<ArgumentError>()
-            .has((e) => '$e', 'text')
+            .has('text', (e) => '$e')
           ..contains('1969-01-01 00:00:00.000Z')
-          ..not((it) => it.contains('Instance of'));
+          ..not(.it()..contains('Instance of'));
       }
       check(
         () => Rand.ulid(

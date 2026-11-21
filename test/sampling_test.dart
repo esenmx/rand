@@ -38,7 +38,7 @@ void main() {
     test('sample from an empty list throws StateError when count > 0', () {
       check(() => Rand.sample(<int>[], count: 10))
           .throws<StateError>()
-          .has((e) => e.message, 'message')
+          .has('message', (e) => e.message)
           .contains('Rand.sample');
     });
 
@@ -48,7 +48,7 @@ void main() {
         <int>[],
       ]) {
         final empty = Rand.sample(from, count: 0);
-        check(empty).isEmpty();
+        check(empty).isEmpty;
         check(() => empty.add(1)).returnsNormally();
       }
     });
@@ -56,7 +56,7 @@ void main() {
     test('sample throws on mismatched weights length naming weights', () {
       check(() => Rand.sample([1, 2], count: 1, weights: [1]))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('weights');
     });
 
@@ -68,7 +68,7 @@ void main() {
       ]) {
         check(() => Rand.sample(['a', 'b'], count: 0, weights: weights))
             .throws<ArgumentError>()
-            .has((e) => e.name, 'name')
+            .has('name', (e) => e.name)
             .equals('weights');
       }
     });
@@ -76,28 +76,28 @@ void main() {
     test('sample rejects weights longer than from naming weights', () {
       check(() => Rand.sample([1], count: 200, weights: [1, 1000]))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('weights');
     });
 
     test('sample checks weights before the empty-pool check', () {
       check(() => Rand.sample(<int>[], count: 3, weights: [-1]))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('weights');
     });
 
     test('sample rejects all-zero weights naming weights', () {
       check(() => Rand.sample(['a', 'b'], count: 1, weights: [0, 0]))
           .throws<ArgumentError>()
-          .has((e) => '${e.message}', 'message')
+          .has('message', (e) => '${e.message}')
           .contains('weights');
     });
 
     test('sample rejects negative weights naming weights', () {
       check(() => Rand.sample(['a', 'b', 'c'], count: 10, weights: [3, -5, 10]))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('weights');
     });
 
@@ -108,7 +108,7 @@ void main() {
       ]) {
         check(() => Rand.sample(from, count: -1))
             .throws<ArgumentError>()
-            .has((e) => '${e.message}', 'message')
+            .has('message', (e) => '${e.message}')
             .contains('count must be >= 0');
       }
     });
@@ -116,7 +116,7 @@ void main() {
     test('sample rejects weights summing past 2^32 naming weights', () {
       check(() => Rand.sample(['a', 'b'], count: 1, weights: [4294967296, 1]))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('weights');
     });
 
@@ -129,7 +129,7 @@ void main() {
       final m = int.parse('9223372036854775807');
       check(() => Rand.sample(['a', 'b', 'c'], count: 1, weights: [3, m, m]))
           .throws<ArgumentError>()
-          .has((e) => e.name, 'name')
+          .has('name', (e) => e.name)
           .equals('weights');
     });
   });

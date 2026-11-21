@@ -8,19 +8,19 @@ void main() {
   group('Colors', () {
     test('color returns valid CssColors', () {
       for (var i = 0; i < 10; i++) {
-        check(CssColors.values.contains(Rand.color())).isTrue();
+        check(CssColors.values.contains(Rand.color())).isTrue;
       }
     });
 
     test('colorDark returns only dark colors', () {
       for (var i = 0; i < 10; i++) {
-        check(Rand.colorDark().isDark).isTrue();
+        check(Rand.colorDark().isDark).isTrue;
       }
     });
 
     test('colorLight returns only light colors', () {
       for (var i = 0; i < 10; i++) {
-        check(Rand.colorLight().isDark).isFalse();
+        check(Rand.colorLight().isDark).isFalse;
       }
     });
 
@@ -41,10 +41,10 @@ void main() {
     });
 
     test('CssColors.isDark classifies extremes correctly', () {
-      check(CssColors.black.isDark).isTrue();
-      check(CssColors.white.isDark).isFalse();
-      check(CssColors.navy.isDark).isTrue();
-      check(CssColors.ivory.isDark).isFalse();
+      check(CssColors.black.isDark).isTrue;
+      check(CssColors.white.isDark).isFalse;
+      check(CssColors.navy.isDark).isTrue;
+      check(CssColors.ivory.isDark).isFalse;
     });
   });
 }
