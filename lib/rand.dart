@@ -531,8 +531,10 @@ final class Rand {
   /// Rand.subset([1, 2, 2, 3].toSet(), count: 2);    // dedupe explicitly
   /// ```
   ///
-  /// The result keeps the equality and ordering of [from], as `from.toSet()`
-  /// does: a subset of a `Set.identity()` is an identity set.
+  /// The result keeps the equality, ordering and runtime element type of
+  /// [from], as `from.toSet()` does: a subset of a `Set.identity()` is an
+  /// identity set, and a subset of a `<int>{}` typed as `Set<num>` rejects a
+  /// `double`.
   ///
   /// Throws [ArgumentError] when [count] is negative, [RangeError] when
   /// `count > from.length`.

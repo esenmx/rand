@@ -192,8 +192,15 @@ void main() {
     test('subset keeps the ordering of a sorted set', () {
       final source = SplayTreeSet<int>((a, b) => b.compareTo(a))
         ..addAll([1, 2, 3, 4, 5]);
-      final picked = Rand.subset(source, count: 3).toList();
-      check(picked).deepEquals(source.where(picked.contains));
+      for (var i = 0; i < 50; i++) {
+        final picked = Rand.subset(source, count: 3).toList();
+        check(picked).deepEquals(source.where(picked.contains));
+      }
+    });
+
+    test('subset keeps the runtime element type of its source', () {
+      final Set<num> source = <int>{1, 2, 3};
+      check(Rand.subset(source, count: 2)).isA<Set<int>>();
     });
 
     test('subset of an unmodifiable set returns a modifiable set', () {

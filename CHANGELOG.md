@@ -17,6 +17,15 @@
   32 %.
 - BREAKING: `RandGen.seeded` requires its seed, as its name says. Replace
   `RandGen.seeded()` with `RandGen(Random())`.
+- BREAKING: `Rand.subset` builds its result with `from.toSet()`, so it keeps the
+  source's runtime element type (a subset of an `<int>{}` typed as `Set<num>`
+  now rejects a `double`) and its iteration order (seeded picks from a sorted or
+  hash set come out in source order; set literals keep theirs).
+
+### Changed
+
+- The agent skill is one shorter `SKILL.md` with every recipe and no repeated
+  rows. It now notes the JavaScript integer bounds and the `subset` contract.
 
 ### Fixed
 
@@ -25,9 +34,8 @@
   returned its middle value, and a 1000 µs `duration` range starting at 10^8
   days returned 2 distinct values. Spans above 2^53 µs still resolve coarser
   than 1 µs: one draw carries 53 random bits.
-- `subset` keeps the equality and ordering of its source set. Three equal
-  objects in a `Set.identity()` came back as a one-element set. Seeded iteration
-  order changes for a sorted or hash source; set literals keep theirs.
+- `subset` keeps the equality of its source set. Three equal objects in a
+  `Set.identity()` came back as a one-element set.
 - `fullName` throws `StateError` when the RNG cannot produce an unused name,
   instead of looping forever on a stub `Random`.
 - `uuidV7` and `ulid` name the rejected `time` in UTC in their `ArgumentError`,
